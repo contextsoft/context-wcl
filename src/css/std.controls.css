@@ -1,0 +1,424 @@
+/* 
+    Basic styles 
+*/
+
+* {
+    -webkit-border-radius: 0;
+    -webkit-touch-callout: none;
+    -webkit-text-size-adjust: none;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    -o-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    color: #333333;
+    margin: 0;
+    padding: 0;
+}
+
+/* 
+    Symbols 
+*/
+
+.ctx_icon-caret {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: 2px;
+    vertical-align: middle;
+    border-top: 4px solid;
+    border-right: 4px solid transparent;
+    border-left: 4px solid transparent;
+}
+
+.ctx_icon-bar {
+    display: block;
+    width: 22px;
+    height: 2px;
+    border-radius: 1px;
+    background-color: #fff;
+    margin: 4px 0px 4px 4px;
+}
+
+.ctx_icon-chevronleft {
+    display: block;
+    background-image: url(../images/chevron-left.png);
+    background-repeat: no-repeat;
+}
+
+.ctx_icon-chevronright {
+    display: block;
+    background-image: url(../images/chevron-right.png);
+    background-repeat: no-repeat;
+}
+
+
+/* 
+    CtxView 
+*/
+
+.CtxView:focus {
+    border-color: rgba(82, 168, 236, 0.8);
+    outline: 0;
+    outline: thin dotted \9;
+    /* IE6-9 */
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
+    -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
+}
+
+.ctx_view_client_area {
+    width: 100%;
+    height: 100%;
+}
+
+.ctx_view_hidden {
+    position: absolute;
+    display: none;
+    left: -1px;
+    top: -1px;
+    width: 0;
+    height: 0;
+}
+
+.ctx_null {
+    display: block;
+    width: 0;
+    height: 0;
+}
+
+.CtxView.scrollbars-horizontal, .CtxView.scrollbars-both {
+    overflow-x: hidden;
+}
+
+.CtxView.scrollbars-horizontal  > .ctx_view_client_area, .CtxView.scrollbars-both > .ctx_view_client_area {
+    width: auto;
+}
+
+.CtxView.scrollbars-vertical, .CtxView.scrollbars-both {
+    overflow-y: hidden;
+}
+
+.CtxView.scrollbars-vertical  > .ctx_view_client_area, .CtxView.scrollbars-both > .ctx_view_client_area {
+    height: auto;
+}
+
+.CtxView.float-right {
+    float: right;
+}
+
+.CtxView.float-left {
+    float: left;
+}
+
+.CtxView.position-absolute {
+    position: absolute;
+}
+
+.CtxView.position-flow, .CtxView.position-relative {
+    position: relative;
+}
+
+.CtxView.position-fixed {
+    position: fixed;
+}
+
+.CtxView.position-static {
+    position: static;
+}
+
+/* 
+    HeaderView 
+*/
+
+.CtxHeaderView {
+    width: 100%;
+    z-index: 100;
+    background-color: #fafafa;
+    border-bottom:  1px solid #E5E5E5;
+    padding: 0px 10px 0px 10px;
+}
+
+.CtxHeaderView.fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.CtxHeaderView.gradient.fixed {
+    border-radius: 0;
+    border-top-style: none;
+}
+
+/* 
+    FooterView 
+*/
+
+.CtxFooterView {
+    /* position */
+    width: 100%;
+    padding: 0px 10px 0px 10px;
+    z-index: 100;
+    /* style */
+    border-top: 1px solid #E5E5E5;
+    background-color: #fafafa;;
+}
+
+.CtxFooterView.fixed {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+}
+
+
+/* 
+    CtxPanelView 
+*/
+
+.CtxPanelView {
+    overflow: hidden;
+}
+
+
+/* 
+    CtxGroupBoxView 
+*/
+
+.CtxGroupBoxView {
+    overflow: hidden;
+}
+
+.CtxGroupBoxView.border {
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+.CtxGroupBoxView > .ctx_view_client_area {
+    padding: 15px;
+}
+
+.CtxGroupBoxView.border > .header {
+    background: #fafafa;
+}
+
+.CtxGroupBoxView > .header {
+    padding: 10px 15px;
+    font-size: 16px;
+    color: #333;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+/* 
+    CtxButtonView and other buttons 
+*/
+
+.CtxButtonView {
+    /* style */
+    display: inline-block;
+    padding: 6px 12px;
+    margin-bottom: 0;
+    font-size: 14px;
+    font-weight: normal;
+    line-height: 1.428571429;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    background-image: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+    /* color related */
+    color: #333;
+    background-color: #fff;
+    border-color: #ccc;
+    /* margin next control */
+    margin-right: 4px;
+}
+
+.CtxButtonView:hover {
+    color: #333333;
+    background-color: #ebebeb;
+    border-color: #adadad;
+}
+
+.CtxButtonView.disabled {
+    /* style */
+    pointer-events: none;
+    cursor: not-allowed;
+    opacity: .65;
+    filter: alpha(opacity=65);
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    /* color related */
+    background-color: #fff;
+    border-color: #ccc;
+}
+
+.CtxButtonView.icon-bar {
+    display: block;
+    width: 22px;
+    height: 2px;
+    border-radius: 1px;
+}
+
+/* Descendant buttons */
+
+/* primary */
+.CtxButtonView[type='primary'] {
+    color: #fff;
+    background-color: #428bca;
+    border-color: #357ebd;
+}
+.CtxButtonView[type='primary']:hover,
+.CtxButtonView[type='primary']:active,
+.CtxButtonView[type='primary'].disabled {
+    color: #ffffff;
+    background-color: #3276b1;
+    border-color: #285e8e;
+}
+
+/* success */
+.CtxButtonView[type='success'] {
+    color: #fff;
+    background-color: #5cb85c;
+    border-color: #4cae4c;
+}
+.CtxButtonView[type='success']:hover,
+.CtxButtonView[type='success']:active,
+.CtxButtonView[type='success'].disabled {
+    color: #fff;
+    background-color: #47a447;
+    border-color: #398439;
+}
+
+/* info */
+.CtxButtonView[type='info'] {
+    color: #fff;
+    background-color: #5bc0de;
+    border-color: #46b8da;
+}
+.CtxButtonView[type='info']:hover,
+.CtxButtonView[type='info']:active,
+.CtxButtonView[type='info'].disabled {
+    color: #fff;
+    background-color: #39b3d7;
+    border-color: #269abc;
+}
+
+/* warning */
+.CtxButtonView[type='warning'] {
+    color: #fff;
+    background-color: #f0ad4e;
+    border-color: #eea236;
+}
+.CtxButtonView[type='warning']:hover,
+.CtxButtonView[type='warning']:active,
+.CtxButtonView[type='warning'].disabled {
+    color: #fff;
+    background-color: #ed9c28;
+    border-color: #d58512;
+}
+
+/* danger */
+.CtxButtonView[type='danger'] {
+    color: #fff;
+    background-color: #d9534f;
+    border-color: #d43f3a;;
+}
+.CtxButtonView[type='danger']:hover,
+.CtxButtonView[type='danger']:active,
+.CtxButtonView[type='danger'].disabled {
+    color: #fff;
+    background-color: #d2322d;
+    border-color: #ac2925;
+}
+
+/* toolbar buttons 24x24 */
+
+/* arrows buttons */
+.CtxButtonView[type="chevronLeft"] {
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    background-image: url(../images/chevron-left.png);
+    background-repeat: no-repeat;
+    background-size: 8px;
+    background-position-x: 6px;
+    background-position-y: 6px;
+}
+
+.CtxButtonView[type="chevronRight"] {
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    background-image: url(../images/chevron-right.png);
+    background-repeat: no-repeat;
+    background-size: 8px;
+    background-position-x: 9px;
+    background-position-y: 6px;
+}
+
+/* Toggle button */
+.CtxButtonView[type="toggle"]
+{
+    background-color: #aaa;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+}
+
+/* 
+    Inputs 
+*/
+
+.CtxInputView.disabled, .CtxSelectView.disabled, .CtxLookupView.disabled,
+.CtxLookupView.disabled *
+{
+    cursor: not-allowed;
+    background-color: #eee;
+}
+
+.CtxInputView, .CtxSelectView {
+    display: inline-block;
+    height: 30px;
+    padding: 4px 6px;
+    margin-bottom: 9px;
+    margin-left: 0;
+    margin-right: 0;
+    font-size: 14px;
+    line-height: 20px;
+    color: #555555;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.CtxSelectView {
+    border: 1px solid #cccccc;
+    background-color: #ffffff;
+}
+
+.CtxInputView {
+    background-color: #ffffff;
+    border: 1px solid #cccccc;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    -webkit-transition: border linear .2s, box-shadow linear .2s;
+    -moz-transition: border linear .2s, box-shadow linear .2s;
+    -o-transition: border linear .2s, box-shadow linear .2s;
+    transition: border linear .2s, box-shadow linear .2s;
+}
+
+
+

@@ -1,0 +1,7 @@
+{
+  "name": "cwcl",
+  "title": "CWCL",
+  "description": "Context Web Components Library",
+  "version": "1.0.0",
+  "main": "index.ts",
+}
