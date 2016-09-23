@@ -1,7 +1,25 @@
 {
-  "name": "cwcl",
-  "title": "CWCL",
+  "name": "context-wcl",
+  "version": "1.0.3",
   "description": "Context Web Components Library",
-  "version": "1.0.0",
+  "author": {
+    "name": "Michael Baytalsky",
+    "email": "mike@contextsoft.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/contextsoft/context-wcl.git"
+  },
   "main": "index.ts",
+  "readme": "# context-wcl\r\nTypeScript based Context Web Components Library\r\n\r\n\r\n",
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/contextsoft/context-wcl/issues"
+  },
+  "homepage": "https://github.com/contextsoft/context-wcl#readme",
+  "_id": "context-wcl@1.0.0",
+  "scripts": {},
+  "_shasum": "51c99a9c5da7bd691309c3d54882c5e3b0eac729",
+  "_from": "context-wcl@latest"
 }
