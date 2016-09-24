@@ -109,8 +109,8 @@ export class ResourseLoader {
         }
     }
 
-    protected baseUri(baseUri, uri) {
-        if (!uri)
+    protected baseUri(baseUri: string, uri: string) {
+        if (uri == '')
             return uri;
         if (baseUri && baseUri.length > 0 && uri.indexOf(baseUri) === 0)
             uri = uri.substr(baseUri.length);
@@ -139,7 +139,7 @@ export class ResourseLoader {
         if (resourceType === "js") {
             // before loading, try to locate it among loaded scripts
             for (i = 0; i < document.scripts.length; i++)
-                if (this.baseUri(document.baseURI, document.scripts[i]).src === url) {
+                if (this.baseUri(document.baseURI, document.scripts[i].baseURI) === url) {
                     this.loadCallback(
                         {
                             target: document.scripts[i]
