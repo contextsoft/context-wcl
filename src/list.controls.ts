@@ -2,9 +2,9 @@
  * Controls displaing list 
  **/
 import * as utils from './utils';
-import {resources} from './resources';
-import {View} from './view';
-import {InputView, ButtonView} from './std.controls';
+import { resources } from './resources';
+import { View } from './view';
+import { InputView, ButtonView } from './std.controls';
 
 resources.register('context.vcl',
     [
@@ -95,7 +95,6 @@ export abstract class Items extends View {
     }
 
     public getValue(): any {
-        // public get value of selected option
         this.updateItems();
         return this.getItemValue(this.items.getRow(this.selectedIndex));
     }
@@ -174,9 +173,9 @@ export class SelectView extends Items {
 
 
     protected updateSelectedIndex(newIndex) {
-        this._selectedIndex = newIndex;
+        super.updateSelectedIndex(newIndex);
         if (this.element && this.visible)
-            (<any>this.element).selectedIndex = this.selectedIndex;
+            (<any>this.element).selectedIndex = this._selectedIndex;
     }
 
     protected internalRenderItems = function () {
@@ -236,8 +235,11 @@ export class ListView extends Items {
     protected filteredItems: number[] = [];
     protected lastClickedElement: HTMLElement;
     protected maxItemsToRender;
-    /** Child element used as list */
-    protected listElement: HTMLElement;
+    /** Is it needed to index children  */
+    protected needsItemsIndex = true;
+    /** Child element which children will be indexed, if not defined ListView itself will be used */
+    protected elementToIndex: HTMLElement;
+
 
     public getValue(): any {
         // public get value of selected option 
@@ -277,10 +279,13 @@ export class ListView extends Items {
     }
 
     protected indexItems() {
+        if (!this.needsItemsIndex)
+            return;
+        
         let children;
 
-        if (this.listElement)
-            children = this.listElement.children;
+        if (this.elementToIndex)
+            children = this.elementToIndex.children;
         else
             children = this.element.children;
         for (let i = 0; i < children.length; i++)
@@ -372,20 +377,7 @@ export class ListView extends Items {
 
         obj.selectedIndex = newIndex;
 
-        // select new element
         if (this.element && this.visible && obj.selectedIndex >= 0) {
-            let children;
-            if (this.listElement)
-                children = this.listElement.children;
-            else
-                children = this.element.children;
-            obj.selectedElement = children[obj.selectedIndex];
-            if (obj.selectedElement === undefined)
-                return;
-            this.setElementSelected(obj.selectedElement, true, obj.status);
-        }
-        /*else {
-            // unknown child index, recursing all
             let recurseChildren = function (el) {
                 let idx, e;
                 for (let i = 0; i < el.children.length; i++) {
@@ -402,9 +394,9 @@ export class ListView extends Items {
                 return null;
             };
             obj.selectedElement = recurseChildren(this.element);
-            this.setElementSelected(obj.selectedElement, true, obj.status);
-        }*/
-
+            if (obj.selectedElement)
+                this.setElementSelected(obj.selectedElement, true, obj.status);
+        }
     }
 
 
@@ -518,7 +510,6 @@ export class LookupView extends ListView {
     protected updatingValue = false;
     protected listId;
 
-
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.maxItemsToRender = 100;
@@ -562,7 +553,7 @@ export class LookupView extends ListView {
     }
 
     protected afterUpdateView() {
-        this.listElement = document.getElementById(this.listId);
+        this.elementToIndex = document.getElementById(this.listId);
         super.afterUpdateView();
     }
 
@@ -705,6 +696,7 @@ export class DatePicker extends LookupView {
         super(parent, name);
 
         this.showPrevNextMonthDays = true;
+        this.needsItemsIndex = false;
 
         // edit control
         this.input = new InputView(this, 'ctxInternalInput');
@@ -792,24 +784,22 @@ export class DatePicker extends LookupView {
 
     protected onPrevMonthBtnClick(event) {
         let picker = (<DatePicker>this.parent);
-        picker.monthToShow.setMonth(this.monthToShow.getMonth() - 1);
+        picker.monthToShow.setMonth(picker.monthToShow.getMonth() - 1);
         picker.updateCalendar(true);
     }
 
     protected onNextMonthBtnClick(event) {
         let picker = (<DatePicker>this.parent);
-        picker.monthToShow.setMonth(this.monthToShow.getMonth() + 1);
+        picker.monthToShow.setMonth(picker.monthToShow.getMonth() + 1);
         picker.updateCalendar(true);
     }
 
 
     protected updateCalendar(dontGoToSelectedDate: boolean) {
-        if (!this.listId || !this.getValue())
+        if (!this.listId)
             return;
         let el = document.getElementById(this.listId);
         el.innerHTML = this.doInternalRenderItems(dontGoToSelectedDate);
-        //this.prevMonthBtn.afterUpdateView();
-        //this.nextMonthBtn.afterUpdateView();
         this.prevMonthBtn.updateView();
         this.nextMonthBtn.updateView();
         this.input.setFocus();

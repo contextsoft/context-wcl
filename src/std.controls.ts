@@ -2,12 +2,13 @@
  * Standart Controls 
  **/
 import * as utils from './utils';
-import {resources} from './resources';
-import {IVoidEvent} from './component';
-import {Align, View, ValueView} from "./view";
-import {CSSTransition} from "./transitions";
-       
-resources.register('context.vcl', 
+import { resources } from './resources';
+import { IVoidEvent } from './component';
+import { Align, View, ValueView } from './view';
+import { CSSTransition } from './transitions';
+import { FieldDataLink, IDataSource, EventType } from './data';
+
+resources.register('context.vcl',
     [
         'css/std.controls.css',
         'images/expand.png'
@@ -82,12 +83,12 @@ export class GroupBoxView extends View {
         this.renderClientArea = true;
         this.additionalCSSClass = ' border ';
     }
-    
+
     /** Sets/Gets GroupBox header */
-    public get header() {
+    public get caption() {
         return this.text;
     }
-    public set header(value) {
+    public set caption(value) {
         this.text = value;
     }
 
@@ -130,8 +131,8 @@ export class ButtonView extends View {
         this._buttonType = buttonType;
         if (this._element)
             this.updateView();
-    }  
-    
+    }
+
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.renderClientArea = true;
@@ -187,7 +188,7 @@ export class InputView extends ValueView {
         super.beforeUpdateView();
         this.getValue(); // storing control's value            
     }
-   
+
     protected afterUpdateView() {
         super.afterUpdateView();
         this.handleEvent('onchange', this.handleChange);
@@ -201,16 +202,17 @@ export class InputView extends ValueView {
         if (this.keyPressFireOnChange)
             this.keyPressTimeoutInstance = setTimeout(() => {
                 if (this.element && this.visible && this._value !== (<any>this.element).value) {
-                    this.getValue();
                     this.handleChange();
                 }
             }, this.changingDelay);
     }
 
     protected handleChange() {
-        // TODO: data binding
-        /*if (this.dataSources.value)
-            this.dataSources.value.notifyDataLinks();*/
+        // retrieve value from element
+        this.getValue();
+        // update data link
+        this.data.value = this._value;
+        // invoke event if assigned
         if (typeof this.onChange === 'function')
             this.onChange();
     }
@@ -221,7 +223,7 @@ export class InputView extends ValueView {
  */
 export class TextAreaView extends InputView {
     protected _element: HTMLTextAreaElement;
-    
+
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.tag = 'textarea';
@@ -258,31 +260,85 @@ export class TextAreaView extends InputView {
     // }
 }
 
+interface ICSSTransitionType {
+    transition: (direction) => string[];
+    duration: number;
+    properties: string[];
+    transitionTo?: (direction) => string[];
+    propertiesTo?: string[];
+    durationTo?: number;
+}
 
 /**
  * Container that allows to display one of several views (as pages) and 
  * switch between them using transitions and transformations.
  */
 export class ContainerView extends View {
-    static directionForward = 1;
-    static directionBack = -1;
+    public static directionForward = 1;
+    public static directionBack = -1;
 
-    public beforeHideView;
-    public beforeShowView;
-    public afterShowView;
-    public afterHideView;
+    public static slideHorizontal: ICSSTransitionType = {
+        transition: ContainerView.cssSlideHorizontal,
+        properties: ['opacity', '-webkit-transform'],
+        duration: 0.5
+        // we may additionally specify To transition
+        // transitionTo: transitionSlideHorizontal,
+        // propertiesTo: ['opacity', '-webkit-transform'],
+    };
+    public static slideVertical: ICSSTransitionType = {
+        transition: ContainerView.cssSlideVertical,
+        properties: ['opacity', '-webkit-transform'],
+        duration: 0.5
+    };
+    public static fadeInOut: ICSSTransitionType = {
+        transition: ContainerView.cssFadeInOut,
+        properties: ['opacity'],
+        duration: 0.5
+    };
+    public static rotateY: ICSSTransitionType = {
+        transition: ContainerView.cssRotateY,
+        properties: ['opacity', '-webkit-transform'],
+        duration: 0.5
+    };
+    public static rotateX: ICSSTransitionType = {
+        transition: ContainerView.cssRotateX,
+        properties: ['opacity', '-webkit-transform'],
+        duration: 0.5
+    };    
+    
+    protected static cssSlideHorizontal(direction) {
+        return (direction === 0) ? ['1', 'translate3d(0,0,0)'] : ['0', 'translate3d(' + (direction * 100) + '%,0,0)'];
+    }
+    protected static cssSlideVertical(direction) {
+        return (direction === 0) ? ['1', 'translate3d(0,0,0)'] : ['0', 'translate3d(0, ' + (direction * 100) + '%,0)'];
+    }
+    protected static cssRotateX(direction) {
+        return (direction === 0) ? ['1', 'rotateX(0deg)'] : ['0', 'rotateX(' + (direction * 180) + 'deg)'];
+    }
+    protected static cssRotateY(direction) {
+        return (direction === 0) ? ['1', 'rotateY(0deg)'] : ['0', 'rotateY(' + (direction * 180) + 'deg)'];
+    }
+    protected static cssFadeInOut(direction) {
+        return (direction === 0) ? ['1'] : ['0'];
+    }
+    
+    public animation: ICSSTransitionType;
+    public beforeHideView: (view: View, direction: number) => boolean;
+    public beforeShowView: (view: View, direction: number) => boolean;
+    public afterShowView: (view: View, direction: number) => void;
+    public afterHideView: (view: View, direction: number) => void;
 
-    protected currentView;
-    protected animation;
+    protected currentView: View;
+    protected priorView: View;
 
     constructor(parent, name) {
         super(parent, name);
         this.currentView = null;
-        this.animation = CSSTransition.slideHorizontal;
+        this.animation = ContainerView.slideHorizontal;
     }
 
 
-    public updateView(view?, direction?) {
+    public updateView(view?: View, direction?: number) {
         if (!view) return;
 
         // restore opacity - MB: this should not be necessary, let's leave off for now
@@ -292,11 +348,11 @@ export class ContainerView extends View {
          */
 
         if (view === this.currentView) {
-            view.setAttribute("currentPage", "true");
+            view.setElementAttribute("currentPage", "true");
             if (typeof this.afterShowView === "function")
                 this.afterShowView(view, direction);
         } else {
-            view.setAttribute("currentPage", "false");
+            view.setElementAttribute("currentPage", "false");
             // Hide object. It will be updated when we show it next time anyway.
             view.setVisible(false);
             if (typeof this.afterHideView === "function")
@@ -304,21 +360,21 @@ export class ContainerView extends View {
         }
     };
 
-    public internalInsertChild(child) {
+    public internalInsertChild(child: any) {
         // append child div to self
-        if (this.element && this.visible) {
-            child.element = null;
+        if (this._element && this.visible) {
+            child._element = null;
             let childElement = document.createElement('div');
             // append child to client area
-            this.element.children[0].appendChild(childElement);
+            this._element.children[0].appendChild(childElement);
             childElement.outerHTML = child.internalRender();
-            child.element = childElement;
+            child._element = childElement;
             child.afterUpdateView();
         } else
             this.updateView();
     };
 
-    public showView(nextView, direction) {
+    public showView(nextView: View, direction: number) {
         if (this.currentView && nextView && this.currentView === nextView)
             return;
 
@@ -351,7 +407,7 @@ export class ContainerView extends View {
 
             // if we are moving forward remember prior view, so we know where to return by Back button
             if (direction === ContainerView.directionForward)
-                nextView.priorView = cur;
+                this.priorView = cur;
         }
 
         // if I'm not rendered or we don't need animation then just assign it and that's it
@@ -378,19 +434,20 @@ export class ContainerView extends View {
 
         // add transition effect for the next view
         if (nextView) {
-            nextView.element.opacity = 0; // now it's transparent
-            nextView.setAttribute("currentPage", "true"); // but is actually visible
+            //nextView.element.opacity = 0; // now it's transparent
+            nextView.element.style.opacity = '0';
+            nextView.setElementAttribute("currentPage", "true"); // but is actually visible
             transitions.add({
                 element: nextView.element,
-                properties: (this.animation.propertiesTo !== 'undefined') ? this.animation.propertiesTo : this.animation.properties,
-                from: (this.animation.transitionTo !== 'undefined') ? this.animation.transitionTo(direction) : this.animation.transition(direction),
-                to: (this.animation.transitionTo !== 'undefined') ? this.animation.transitionTo(0) : this.animation.transition(0),
-                duration: (this.animation.durationTo !== 'undefined') ? this.animation.durationTo : this.animation.duration
+                properties: (this.animation.propertiesTo) ? this.animation.propertiesTo : this.animation.properties,
+                from: (this.animation.transitionTo) ? this.animation.transitionTo(direction) : this.animation.transition(direction),
+                to: (this.animation.transitionTo) ? this.animation.transitionTo(0) : this.animation.transition(0),
+                duration: (this.animation.durationTo) ? this.animation.durationTo : this.animation.duration
             });
         }
 
         // perform animated transition
-        let animateDurationTo = (this.animation.durationTo !== 'undefined') ? this.animation.durationTo : this.animation.duration;
+        let animateDurationTo = (this.animation.durationTo) ? this.animation.durationTo : this.animation.duration;
         setTimeout(function () {
             _this.updateView(cur, direction);
             _this.updateView(nextView, direction);
@@ -401,7 +458,7 @@ export class ContainerView extends View {
 
     public back() {
         if (this.currentView)
-            this.showView(this.currentView.priorView, ContainerView.directionBack);
+            this.showView(this.priorView, ContainerView.directionBack);
     }
 }
 
@@ -441,7 +498,7 @@ export class Splitter extends View {
 
     public isSplitter(): boolean {
         return true;
-    }    
+    }
 
     protected setVertical(vertical) {
         this.vertical = vertical;

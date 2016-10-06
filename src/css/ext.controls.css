@@ -1,0 +1,196 @@
+/* CtxTabsView */
+
+/* Common */
+
+.CtxTabsView {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.CtxTabsView .caption {
+    display: none;
+    padding-top: 14px;
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-bottom: 14px;
+    font-size: 16px;
+    font-weight: 200;
+    color: #777777;
+    float: left;
+}
+
+.CtxTabsView.flat .caption {
+    padding-left: 0px;
+}
+
+
+.CtxTabsView .caption.ctx_transparent {
+    color: transparent;
+}
+
+.CtxTabsView .tabs {
+    min-height: 42px;
+    border-radius: 4px 4px 0 0;
+}
+
+.CtxTabsView .tabs > div {
+    cursor: pointer;
+    float: left;
+}
+
+.CtxTabsView .dropDownButton {
+    width: 32px;
+    height: 32px;
+    display: none;
+    float: right;
+    margin-top: 7px;
+    border: 1px solid #ddd;
+}
+
+.CtxTabsView.leftDropDownButton .dropDownButton {
+    float: left;
+}
+
+/* Standard Style */
+
+.CtxTabsView .tabs > div.active {
+    background-color: inherit;
+}
+
+.CtxTabsView {
+    width: 100%;
+}
+
+.CtxTabsView .tabs {
+    width: 100%;
+    border-bottom: 1px solid #ddd;
+}
+
+.CtxTabsView .tabs > div {
+    cursor: pointer;
+    float: left;
+    padding: 10px 15px;
+    border-radius: 4px 4px 0 0;
+    color: #3e96ff;
+}
+
+.CtxTabsView .tabs > div:hover {
+    color: #365fbc;
+    background-color: #ededed;
+    padding-bottom: 15px;
+}
+
+.CtxTabsView .tabs > div.selected
+{
+    color: #555;
+    cursor: default;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-bottom-width: 0;
+    padding-bottom: 15px;
+}
+
+/* Flat Style */
+
+.CtxTabsView.flat .caption {
+    margin-left: -8px;
+}
+
+.CtxTabsView.flat .tabs {
+    width: auto;
+    border: none;
+}
+
+.CtxTabsView.flat .tabs > div {
+    padding: 12px 0;
+    margin-right: 15px;
+    display: block;
+    color: #555555;
+    border-radius: 0;
+    border: none;
+    font-weight: bolder;
+}
+
+.CtxTabsView.flat > .tabs > div:hover {
+    color: #3e96ff;
+    background-color: transparent;
+}
+
+.CtxTabsView.flat .tabs > div.selected
+{
+    text-decoration: none;
+    background-color: transparent;
+    color: #3e96ff;
+}
+
+/* Small screens */
+
+@media (max-width: 767px)
+{
+    /* Same for default and flat styles */
+
+    .CtxTabsView {
+        float: left;
+        border-radius: 4px;
+    }
+
+    .CtxTabsView .caption {
+        display: inline-block;
+    }
+
+    .CtxTabsView .dropDownButton {
+        display: inline-block;
+    }
+
+    .CtxTabsView .tabs,
+    .CtxTabsView.flat .tabs {
+        display: none;
+        width: 100%;
+        height: auto;
+        border-radius: 4px;
+        position: absolute;
+        left: 0;
+        z-index: 100;
+        background-color: #333;
+        color: #ddd;
+    }
+
+    .CtxTabsView .tabs.droppedDown {
+        display: block;
+        margin-top: 50px;
+    }
+
+    .CtxTabsView .tabs > div,
+    .CtxTabsView.flat .tabs > div {
+        float: none;
+        padding: 20px;
+        color: #c9c4c4;
+        font-weight: normal;
+    }
+
+    .CtxTabsView .tabs > div:hover,
+    .CtxTabsView.flat .tabs > div:hover {
+        background-color: #5f5f5f;
+        color: #eee;
+        border-radius: 4px;
+        padding: 20px;
+    }
+
+    .CtxTabsView .tabs > div.active,
+    .CtxTabsView.flat .tabs > div.active {
+        background-color: #a8a8a8;
+        color: #eee;
+        border-radius: 4px;
+        padding: 20px;
+        border: none;
+    }
+
+    .CtxTabsView.flat > .tabs > div:hover,
+    .CtxTabsView.flat .tabs > div.active {
+        width: 100%;
+    }
+
+}

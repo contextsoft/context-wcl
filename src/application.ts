@@ -73,6 +73,22 @@ export class Application {
         if (onReady)
             this.onReady = onReady;
 
+        utils.setLocaleFunc((str: string): string => 
+        {
+            let locale = this.settings['locale'];
+            let localeStr;
+            if (Application.locales[locale])
+                localeStr = Application.locales[locale][str];
+
+            if (localeStr)
+                return localeStr;
+            else {
+                if (this.settings['debug'])
+                    utils.log('NOT TRANSLATED: [' + str + ']');
+                return str;
+            }
+        });
+
         this.initLibraries();
         this.sessionInfo = {};
         this.loadSettings();
@@ -107,21 +123,6 @@ export class Application {
             this.settings = this.defaultSettings;
     }
 
-    /** Localizes string into selected language */
-    public L(str: string) {
-        let locale = this.settings['locale'];
-        let localeStr;
-        if (Application.locales[locale])
-            localeStr = Application.locales[locale][str];
-
-        if (localeStr)
-            return localeStr;
-        else {
-            if (this.settings['debug'])
-                utils.log('NOT TRANSLATED: [' + str + ']');
-            return str;
-        }
-    }
 
     /** Shows localized alert */
     public showMessage(msg: string) {
@@ -144,6 +145,12 @@ export class Application {
     /** Returns DOM body element*/
     public getBody() {
         return document.getElementsByTagName('body')[0];
+    }
+
+    /** Localizes string into selected language */
+    public L(str)
+    {
+        return utils.L(str);
     }
 
     /** Makes DOM body unmovable on mobile devices */

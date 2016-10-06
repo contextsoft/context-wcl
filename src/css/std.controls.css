@@ -421,4 +421,26 @@ body {
 }
 
 
+/* ContainerView */
+
+.CtxContainerView > .ctx_view_client_area > .CtxView {
+    display: none;
+}
+
+.CtxContainerView > .ctx_view_client_area > .CtxView[currentPage="true"] {
+    display: block;
+}
+
+.CtxContainerView:before,
+.CtxContainerView:after {
+    display: table;
+    content: "";
+}
+
+.CtxContainerView:after {
+    clear: both;
+}
+
+
+
 

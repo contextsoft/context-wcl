@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Ctx Lib Test</title>
+    <script>
+        var require = {
+            baseUrl: "../../",
+            deps: ['tests/test2/myapp'],
+            paths: {
+                "jquery": 'node_modules/jquery',
+                "context.vcl": 'node_modules/context.vcl',
+                "breeze-client": 'node_modules/breeze-client'
+            },
+            packages: [
+                {name: 'breeze-client', main: 'breeze.debug.js'}, 
+                {name: 'jquery', main: 'jquery.js'} 
+            ],
+            callback: function() 
+            {
+                require(['tests/test2/myapp'], function(app) 
+                {
+                    app.main();
+                });
+            }
+        };
+    </script>
+    <script type="text/javascript" src="../../node_modules/require.js/require.js"></script>
+</head>
+
+<body>
+</body>
+
+</html>

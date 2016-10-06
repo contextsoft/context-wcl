@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "amd",
+        "preserveConstEnums": true,
+        "outFile": "myapp.js",
+        // "outDir": "./dist",        
+        "moduleResolution": "node",
+        "sourceMap": true
+    },
+    "include": [
+        "../../node_modules/context.vcl/*",
+        "./*"
+    ]
+}

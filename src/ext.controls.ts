@@ -1,14 +1,20 @@
 import * as utils from './utils';
+import {resources} from './resources';
 import {View} from "./view";
 import {ListView} from './list.controls';
 import {ButtonType, ButtonView, ContainerView, PanelView, TextView} from './std.controls';
+
+resources.register('context.vcl',
+    [
+        'css/ext.controls.css'
+    ]
+);
 
 
 /**
  * Tabs switch control
  */
 export class TabsView extends ListView {
-    public onItemClick: (index: number) => void;
     protected dropDownButton: ButtonView;
     protected droppedDown = '';
 
@@ -26,7 +32,9 @@ export class TabsView extends ListView {
 
     public render() {
         let html = View.getTag('div', 'class="tabs ' + this.droppedDown + '"', this.internalRenderItems());
-        html += View.getTag('div', 'class="caption" ', this.getSelectedItem().text);
+        let selItm = this.getSelectedItem();
+        if (selItm && selItm.text)
+            html += View.getTag('div', 'class="caption" ', this.getSelectedItem().text);
         html = this.renderTag(html + this.dropDownButton.render());
         return html;
     }
@@ -37,7 +45,7 @@ export class TabsView extends ListView {
             this.setElementSelected(this.selectedElement, false);
         this.selectedElement = null;
 
-        this.selectedIndex = newIndex;
+        this._selectedIndex = newIndex;
 
         // select new element
         if (this.element && this.visible && this.selectedIndex >= 0) {
@@ -51,7 +59,7 @@ export class TabsView extends ListView {
     }
 
     protected afterUpdateView() {
-        this.internalAfterUpdateView();
+        super.afterUpdateView();
         if (this.element && this.visible) {
             let children = (<HTMLElement>this.element.firstChild).children;
             this.renderedRowCount = children.length;
@@ -70,30 +78,44 @@ export class TabsView extends ListView {
 
         let idx = listElement.getAttribute('index');
         this.setSelectedIndex(idx);
-
-        if (this.onItemClick)
-            this.onItemClick(idx);
     }
+}
+
+export interface IPageViewPage {
+    text: string;
+    value: View; 
 }
 
 /**
  * Tabs switch with pages inside
  */
 export class PageView extends View {
+    /** Pages list 
+     * e.g.
+     * pagesList.items = [{text: 'Page 1', value: myView1}, {text: 'Page 2', value: myView2}]
+    */
+    public get items(): IPageViewPage[] {
+        return this.pagesSwitcher.items;
+    }
+    public set items(items: IPageViewPage[]) {
+        this.pagesSwitcher.items = items;
+    }
+
     /** Fires when PageView requires its pages 
+     *  Using this excludes use of items property
      *  e.g: 
      *  pageView.onGetItems = function(addPageCallback) {
      *     addItemCallback({text: 'Page 1', value: someView}, {text: 'Page 2', value: someView2})
      *  } 
     **/
-    public onGetItems: (addPageCallback: (item) => void) => void;
+    public onGetItems: (addPageCallback: (item: IPageViewPage) => void) => void;
 
-    protected pagesSwitcher = new TabsView(this, 'pagesSwitcher');
-    protected pagesContainer = new ContainerView(this, 'pagesContainer');
+    protected pagesSwitcher: TabsView;
+    protected pagesContainer: ContainerView;
 
     constructor(parent: View, name?: string) {
         super(parent, name);
-        var _this = this;
+        this.renderClientArea = true;
 
         // Tabs switcher
         this.pagesSwitcher = new TabsView(this, 'pagesSwitcher');
@@ -101,7 +123,9 @@ export class PageView extends View {
 
         // Container for pages
         this.pagesContainer = new ContainerView(this, 'pagesContainer');
-        this.pagesSwitcher.onItemClick = function () {
+        this.pagesContainer.animation = ContainerView.fadeInOut;
+        var _this = this;
+        this.pagesSwitcher.onSelectionChange = function(index) {
             _this.pagesContainer.showView(_this.pagesSwitcher.getValue(), ContainerView.directionForward);
         };
     }

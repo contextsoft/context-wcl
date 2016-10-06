@@ -1,0 +1,578 @@
+
+/* CtxMenuView */
+
+.CtxMenuView {
+    display: none;
+}
+
+/* CtxPopupView */
+
+.CtxPopupView {
+    position: absolute;
+    z-index: 9999;
+    min-width: 160px;
+    margin: 2px 0 0;
+    list-style: none;
+    background-color: white;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding;
+    background-clip: padding-box;
+}
+
+.CtxPopupView.dropShadow {
+    -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.CtxPopupView.roundedCorners {
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+}
+
+.CtxPopupView > .CtxMenu {
+    display: block;
+    position: relative;
+    border: none;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+.CtxPopupView.callout::before {
+    position: absolute;
+    display: inline-block;
+    border: 7px solid transparent;
+    content: '';
+}
+
+.CtxPopupView.callout::after {
+    position: absolute;
+    display: inline-block;
+    border: 6px solid transparent;
+    content: '';
+}
+
+.CtxPopupView.callout.topLeft::before {
+    bottom: -7px;
+    left: 14px;
+    margin-left: -7px;
+    border-top: 7px solid #CCC;
+    border-bottom: none;
+}
+
+.CtxPopupView.callout.topLeft::after {
+    bottom: -6px;
+    left: 14px;
+    margin-left: -6px;
+    border-top: 6px solid white;
+    border-bottom: none;
+}
+
+.CtxPopupView.callout.topRight::before {
+    bottom: -7px;
+    right: 14px;
+    margin-left: -7px;
+    border-top: 7px solid #CCC;
+    border-bottom: none;
+}
+
+.CtxPopupView.callout.topRight::after {
+    bottom: -6px;
+    right: 14px;
+    margin-left: -6px;
+    border-top: 6px solid white;
+    border-bottom: none;
+}
+
+.CtxPopupView.callout.topCenter::before {
+    bottom: -7px;
+    left: 50%;
+    margin-left: -7px;
+    border-top: 7px solid #CCC;
+    border-bottom: none;
+}
+
+.CtxPopupView.callout.topCenter::after {
+    bottom: -6px;
+    left: 50%;
+    margin-left: -6px;
+    border-top: 6px solid white;
+    border-bottom: none;
+}
+
+.CtxPopupView.callout.bottomLeft::before {
+    top: -7px;
+    left: 14px;
+    margin-left: -7px;
+    border-bottom: 7px solid #CCC;
+    border-top: none;
+}
+
+.CtxPopupView.callout.bottomLeft::after {
+    top: -6px;
+    left: 14px;
+    margin-left: -6px;
+    border-bottom: 6px solid white;
+    border-top: none;
+}
+
+.CtxPopupView.callout.bottomRight::before {
+    top: -7px;
+    right: 14px;
+    margin-right: -7px;
+    border-bottom: 7px solid #CCC;
+    border-top: none;
+}
+
+.CtxPopupView.callout.bottomRight::after {
+    top: -6px;
+    right: 14px;
+    margin-right: -6px;
+    border-bottom: 6px solid white;
+    border-top: none;
+}
+
+.CtxPopupView.callout.bottomCenter::before {
+    top: -7px;
+    left: 50%;
+    margin-left: -7px;
+    border-bottom: 7px solid #CCC;
+    border-top: none;
+}
+
+.CtxPopupView.callout.bottomCenter::after {
+    top: -6px;
+    left: 50%;
+    margin-left: -6px;
+    border-bottom: 6px solid white;
+    border-top: none;
+}
+
+.CtxData {
+    display: none;
+}
+
+/* CtxSimpleGridView */
+
+.CtxSimpleGridView {
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+}
+
+.CtxSimpleGridView .ctx_grid_container {
+    overflow-y: auto;
+    height: 100%;
+    width: 100%;
+}
+
+.CtxSimpleGridView .ctx_grid_container > table {
+    width: 100%;
+    border-spacing: 0;
+    border-collapse: collapse;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    -o-user-select: text;
+    user-select: text;
+    /*float: left; TODO: Firefox fix, doesnot work with CtxScroller */
+}
+
+.CtxSimpleGridView .ctx_grid_container > table > * > tr > td, th  {
+    border-bottom: 1px solid #bbbbbb;
+    padding: 5px;
+    vertical-align: top;
+    /*text-align: left;*/
+}
+
+.CtxSimpleGridView .ctx_grid_container > table > thead > tr
+{
+    font-weight: bold;
+}
+
+/* Fixed Header */
+
+.CtxSimpleGridView[fixedHeader='true'] .ctx_grid_container {
+    margin-top: 25px;
+    margin-bottom: -25px;
+    overflow-y: scroll;
+}
+
+.CtxSimpleGridView[fixedHeader='true'] .ctx_grid_container > table > thead > tr > th > .ctx_grid_header_inner
+{
+    position: absolute;
+    margin-top: -25px;
+}
+
+.CtxSimpleGridView[fixedHeader='true'][drawHeaderBackground='true'] .ctx_grid_container .ctx_grid_header {
+    position: absolute;
+    height: 25px;
+    margin-top: -25px;
+    width: 100%;
+    background-color: #f2f2f2;
+}
+
+.CtxSimpleGridView[fixedHeader='true'] .ctx_grid_container > table > * > tr >  th  {
+    border-bottom: none;
+    padding-bottom: 0px;
+}
+
+
+/* Selection */
+
+.CtxSimpleGridView[drawSelection="true"] .ctx_grid_container > table > tbody > tr.active
+{
+}
+
+.CtxSimpleGridView[drawSelection="true"] .ctx_grid_container > table > tbody > tr.active,
+.CtxSimpleGridView[drawSelection="true"] .ctx_grid_container > table > tbody > tr.active:hover
+{
+    background-color: #e4e4e4;
+}
+
+.CtxSimpleGridView[drawSelection="true"] .ctx_grid_container > table > tbody > tr:hover
+{
+    background-color: #f4f4f4;
+}
+
+.CtxSimpleGridView[drawSelection="true"] .ctx_grid_container > table > tbody > tr > td.active
+{
+}
+
+
+/* CtxGridLayout */
+
+.ctx_transparent {
+    display: none;
+}
+
+.CtxGridLayout {
+    width: 100%;
+}
+
+@media (min-width: 768px)
+{
+    .CtxGridLayout {
+        display: table;
+    }
+
+    .ctx_row {
+        display: table-row;
+    }
+
+    .ctx_cell {
+        display: table-cell;
+    }
+}
+
+/* Controls layout */
+@media (max-width: 767px) {
+    .CtxGridLayout > .ctx_row > .ctx_cell > .CtxTextView {
+        padding-bottom: 4px;
+    }
+}
+
+/* CtxWorkAreaLayout */
+
+.CtxWorkAreaLayout {
+    margin-left: auto;
+    margin-right: auto;
+    padding-right: 15px;
+    padding-left: 15px;
+    /*height: 100%;*/
+}
+
+.CtxWorkAreaLayout:before,
+.CtxWorkAreaLayout:after {
+    display: table;
+    content: " ";
+}
+
+.CtxWorkAreaLayout:after {
+    clear: both;
+}
+
+@media (min-width: 768px) {
+    .CtxWorkAreaLayout {
+        width: 750px;
+    }
+}
+
+@media (min-width: 992px) {
+    .CtxWorkAreaLayout {
+        width: 970px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .CtxWorkAreaLayout {
+        width: 1170px;
+    }
+}
+
+/* CtxSplitter */
+
+.CtxSplitter {
+    background-color: #dddddd;
+}
+
+.CtxSplitter[vertical="true"] {
+    cursor: ew-resize;
+    width: 2px;
+}
+
+.CtxSplitter[vertical="false"] {
+    cursor: ns-resize;
+    height: 2px;
+}
+
+
+/* PageView */
+
+.PageView .pagesContainer {
+    padding-top: 8px;
+}
+
+/* CtxGridView */
+
+.CtxGridView {
+    overflow: hidden;
+    min-height: 100px;
+}
+
+/* Header */
+
+.CtxGridView .ctx_grid_header_outer {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.CtxGridView .ctx_grid_header {
+    display: table-row;
+}
+
+.CtxGridView .ctx_grid_header > div {
+    font-weight: bold;
+}
+
+/* Body */
+
+.CtxGridView .ctx_grid_body {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+.CtxGridView .ctx_grid_row  {
+    display: table-row;
+}
+
+.CtxGridView .ctx_grid_cell {
+    display: table-cell;
+    padding: 5px;
+    /*width: 100px;*/
+    border-bottom: 1px solid #bbbbbb;
+    text-overflow: ellipsis;
+    cursor: default;
+}
+
+/* Footer */
+
+.CtxGridView .ctx_grid_footer_outer {
+    display: table;
+    width: 100%;
+}
+
+.CtxGridView .ctx_grid_footer {
+    display: table-row;
+}
+
+.CtxGridView .ctx_grid_footer > div {
+    font-weight: bold;
+    border-bottom: none;
+}
+
+/* Fixed header and footer */
+
+.CtxGridView[fixedHeader='true'] .ctx_grid_body_outer {
+    position:absolute;
+    top: 28px;
+    bottom: 0px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.CtxGridView[showFooter='true'] .ctx_grid_body_outer {
+    bottom: 28px;
+}
+
+
+.CtxGridView/*[showFooter='true'][fixedHeader='true']*/ .ctx_grid_row:last-child .ctx_grid_cell {
+    border-bottom: none;
+}
+
+.CtxGridView[fixedHeader='true'] .ctx_grid_footer_outer {
+    position:absolute;
+    bottom: 0px;
+}
+
+
+.CtxGridView[fixedHeader='true'] .ctx_grid_footer > div {
+    border-top: 1px solid #bbbbbb;
+}
+
+/* Selection Row */
+
+.CtxGridView[drawSelection="true"] .ctx_grid_body .ctx_grid_row.active,
+.CtxGridView[drawSelection="true"] .ctx_grid_body .ctx_grid_row.active:hover
+{
+    background-color: #e4e4e4;
+}
+
+.CtxGridView[drawSelection="true"] .ctx_grid_body .ctx_grid_row:hover
+{
+    background-color: #f4f4f4;
+}
+
+
+/* CtxModalView */
+
+.CtxModalView {
+    background-color: rgba(0, 0, 0, 0.2);
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1050;
+    display: block;
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
+    outline: 0;
+    text-align: center;
+}
+
+.CtxModalView .cxtModalContainer {
+    display: inline-block;
+    position: relative;
+    background-color: #fff;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: 1px solid rgba(0, 0, 0, .2);
+    border-radius: 6px;
+    outline: 0;
+    -webkit-box-shadow: 0 3px 9px rgba(0, 0, 0, .5);
+    box-shadow: 0 3px 9px rgba(0, 0, 0, .5);
+    width: auto;
+    min-width: 300px;
+    max-width: 600px;
+    height: auto;
+    margin: 30px auto;
+    padding: 15px;
+}
+
+@media (max-width: 767px) {
+    .CtxModalView .cxtModalContainer {
+        min-width: 150px;
+        max-width: 300px;
+    }
+}
+
+/* CtxDialog */
+
+.CtxDialog {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.CtxDialog .cxtModalContainer {
+}
+
+
+.CtxDialog .cxtModalContainer .ctxCaption {
+    font-size: 18px;
+    font-weight: bolder;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.CtxDialog .cxtModalContainer .ctxButtonsContainer {
+    text-align: right;
+}
+
+/* CtxTreeView */
+
+.CtxTreeView {
+    overflow: auto;
+}
+
+.CtxTreeView .ctx_tree {
+    list-style-type: none;
+    /*background: url(../images/vline.png) repeat-y;*/
+    margin: 0;
+    padding: 0;
+    padding-left: 16px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    cursor: default;
+    background-position-x: 9px;
+    background-color: #fff;
+    text-align: left;
+}
+
+.CtxTreeView .ctx_node {
+    margin: 0;
+    padding: 0 8px;
+    /*line-height: 22px;*/
+    /*background: url(../images/node.png) no-repeat;*/
+    white-space: nowrap;
+}
+
+.CtxTreeView .ctx_node .ctx_node_text{
+    display: inline-block;
+    padding: 3px 4px;
+}
+
+.CtxTreeView .ctx_node[active] .ctx_node_text{
+    background-color: #2266dd;
+    color: #fff;
+}
+
+.CtxTreeView .ctx_node .ctx_icon {
+    margin-bottom: -2px;
+    margin-right: 2px;
+}
+
+
+    /*.CtxTreeView .ctx_last_node {
+        margin: 0;
+        padding: 0 20px;
+        line-height: 22px;
+        background: #fff url(../images/lastnode.png) no-repeat;
+    }*/
+
+.CtxTreeView .ctx_expand_node {
+    position: absolute;
+    margin-top: 4px;
+    margin-left: -22px;
+    vertical-align: sub;
+    background: url(../images/expand.png) no-repeat;
+    height: 16px;
+    width: 16px;
+}
+
+.CtxTreeView .ctx_collapse_node {
+    position: absolute;
+    margin-top: 4px;
+    margin-left: -22px;
+    vertical-align: sub;
+    background: url(../images/collapse.png) no-repeat;
+    height: 16px;
+    width: 16px;
+}

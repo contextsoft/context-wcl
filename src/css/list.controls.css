@@ -73,7 +73,7 @@
 }
 
 .CtxLookupView .ctxInnerList > div.selected,
-.CtxLookupView .ctxInnerList > div .active, {
+.CtxLookupView .ctxInnerList > div.active {
     color: #262626;
     background-color: #e4e4e4;
 }

@@ -577,3 +577,14 @@ Array.prototype.move = function (old_index, new_index) {
     return this;
 };
 
+export interface IStringFunc 
+{
+    (str: string): string;
+}
+
+export function setLocaleFunc(localeFunc: IStringFunc): void
+{
+    L = localeFunc;
+}
+
+export var L: IStringFunc = (str: string): string => { return str; };

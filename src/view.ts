@@ -1,5 +1,6 @@
 import * as utils from './utils';
 import {Component, IInterface} from './component';
+import {IDataLink, FieldDataLink, IDataSource, EventType } from './data';
 
 interface IVoidEvent extends IInterface {
     (): void;
@@ -726,6 +727,11 @@ export class View extends Component {
 export class ValueView extends View {
     protected _value: string;
 
+    public data = new FieldDataLink((eventType: EventType, data: any): void =>
+    {
+        this.setValue((this.data).value);
+    });
+
     /** Gets/sets controls's value */
     public get value() {
         return this.getValue();
@@ -756,5 +762,6 @@ export class ValueView extends View {
         if (this._element && typeof this._value !== 'undefined')
             (<any>this._element).value = this._value;
     }
+    
 }
 
