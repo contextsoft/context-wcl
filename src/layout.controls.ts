@@ -2,7 +2,7 @@
  * Controls that layouts its content 
  */
 
-import * as utils from './utils';
+import {utils} from './utils';
 import {View} from './view';
 
 /**

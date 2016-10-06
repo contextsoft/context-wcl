@@ -1,3 +1,7 @@
+export namespace utils 
+{
+
+
 /**
  * Various handy routines
  **/
@@ -462,7 +466,7 @@ export function clone(src) {
         let name, s, empty = {};
         for (name in source) {
             // the (!(name in empty) || empty[name] !== s) condition avoids copying properties in "source"
-            // inherited from Object.prototype.	 For example, if dest has a custom toString() method,
+            // inherited from Object.prototype.  For example, if dest has a custom toString() method,
             // don't overwrite it with the toString() method that source inherited from Object.prototype
             s = source[name];
             if (!(name in dest) || (dest[name] !== s && (!(name in empty) || empty[name] !== s))) {
@@ -474,7 +478,7 @@ export function clone(src) {
 
     if (!src || typeof src != "object" || Object.prototype.toString.call(src) === "[object Function]") {
         // null, undefined, any non-object, or function
-        return src;	// anything
+        return src; // anything
     }
     if (src.nodeType && "cloneNode" in src) {
         // DOM Node
@@ -482,7 +486,7 @@ export function clone(src) {
     }
     if (src instanceof Date) {
         // Date
-        return new Date(src.getTime());	// Date
+        return new Date(src.getTime()); // Date
     }
     if (src instanceof RegExp) {
         // RegExp
@@ -525,6 +529,22 @@ export function extend<T, U>(first: T, second: U): T & U {
         }
     }
     return result;
+}
+
+
+export interface IStringFunc 
+{
+    (str: string): string;
+}
+
+export function setLocaleFunc(localeFunc: IStringFunc): void
+{
+    L = localeFunc;
+}
+
+export var L: IStringFunc = (str: string): string => { return str; };
+
+
 }
 
 // Object extensions, polyfill
@@ -576,15 +596,3 @@ Array.prototype.move = function (old_index, new_index) {
     this.splice(new_index, 0, this.splice(old_index, 1)[0]);
     return this;
 };
-
-export interface IStringFunc 
-{
-    (str: string): string;
-}
-
-export function setLocaleFunc(localeFunc: IStringFunc): void
-{
-    L = localeFunc;
-}
-
-export var L: IStringFunc = (str: string): string => { return str; };

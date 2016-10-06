@@ -8,11 +8,10 @@
     <script>
         var require = {
             baseUrl: "../../",
-            deps: ['tests/test2/myapp'],
+            deps: ['examples/app01/myapp'],
             paths: {
-                "jquery": 'node_modules/jquery',
-                "context.vcl": 'node_modules/context.vcl',
-                "breeze-client": 'node_modules/breeze-client'
+                "jquery": '../jquery/dist',
+                "breeze-client": '../breeze-client'
             },
             packages: [
                 {name: 'breeze-client', main: 'breeze.debug.js'}, 
@@ -20,14 +19,14 @@
             ],
             callback: function() 
             {
-                require(['tests/test2/myapp'], function(app) 
+                require(['examples/app01/myapp'], function(app) 
                 {
                     app.main();
                 });
             }
         };
     </script>
-    <script type="text/javascript" src="../../node_modules/require.js/require.js"></script>
+    <script type="text/javascript" src="../../../requirejs/require.js"></script>
 </head>
 
 <body>

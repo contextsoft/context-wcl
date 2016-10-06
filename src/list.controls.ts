@@ -1,12 +1,12 @@
 /** 
  * Controls displaing list 
  **/
-import * as utils from './utils';
+import { utils } from './utils';
 import { resources } from './resources';
 import { View } from './view';
 import { InputView, ButtonView } from './std.controls';
 
-resources.register('context.vcl',
+resources.register('context-wcl',
     [
         'css/list.controls.css'
     ]
@@ -16,7 +16,8 @@ resources.register('context.vcl',
  * Parent for list-like controls
  * TODO: when Array.isArray(items) Array.prototype extensions from utils.ts used, needs more convient data binding 
  **/
-export abstract class Items extends View {
+export abstract class Items extends View
+{
     /** Items List
      * e.g.
      * list.items = ['item 1', 'item 2', 'item 3'];
@@ -39,21 +40,26 @@ export abstract class Items extends View {
     protected _selectedIndex;
     //protected filteredItems: any[];
 
-    public get selectedIndex() {
+    public get selectedIndex()
+    {
         return this.getSelectedIndex();
     }
-    public set selectedIndex(index) {
+    public set selectedIndex(index)
+    {
         this.setSelectedIndex(index);
     }
 
 
-    public getSelectedIndex() {
+    public getSelectedIndex()
+    {
         return this._selectedIndex;
     }
 
-    public setSelectedIndex(index) {
+    public setSelectedIndex(index)
+    {
         index = parseInt(index);
-        if (this._selectedIndex !== index) {
+        if (this._selectedIndex !== index)
+        {
             this.updateSelectedIndex(index);
             // invoke on selection change event
             if (this.onSelectionChange)
@@ -65,7 +71,8 @@ export abstract class Items extends View {
         }
     }
 
-    public indexOfItem(itemValue, startWith = 0) {
+    public indexOfItem(itemValue, startWith = 0)
+    {
         if (this.items)
             for (let i = startWith; i < this.items.getRowCount(); i++)
                 if (this.getItemValue(this.items.getRow(i)) === itemValue)
@@ -73,10 +80,12 @@ export abstract class Items extends View {
         return -1;
     };
 
-    public getItemValue(anItem) {
+    public getItemValue(anItem)
+    {
         if (anItem === 'undefined' || typeof anItem === "string")
             return anItem;
-        else if (typeof anItem === "object") {
+        else if (typeof anItem === "object")
+        {
             if (anItem.value !== undefined)
                 return anItem.value;
             if (anItem.text !== undefined)
@@ -86,21 +95,25 @@ export abstract class Items extends View {
     };
 
     /** Selected option by value */
-    public get value() {
+    public get value()
+    {
         return this.getValue();
     }
 
-    public set value(value) {
+    public set value(value)
+    {
         this.setValue(value);
     }
 
-    public getValue(): any {
+    public getValue(): any
+    {
         this.updateItems();
         return this.getItemValue(this.items.getRow(this.selectedIndex));
     }
 
     /** Sets selected option by value */
-    public setValue(value) {
+    public setValue(value)
+    {
         this.updateItems();
         let idx = this.indexOfItem(value);
         this.setSelectedIndex(idx);
@@ -108,7 +121,8 @@ export abstract class Items extends View {
     }
 
     /** Returns value of selected option */
-    public getSelectedItem(option?: string) {
+    public getSelectedItem(option?: string)
+    {
         this.updateItems();
         let item = this.items.getRow(this.getSelectedIndex());
         if (option)
@@ -117,15 +131,18 @@ export abstract class Items extends View {
             return item;
     }
 
-    public updateItems(forceUpdate = false) {
-        if (this.onGetItems && (forceUpdate || this.items.length === 0)) {
+    public updateItems(forceUpdate = false)
+    {
+        if (this.onGetItems && (forceUpdate || this.items.length === 0))
+        {
             let _newItems = [];
             //TODO: data binding
             /*if (this.dataLinks.items)
                 _newItems = this.dataLinks.items.getValue();
             else*/
             if (this.onGetItems)
-                this.onGetItems(function (item) {
+                this.onGetItems(function (item)
+                {
                     _newItems.push(item);
                 });
 
@@ -138,12 +155,14 @@ export abstract class Items extends View {
         }
     }
 
-    protected updateSelectedIndex(newIndex: number) {
+    protected updateSelectedIndex(newIndex: number)
+    {
         // implement in descendants to update selection
         this._selectedIndex = newIndex;
     }
 
-    protected beforeRender() {
+    protected beforeRender()
+    {
         if (this.onGetItems)
             this.items = null;
     }
@@ -153,37 +172,44 @@ export abstract class Items extends View {
 /**
  * <select> wrapper
  **/
-export class SelectView extends Items {
-    constructor(parent: View, name?: string) {
+export class SelectView extends Items
+{
+    constructor(parent: View, name?: string)
+    {
         super(parent, name);
         this.tag = 'select';
         this.renderClientArea = false;
     }
 
-    public getSelectedIndex() {
+    public getSelectedIndex()
+    {
         if (this.element && this.visible)
             return this._selectedIndex = (<any>this.element).selectedIndex;
         else
             return this._selectedIndex;
     }
 
-    public render(): string {
+    public render(): string
+    {
         return this.renderTag(this.internalRenderItems());
     }
 
 
-    protected updateSelectedIndex(newIndex) {
+    protected updateSelectedIndex(newIndex)
+    {
         super.updateSelectedIndex(newIndex);
         if (this.element && this.visible)
             (<any>this.element).selectedIndex = this._selectedIndex;
     }
 
-    protected internalRenderItems = function () {
+    protected internalRenderItems = function ()
+    {
         let html = '';
         this.updateItems();
         let selIdx = this.getSelectedIndex();
 
-        for (let i = 0; i < this.items.getRowCount(); i++) {
+        for (let i = 0; i < this.items.getRowCount(); i++)
+        {
             let comboItem = /*this._currentItem =*/ this.items.getRow(i);
 
             let attr = '';
@@ -191,7 +217,8 @@ export class SelectView extends Items {
                 attr += 'selected ';
             if (typeof comboItem === "string")
                 html += '<option ' + attr + ' >' + utils.escapeHTML(comboItem) + '</option>';
-            else {
+            else
+            {
                 for (let a in comboItem)
                     if (comboItem.hasOwnProperty(a))
                         if (a !== 'text' && a !== 'selected')
@@ -202,12 +229,14 @@ export class SelectView extends Items {
         return html;
     };
 
-    protected afterUpdateView() {
+    protected afterUpdateView()
+    {
         super.afterUpdateView();
         this.handleEvent('onchange', this.handleChange);
     }
 
-    protected handleChange = function () {
+    protected handleChange = function ()
+    {
         /*if (this.dataSources.selectedItem)
             this.dataSources.selectedItem.notifyDataLinks();*/
 
@@ -219,7 +248,8 @@ export class SelectView extends Items {
 /**
  * Displays list
  **/
-export class ListView extends Items {
+export class ListView extends Items
+{
     public onItemClick: (item) => void;
 
     /** Fires when item's text need */
@@ -241,11 +271,13 @@ export class ListView extends Items {
     protected elementToIndex: HTMLElement;
 
 
-    public getValue(): any {
+    public getValue(): any
+    {
         // public get value of selected option 
         this.updateItems();
         let idx = 0;
-        for (let i = 0; i < this.items.getRowCount(); i++) {
+        for (let i = 0; i < this.items.getRowCount(); i++)
+        {
             if (this.filteredItems.indexOf(i) >= 0)
                 continue;
             if (idx === this.getSelectedIndex())
@@ -254,19 +286,23 @@ export class ListView extends Items {
         }
     }
 
-    public render() {
+    public render()
+    {
         return this.renderTag(this.internalRenderItems());
     }
 
 
-    protected setElementSelected(element, selected, addClassName?) {
+    protected setElementSelected(element, selected, addClassName?)
+    {
         addClassName = addClassName || 'selected';
         element.className = this.getSelectedCSSClass(element.className, addClassName, selected);
     }
 
-    protected afterUpdateView() {
+    protected afterUpdateView()
+    {
         super.afterUpdateView();
-        if (this.element && this.visible) {
+        if (this.element && this.visible)
+        {
             this.indexItems();
             //this.handleEvent('onclick', this.handleClick);
             this.handleEvent('onkeydown', this.handleKeyDown);
@@ -278,10 +314,11 @@ export class ListView extends Items {
         //this.internalTriggerReady();
     }
 
-    protected indexItems() {
+    protected indexItems()
+    {
         if (!this.needsItemsIndex)
             return;
-        
+
         let children;
 
         if (this.elementToIndex)
@@ -298,13 +335,15 @@ export class ListView extends Items {
         this.updateSelectedIndex(this.selectedIndex);
     }
 
-    protected getActiveElement(event) {
+    protected getActiveElement(event)
+    {
         // active element is the one being currently touched
         let listElement = event.toElement || event.target;
         if (!listElement)
             return null;
         let idx = listElement.getAttribute('index');
-        while (listElement && !idx) {
+        while (listElement && !idx)
+        {
             listElement = listElement.parentElement;
             if (!listElement)
                 continue;
@@ -316,17 +355,20 @@ export class ListView extends Items {
         return listElement;
     }
 
-    protected handleKeyDown(event) {
+    protected handleKeyDown(event)
+    {
         if (event.eventPhase !== 3)
             return;
         let keyCode = ('which' in event) ? event.which : event.keyCode;
-        switch (parseInt(keyCode)) {
+        switch (parseInt(keyCode))
+        {
             case 38:
                 if (this.activeIndex > 0)
                     this.updateActiveIndex(this.activeIndex - 1);
                 break;
             case 40:
-                if (this.activeIndex < this.renderedRowCount - 1) {
+                if (this.activeIndex < this.renderedRowCount - 1)
+                {
                     if (this.activeIndex < 0)
                         this.updateActiveIndex(0);
                     else
@@ -336,7 +378,8 @@ export class ListView extends Items {
         }
     }
 
-    protected handleClick(event) {
+    protected handleClick(event)
+    {
         let listElement = this.getActiveElement(event);
         if (!listElement)
             return;
@@ -347,7 +390,8 @@ export class ListView extends Items {
         this.setFocus();
     }
 
-    protected handleMouseDown(event) {
+    protected handleMouseDown(event)
+    {
         if (event instanceof MouseEvent && event.button > 0)
             return;
         let listElement = this.getActiveElement(event);
@@ -360,7 +404,8 @@ export class ListView extends Items {
         this.handleClick(event);
     }
 
-    protected handleMouseUp(event) {
+    protected handleMouseUp(event)
+    {
         if (event instanceof MouseEvent && event.button > 0)
             return;
         if (this.lastClickedElement)
@@ -369,7 +414,8 @@ export class ListView extends Items {
         //this.handleClick(event);
     }
 
-    protected updateActiveOrSelectedIndex(newIndex, obj: { selectedElement; selectedIndex; status }) {
+    protected updateActiveOrSelectedIndex(newIndex, obj: { selectedElement; selectedIndex; status })
+    {
         // unselect current element
         if (obj.selectedElement)
             this.setElementSelected(obj.selectedElement, false, obj.status);
@@ -377,15 +423,19 @@ export class ListView extends Items {
 
         obj.selectedIndex = newIndex;
 
-        if (this.element && this.visible && obj.selectedIndex >= 0) {
-            let recurseChildren = function (el) {
+        if (this.element && this.visible && obj.selectedIndex >= 0)
+        {
+            let recurseChildren = function (el)
+            {
                 let idx, e;
-                for (let i = 0; i < el.children.length; i++) {
+                for (let i = 0; i < el.children.length; i++)
+                {
                     idx = el.children[i].getAttribute('index');
                     //log(el.children[i].getAttribute('class') + ': ' + idx);
                     if (idx == obj.selectedIndex)
                         return el.children[i];
-                    else if (el.children[i].children !== 'undefined') {
+                    else if (el.children[i].children !== 'undefined')
+                    {
                         e = recurseChildren(el.children[i]);
                         if (e !== null)
                             return e;
@@ -400,7 +450,8 @@ export class ListView extends Items {
     }
 
 
-    protected updateSelectedIndex(newIndex) {
+    protected updateSelectedIndex(newIndex)
+    {
         let obj = {
             selectedElement: this.selectedElement,
             selectedIndex: this.selectedIndex,
@@ -414,7 +465,8 @@ export class ListView extends Items {
         this.updateActiveIndex(this.selectedIndex);
     }
 
-    protected updateActiveIndex = function (newIndex) {
+    protected updateActiveIndex = function (newIndex)
+    {
         let obj = {
             selectedElement: this.activeElement,
             selectedIndex: this.activeIndex,
@@ -428,14 +480,16 @@ export class ListView extends Items {
         return true;
     };
 
-    protected internalRenderItems() {
+    protected internalRenderItems()
+    {
         this.updateItems();
         let cnt = 0;
         let html = '';
         let itemsToRender = this.items.getRowCount();
         if (this.maxItemsToRender && this.maxItemsToRender < itemsToRender)
             itemsToRender = this.maxItemsToRender;
-        for (let i = 0; i < this.items.getRowCount() && cnt < itemsToRender; i++) {
+        for (let i = 0; i < this.items.getRowCount() && cnt < itemsToRender; i++)
+        {
             if (this.filteredItems.indexOf(i) >= 0)
                 continue;
             cnt++;
@@ -446,7 +500,8 @@ export class ListView extends Items {
             let item: any = /*this._currentItem =*/ this.items.getRow(i);
             if (typeof item === "string")
                 html += this.getItemHtml(item, i, attr, item);
-            else {
+            else
+            {
                 if (this.appendPropertiesToAttributes)
                     for (let a in item)
                         if (item.hasOwnProperty(a))
@@ -468,17 +523,20 @@ export class ListView extends Items {
         return html;
     }
 
-    protected getItemHtml = function (item, index, attr, text) {
+    protected getItemHtml = function (item, index, attr, text)
+    {
         let r = View.getTag('div', attr, text) + '\n';
         return r;
     };
 
-    protected getSelectedCSSClass(classNames, className, selected) {
+    protected getSelectedCSSClass(classNames, className, selected)
+    {
         let hasClassActive = false;
         if (classNames)
             hasClassActive = utils.indexOfWord(classNames, className) >= 0;
 
-        if (selected) {
+        if (selected)
+        {
             if (!hasClassActive)
                 classNames = classNames + ' ' + className;
         }
@@ -492,7 +550,8 @@ export class ListView extends Items {
 /**
  * Lookup control
  */
-export class LookupView extends ListView {
+export class LookupView extends ListView
+{
     protected static listIdCounter = 1;
 
     /** Lookup at value beginning or anywhere, default true */
@@ -510,7 +569,8 @@ export class LookupView extends ListView {
     protected updatingValue = false;
     protected listId;
 
-    constructor(parent: View, name?: string) {
+    constructor(parent: View, name?: string)
+    {
         super(parent, name);
         this.maxItemsToRender = 100;
         //this.childToIndex = 1;
@@ -526,14 +586,16 @@ export class LookupView extends ListView {
         this.inputBtn.events.onclick = this.onInputBtnClick;
     }
 
-    public render() {
+    public render()
+    {
         this.listId = 'ctxLookupView' + LookupView.listIdCounter++;
         return this.renderTag('<div class="ctxInputBlock">' + this.input.internalRender() +
             '<div class="ctxInputBtnGroup">' + this.inputBtn.internalRender() + '</div></div>' +
             View.getTag('div', 'class="ctxInnerList" id="' + this.listId + '"', this.internalRenderItems()));
     }
 
-    public setSelectedIndex(index) {
+    public setSelectedIndex(index)
+    {
         super.setSelectedIndex(index);
         if (this.selectedIndex < 0)
             return;
@@ -543,22 +605,26 @@ export class LookupView extends ListView {
         this.updatingValue = false;
     }
 
-    public setValue(value) {
+    public setValue(value)
+    {
         super.setValue(value);
         this.input.value = value;
     }
 
-    public getValue(): any {
+    public getValue(): any
+    {
         return super.getValue() || this.input.value;
     }
 
-    protected afterUpdateView() {
+    protected afterUpdateView()
+    {
         this.elementToIndex = document.getElementById(this.listId);
         super.afterUpdateView();
     }
 
 
-    protected handleKeyDown(event) {
+    protected handleKeyDown(event)
+    {
         super.handleKeyDown(event);
         if (event.eventPhase != 3)
             return;
@@ -567,23 +633,27 @@ export class LookupView extends ListView {
             this.setSelectedIndex(this.activeIndex);
     };
 
-    protected onInputChange() {
+    protected onInputChange()
+    {
         (<LookupView>this.parent).doInputChange(false);
     }
 
-    protected doInputChange(forceShow: boolean) {
+    protected doInputChange(forceShow: boolean)
+    {
         if (this.updatingValue || !this.enabled)
             return;
         let item, value, pos;
 
         this.filteredItems = [];
 
-        if (!forceShow) {
+        if (!forceShow)
+        {
             let inputVal = this.input.value;
             if (!this.caseSensitive)
                 inputVal = inputVal.toLowerCase();
 
-            for (let i = 0; i < this.items.getRowCount(); i++) {
+            for (let i = 0; i < this.items.getRowCount(); i++)
+            {
                 item = this.items.getRow(i);
 
                 if (typeof item === "string")
@@ -615,16 +685,19 @@ export class LookupView extends ListView {
         this.showDropdown(el.innerHTML.length > 0);
     }
 
-    protected onInputBlur(event) {
+    protected onInputBlur(event)
+    {
         let lookup: LookupView = <LookupView>this.parent;
         if (event.relatedTarget && event.relatedTarget.className.indexOf('ctxInternalInputButton') >= 0)
             return;
         lookup.showDropdown(false);
     }
 
-    protected onInputKeyPress(event) {
+    protected onInputKeyPress(event)
+    {
         let lookup: LookupView = <LookupView>this.parent;
-        if (!lookup.enabled) {
+        if (!lookup.enabled)
+        {
             event.preventDefault();
             return;
         }
@@ -636,7 +709,8 @@ export class LookupView extends ListView {
             event.preventDefault();
     }
 
-    protected onInputBtnClick(event) {
+    protected onInputBtnClick(event)
+    {
         let lookup: LookupView = <LookupView>this.parent;
         if (!lookup.enabled)
             return;
@@ -647,7 +721,8 @@ export class LookupView extends ListView {
         lookup.input.setFocus();
     }
 
-    protected showDropdown(show: boolean) {
+    protected showDropdown(show: boolean)
+    {
         let el = document.getElementById(this.listId);
         if (show)
             el.style.visibility = 'visible';
@@ -662,7 +737,8 @@ export class LookupView extends ListView {
 /**
  *  Date select control
  */
-export class DatePicker extends LookupView {
+export class DatePicker extends LookupView
+{
     /** First day of week, 0 - sunday, 1 - monday, default 0 */
     public firstDayOfWeek = 0;
 
@@ -670,10 +746,12 @@ export class DatePicker extends LookupView {
     public dateFormat = '';
 
     /** Show or not prev and next month days, default true */
-    get showPrevNextMonthDays() {
+    get showPrevNextMonthDays()
+    {
         return this.attributes.showPrevNextMonthDay;
     }
-    set showPrevNextMonthDays(value) {
+    set showPrevNextMonthDays(value)
+    {
         if (this.attributes.showPrevNextMonthDay && this.attributes.showPrevNextMonthDay === value)
             return;
         this.attributes.showPrevNextMonthDay = value;
@@ -692,7 +770,8 @@ export class DatePicker extends LookupView {
     protected prevMonthBtn: ButtonView;
     protected nextMonthBtn: ButtonView;
 
-    constructor(parent: View, name?: string) {
+    constructor(parent: View, name?: string)
+    {
         super(parent, name);
 
         this.showPrevNextMonthDays = true;
@@ -721,11 +800,13 @@ export class DatePicker extends LookupView {
         this.nextMonthBtn.events.onclick = this.onNextMonthBtnClick;
     }
 
-    public getValue() {
+    public getValue()
+    {
         return this.selectedDate;
     }
 
-    public setValue(value) {
+    public setValue(value)
+    {
         this.selectedDate = value;
         if (value)
             this.input.setValue(utils.formatDate(this.selectedDate, this.dateFormat));
@@ -734,10 +815,12 @@ export class DatePicker extends LookupView {
         this.updateCalendar(false);
     }
 
-    public setSelectedIndex(index) {
+    public setSelectedIndex(index)
+    {
         //super.setSelectedIndex(index);
         index = parseInt(index);
-        if (this._selectedIndex !== index) {
+        if (this._selectedIndex !== index)
+        {
             this.updateSelectedIndex(index);
             // invoke on selection change event
             if (this.onSelectionChange)
@@ -758,7 +841,8 @@ export class DatePicker extends LookupView {
         this.updatingValue = false;
     }
 
-    protected onInputBlur(event) {
+    protected onInputBlur(event)
+    {
         if (event.relatedTarget && (event.relatedTarget.className.indexOf('internalInputButton') >= 0
             || event.relatedTarget.className.indexOf('ctxPrevMonthBtn') >= 0
             || event.relatedTarget.className.indexOf('ctxNextMonthBtn') >= 0))
@@ -766,14 +850,16 @@ export class DatePicker extends LookupView {
         (<DatePicker>this.parent).showDropdown(false);
     }
 
-    protected onInputKeyPress(event) {
+    protected onInputKeyPress(event)
+    {
         this.handleKeyDown(event);
         let keyCode = ('which' in event) ? event.which : event.keyCode;
         if (parseInt(keyCode) == 38 || parseInt(keyCode) == 40)
             event.preventDefault();
     }
 
-    protected onInputBtnClick(event) {
+    protected onInputBtnClick(event)
+    {
         let picker = (<DatePicker>this.parent);
         if (!picker.listVisible)
             picker.showDropdown(true);
@@ -782,20 +868,23 @@ export class DatePicker extends LookupView {
         picker.input.setFocus();
     }
 
-    protected onPrevMonthBtnClick(event) {
+    protected onPrevMonthBtnClick(event)
+    {
         let picker = (<DatePicker>this.parent);
         picker.monthToShow.setMonth(picker.monthToShow.getMonth() - 1);
         picker.updateCalendar(true);
     }
 
-    protected onNextMonthBtnClick(event) {
+    protected onNextMonthBtnClick(event)
+    {
         let picker = (<DatePicker>this.parent);
         picker.monthToShow.setMonth(picker.monthToShow.getMonth() + 1);
         picker.updateCalendar(true);
     }
 
 
-    protected updateCalendar(dontGoToSelectedDate: boolean) {
+    protected updateCalendar(dontGoToSelectedDate: boolean)
+    {
         if (!this.listId)
             return;
         let el = document.getElementById(this.listId);
@@ -805,18 +894,21 @@ export class DatePicker extends LookupView {
         this.input.setFocus();
     }
 
-    protected weekday(dayOfWeek) {
+    protected weekday(dayOfWeek)
+    {
         if (this.firstDayOfWeek == 0)
             return dayOfWeek == 0 || dayOfWeek == 6 ? ' weekend' : '';
         else
             return dayOfWeek == 5 || dayOfWeek == 6 ? ' weekend' : '';
     }
 
-    protected internalRenderItems() {
+    protected internalRenderItems()
+    {
         return this.doInternalRenderItems();
     }
 
-    protected doInternalRenderItems(dontGoToSelectedDate = false) {
+    protected doInternalRenderItems(dontGoToSelectedDate = false)
+    {
         this.updateItems();
         let html = '', i, j, d;
         let monthToShow = this.monthToShow;
@@ -839,7 +931,8 @@ export class DatePicker extends LookupView {
         // week days names
         j = this.firstDayOfWeek;
         html += '<div class="ctxDaysTable"><div class="ctxRow">\n';
-        for (i = 0; i <= 6; i++) {
+        for (i = 0; i <= 6; i++)
+        {
             html += View.getTag('div', 'class="ctxWeekDay"' + this.weekday(i), this.L(weekDays[j]));
             j++;
             if (j > 6)
@@ -849,15 +942,18 @@ export class DatePicker extends LookupView {
 
         // prev month days
         daysInPrevMonth = daysInPrevMonth - dayOfWeek;
-        for (i = 0; i < dayOfWeek; i++) {
+        for (i = 0; i < dayOfWeek; i++)
+        {
             daysInPrevMonth++;
             html += View.getTag('div', 'class="ctxPrevMonthDay"' + this.weekday(i), daysInPrevMonth.toString());
         }
 
         // days
         let s, today = new Date();
-        for (i = 1; i <= daysInMonth; i++) {
-            if (dayOfWeek > 6) {
+        for (i = 1; i <= daysInMonth; i++)
+        {
+            if (dayOfWeek > 6)
+            {
                 html += '\n</div>\n<div class="ctxRow">\n';
                 dayOfWeek = 0;
             }

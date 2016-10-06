@@ -1,13 +1,15 @@
-import * as utils from './utils';
-import {Component, IInterface} from './component';
-import {IDataLink, FieldDataLink, IDataSource, EventType } from './data';
+import { utils } from './utils';
+import { Component, IInterface } from './component';
+import { IDataLink, FieldDataLink, IDataSource, EventType } from './data';
 
-interface IVoidEvent extends IInterface {
+interface IVoidEvent extends IInterface
+{
     (): void;
 }
 
 /** Views's Align */
-export class Align implements IAlign {
+export class Align implements IAlign
+{
     static left: IAlign = { id: 'left', style: 'position: absolute; left: 0; top: 0; bottom: 0' };
     static top: IAlign = { id: 'top', style: 'position: absolute; left: 0; top: 0; right: 0' };
     static right: IAlign = { id: 'right', style: 'position: absolute; top: 0; right: 0; bottom: 0' };
@@ -17,7 +19,8 @@ export class Align implements IAlign {
     style: string;
 }
 
-interface IAlign {
+interface IAlign
+{
     id: string;
     style: string;
 }
@@ -32,11 +35,13 @@ interface IAlign {
 /** 
  * Root for all controls 
  **/
-export class View extends Component {
+export class View extends Component
+{
     /** Returns html <tag attr>innerHtml</tag>
      * leaveOpen means close or not tag
      */
-    public static getTag(tag: string, attr: string, innerHtml: string, leaveOpen = false): string {
+    public static getTag(tag: string, attr: string, innerHtml: string, leaveOpen = false): string
+    {
         let t = tag || 'div';
         let res = '<' + t + ' ' + (attr || '');
         res += (t === 'input') ? '/' : '';
@@ -50,7 +55,8 @@ export class View extends Component {
 
 
     /** Controls's id for DOM */
-    public get id() {
+    public get id()
+    {
         return this._id;
     }
 
@@ -81,7 +87,7 @@ export class View extends Component {
     /** Object with additional control's DOM attributes */
     public attributes: any = {};
 
-    /** Fires on show/hide */ 
+    /** Fires on show/hide */
     public onVisibleChanged: IVoidEvent;
 
     /** Fires after control was shown */
@@ -120,27 +126,33 @@ export class View extends Component {
     protected _text: any;
     protected _classPath: string;
 
-    constructor(parent: View, name?: string) {
+    constructor(parent: View, name?: string)
+    {
         super(name);
         this._id = 'w' + (View.nextViewId++);
         this._parent = parent;
         if (parent)
             parent.addView(this);
+        this.initComponents();
     }
 
     /** Control's parent control */
-    public get parent() {
+    public get parent()
+    {
         return this._parent;
     }
 
     /** Enables or disabled controls */
-    public get enabled() {
+    public get enabled()
+    {
         //let a = this.getAction();
         //return (a) ? (a.getEnabled() && a.execute) : this._enabled;
         return this._enabled;
     }
-    public set enabled(value) {
-        if (value !== this._enabled) {
+    public set enabled(value)
+    {
+        if (value !== this._enabled)
+        {
             this._enabled = value;
             // let a = this.getAction();
             // if(a)
@@ -151,11 +163,14 @@ export class View extends Component {
     }
 
     /** Sets/Gets CSS class in addition to generated one e.g. 'TextView View additionalCSSClass'  */
-    public get additionalCSSClass() {
+    public get additionalCSSClass()
+    {
         return this._additionalCSSClass;
     }
-    public set additionalCSSClass(value) {
-        if (this._additionalCSSClass !== value) {
+    public set additionalCSSClass(value)
+    {
+        if (this._additionalCSSClass !== value)
+        {
             this._additionalCSSClass = value;
             if (this.visible && this.element)
                 this.element.className = this.getCSSClass();
@@ -163,7 +178,8 @@ export class View extends Component {
     }
 
     /** Cached DOM body element */
-    public get bodyElement() {
+    public get bodyElement()
+    {
         if (!this._bodyElement && this._bodyElementId)
             this._bodyElement = document.getElementById(this._bodyElementId);
         if (!this._bodyElement)
@@ -173,16 +189,20 @@ export class View extends Component {
 
 
     /** Shows or hides control */
-    public get visible() {
+    public get visible()
+    {
         // return (this.action) ? this.action.visible : this._visible;
         return this._visible;
     }
-    public set visible(value: boolean) {
+    public set visible(value: boolean)
+    {
         this.setVisible(value);
     }
 
-    public setVisible(value) {
-        if (value !== this._visible) {
+    public setVisible(value)
+    {
+        if (value !== this._visible)
+        {
             this._visible = value;
             this.updateView();
             this.visibleChanged();
@@ -190,12 +210,14 @@ export class View extends Component {
     };
 
     /** Control's DOM element */
-    public get element() {
+    public get element()
+    {
         return this._element;
     }
 
     /** Sets/Gets content which will be rendered */
-    public get text() {
+    public get text()
+    {
         let result;
         if (typeof this.onGetText === "function")
             result = this.onGetText();
@@ -207,8 +229,10 @@ export class View extends Component {
 
         return (result) ? String(result) : '';
     }
-    public set text(value) {
-        if (value !== this._text) {
+    public set text(value)
+    {
+        if (value !== this._text)
+        {
             this._text = value;
             if (this.element)
                 this.updateView();
@@ -216,7 +240,8 @@ export class View extends Component {
     }
 
     /** Class path for css, e.g. "CtxView CtxTextView" */
-    public get classPath(): string {
+    public get classPath(): string
+    {
         return this._classPath;
     }
 
@@ -242,50 +267,62 @@ export class View extends Component {
 
 
     /** Returns control's DOM element */
-    public getElement() {
+    public getElement()
+    {
         return document.getElementById(this.id);
     }
 
-    public getClientElementId() {
+    public getClientElementId()
+    {
         return this.id + '_client';
     }
 
     /** Returns   */
-    public getClientElement() {
+    public getClientElement()
+    {
         return document.getElementById(this.getClientElementId());
     }
 
     /** Hides and removes control from parent */
-    public destroy() {
+    public destroy()
+    {
         this.hide();
         this.setParent(null);
     }
 
     /** Returns control's parent' */
-    public getParent() {
+    public getParent()
+    {
         return this.parent;
     }
 
     /** Moves control to the new parent */
-    public setParent(value) {
-        if (value !== this.parent) {
-            if (this.parent) {
+    public setParent(value)
+    {
+        if (value !== this.parent)
+        {
+            if (this.parent)
+            {
                 this.parent.removeView(this);
 
                 // destroy element if it exists within parent view
-                if (this.element && this.parent.element) {
-                    if (this.parent.visible) {
+                if (this.element && this.parent.element)
+                {
+                    if (this.parent.visible)
+                    {
                         // let parent redraw itself
                         this._element = null;
                         this.parent.updateView();
                     }
-                    else {
+                    else
+                    {
                         // simply delete element from DOM
                         this.element.parentElement.removeChild(this.element);
                     }
                 }
             }
-            else if (this.element) {
+            else if (this.element)
+            {
                 // if we belong to body, in this case the parent was null but the element exists
                 this.bodyElement.removeChild(this.element);
             }
@@ -299,7 +336,8 @@ export class View extends Component {
             this._parent = value;
 
             // update new parent to create it if it's visible - this will keep status quo
-            if (this.visible) {
+            if (this.visible)
+            {
                 if (this.parent)
                     this.parent.updateView();
                 else
@@ -309,13 +347,16 @@ export class View extends Component {
     }
 
     /** While control updating it won't be rerender */
-    public beginUpdate() {
+    public beginUpdate()
+    {
         this.updating++;
     }
 
     /** Ends control update and renders it */
-    public endUpdate() {
-        if (this.updating > 0) {
+    public endUpdate()
+    {
+        if (this.updating > 0)
+        {
             this.updating--;
             if (!this.updating)
                 this.updateView();
@@ -323,12 +364,16 @@ export class View extends Component {
     }
 
     /** Calls action and rerenders control */
-    public update(action) {
+    public update(action)
+    {
         this.beginUpdate();
-        if (typeof action === "function") {
-            try {
+        if (typeof action === "function")
+        {
+            try
+            {
                 action.call(this);
-            } catch (e) {
+            } catch (e)
+            {
                 this.endUpdate();
                 throw e;
             }
@@ -337,46 +382,54 @@ export class View extends Component {
     }
 
     /** Add param view to controls children */
-    public addView(view) {
+    public addView(view)
+    {
         if (view && this.children.indexOf(view) < 0)
             this.children.push(view);
     }
 
     /** Removes view from control's children */
-    public removeView(view) {
+    public removeView(view)
+    {
         let idx = this.children.indexOf(view);
         if (idx >= 0)
             this.children.splice(idx, 1);
     }
 
     /** Shows control */
-    public show() {
+    public show()
+    {
         this.visible = true;
     }
 
     /** Hides control */
-    public hide() {
+    public hide()
+    {
         this.visible = false;
     }
 
     /** Rerenders control */
-    public updateView() {
+    public updateView()
+    {
         // do nothing if we are in updating mode
         if (this.updating) return;
 
         // update view
         this._element = this.getElement();
-        if (this.element) {
+        if (this.element)
+        {
             this.beforeUpdateView();
             this.element.outerHTML = this.internalRender();
             this.internalAfterUpdateView();
         }
-        else if (this.parent) {
+        else if (this.parent)
+        {
             // update parent
             this._element = null;
             this.parent.internalInsertChild(this);
         }
-        else if (!this.parent) {
+        else if (!this.parent)
+        {
             this.beforeUpdateView();
             // update body
             this._element = null;
@@ -392,21 +445,24 @@ export class View extends Component {
     }
 
     /** Returns control's DOM element attribute */
-    public getElementAttribute(name) {
+    public getElementAttribute(name)
+    {
         if (this.element && this.visible)
             return this.element.getAttribute(name);
         else return this.attributes[name];
     }
 
     /** Sets control's DOM element attribute */
-    public setElementAttribute(name, value) {
+    public setElementAttribute(name, value)
+    {
         if (this.element && this.visible)
             this.element.setAttribute(name, value);
         return this.attributes[name] = value;
     }
 
     /** Returns control's or its action's icon url */
-    public getIcon() {
+    public getIcon()
+    {
         return this.icon || '';
         // else {
         //     if (this.action && this.action.icon)
@@ -417,7 +473,8 @@ export class View extends Component {
     }
 
     /** Return icon withing <img> tag */
-    public renderIcon(): string {
+    public renderIcon(): string
+    {
         let icon = this.getIcon();
         if (icon)
             return '<img src="' + icon + '">';
@@ -426,15 +483,18 @@ export class View extends Component {
     }
 
     /** Return controls html without children */
-    public renderTag(innerHtml: string, leaveOpen?: boolean): string {
+    public renderTag(innerHtml: string, leaveOpen?: boolean): string
+    {
         return View.getTag(this.tag, this.internalGetTagAttr(), innerHtml, leaveOpen);
     }
 
     /** Returns control's html with children */
-    public render(): string {
+    public render(): string
+    {
         let html = this.renderSelf() + this.renderChildren();
 
-        if (this.renderClientArea) {
+        if (this.renderClientArea)
+        {
             html = View.getTag(this.clientAreaTag, this.getClientAreaTagAttr(), html);
             // render non-client area children
             html += this.renderChildren(true);
@@ -444,16 +504,18 @@ export class View extends Component {
     }
 
     /** Return control's html accouting it's visibility */
-    public internalRender(): string {
-        if (this.visible) 
+    public internalRender(): string
+    {
+        if (this.visible)
             return this.render();
-        
-        else 
+
+        else
             return '<div class="' + this.hiddenViewClass + '" id=' + this.id + '></div>';
     }
 
     /** Aligns control's children when alignChildren = true */
-    public realignChildren(offset?) {
+    public realignChildren(offset?)
+    {
         if (!this.alignChildren)
             return;
 
@@ -465,14 +527,16 @@ export class View extends Component {
             'client': { left: 0, top: 0, right: 0, bottom: 0 }
         };
 
-        function incOffset(id, value) {
+        function incOffset(id, value)
+        {
             for (let o in offset)
                 if (offset.hasOwnProperty(o) && offset[o].hasOwnProperty(id))
                     offset[o][id] += value;
         }
 
         let c, aid, el;
-        for (let i = 0; i < this.children.length; i++) {
+        for (let i = 0; i < this.children.length; i++)
+        {
             c = this.children[i];
             aid = c.align ? c.align.id : Align.left.id;
             el = c.element;
@@ -484,7 +548,8 @@ export class View extends Component {
             el.style['top'] = offset[aid].top + 'px';
             el.style['bottom'] = offset[aid].bottom + 'px';
 
-            if (c.align) {
+            if (c.align)
+            {
                 if (aid == Align.left.id)
                     incOffset('left', el.offsetWidth);
                 else if (aid == Align.right.id)
@@ -504,7 +569,8 @@ export class View extends Component {
     }
 
     /** Focuses control's DOM element */
-    public setFocus() {
+    public setFocus()
+    {
         if (this.element && this.visible)
             this.element.focus();
     }
@@ -523,7 +589,8 @@ export class View extends Component {
     //         this.children[i].updateActionShortcuts(value);
     // }
 
-    protected visibleChanged() {
+    protected visibleChanged()
+    {
         // this.updateActionShortcuts(true);
         if (this.onVisibleChanged)
             this.onVisibleChanged();
@@ -531,18 +598,23 @@ export class View extends Component {
 
 
     /** Resets all children elements to null */
-    protected resetChildrenElements() {
-        for (let i = 0; i < this.children.length; i++) {
+    protected resetChildrenElements()
+    {
+        for (let i = 0; i < this.children.length; i++)
+        {
             this.children[i]._element = null;
             this.children[i].resetChildrenElements();
         }
     }
 
     /** Assigns event handler to control's DOM-element in addition to control.events handlers */
-    protected handleEvent(eventName: string, handler: any) {
-        if (this.element && this.visible) {
+    protected handleEvent(eventName: string, handler: any)
+    {
+        if (this.element && this.visible)
+        {
             if (handler)
-                this.element[eventName] = (event) => {
+                this.element[eventName] = (event) =>
+                {
                     handler.call(this, event);
                     if (this.events[eventName])
                         this.events[eventName].call(this, event);
@@ -566,31 +638,37 @@ export class View extends Component {
     //         return this.parent.getChildrenOwner();
     // }
 
-    protected internalTriggerReady() {
+    protected internalTriggerReady()
+    {
         if (this.visible && this.element && this.onReady)
             this.onReady();
     }
 
-    protected beforeUpdateView() {
+    protected beforeUpdateView()
+    {
 
     }
 
     //TODO: unclear code, looks like internalAfterUpdateView and afterUpdateView should be combined 
-    protected internalAfterUpdateView() {
+    protected internalAfterUpdateView()
+    {
         this.afterUpdateView();
         this.initSplitter();
         this.realignChildren();
-        setTimeout(() => {
+        setTimeout(() =>
+        {
             this.realignChildren();
         }, 0);
         this.internalTriggerReady();
     }
 
-    protected afterUpdateView() {
+    protected afterUpdateView()
+    {
         // assign DOM element
         this._element = this.getElement();
 
-        if (!this.visible || !this.element) {
+        if (!this.visible || !this.element)
+        {
             // clear elements for all children
             this.resetChildrenElements();
             return;
@@ -626,16 +704,20 @@ export class View extends Component {
     //     }
     // }
 
-    protected internalInsertChild(child) {
+    protected internalInsertChild(child)
+    {
         this.updateView();
     }
 
     /** Returns control's CSS class */
-    protected getCSSClass() {
+    protected getCSSClass()
+    {
         let c = this.name ? this.name + ' ' : '';
-        if (!this._classPath) {
+        if (!this._classPath)
+        {
             let t: any = Object.getPrototypeOf(this), cp = '';
-            while (t) {
+            while (t)
+            {
                 cp += (cp == '' ? '' : ' ') + this.cssPrefix + Component.getFunctionName(t.constructor);
                 t = Object.getPrototypeOf(t);
                 if (!t || !t.constructor || t.constructor === Component)
@@ -657,11 +739,13 @@ export class View extends Component {
     }
 
     /** Returns all control element's attributes */
-    protected internalGetTagAttr(): string {
+    protected internalGetTagAttr(): string
+    {
         let e = this.element;
         let s = (e && e.className !== this.hiddenViewClass) ? e.style.cssText : (typeof this.style == 'string' ? this.style : '');
         let align = '';
-        if (this.align) {
+        if (this.align)
+        {
             s += s ? ('; ' + this.align.style) : this.align.style;
             align = utils.formatStr(' ctx_align="{0}"', [this.align.id]);
         }
@@ -675,11 +759,13 @@ export class View extends Component {
     }
 
     /** Return control element's this.attrubutes */
-    protected getTagAttr() {
+    protected getTagAttr()
+    {
         return utils.attributesToString(this.attributes);
     }
 
-    protected getClientAreaTagAttr() {
+    protected getClientAreaTagAttr()
+    {
         // this renders view with client area
         // the reason for this is to be able to layout child views
         // this allows to use padding to create internal margins
@@ -688,14 +774,16 @@ export class View extends Component {
     }
 
     /** Returns control's content html */
-    protected renderSelf(): string {
+    protected renderSelf(): string
+    {
         return this.renderIcon() + this.text;
     }
 
     /** Returns control's childs html 
      * nonClientArea indicates if client area or not rendered at the moment 
      * */
-    protected renderChildren(nonClientArea = false): string {
+    protected renderChildren(nonClientArea = false): string
+    {
         let contentHtml = '';
         for (let i = 0; i < this.children.length; i++)
             if (nonClientArea == this.children[i].renderInNonClientArea)
@@ -703,28 +791,38 @@ export class View extends Component {
         return contentHtml;
     }
 
-    public isSplitter(): boolean {
+    public isSplitter(): boolean
+    {
         return false;
     }
 
     /** Splitter support */
-    protected initSplitter() {
+    protected initSplitter()
+    {
         let c = null, prevc = null;
-        for (let i = 0; i < this.children.length; i++) {
+        for (let i = 0; i < this.children.length; i++)
+        {
             prevc = c;
             c = this.children[i];
-            if (c.isSplitter()) {
+            if (c.isSplitter())
+            {
                 c.control = prevc;
                 c.setVertical(c.align.id == Align.left.id || c.align.id == Align.right.id);
             }
         }
+    }
+
+    protected initComponents()
+    {
+        // Implement in descendants to init internal components 
     }
 }
 
 /** 
  * Control with a value 
  **/
-export class ValueView extends View {
+export class ValueView extends View
+{
     protected _value: string;
 
     public data = new FieldDataLink((eventType: EventType, data: any): void =>
@@ -733,35 +831,42 @@ export class ValueView extends View {
     });
 
     /** Gets/sets controls's value */
-    public get value() {
+    public get value()
+    {
         return this.getValue();
     }
-    public set value(_value) {
+    public set value(_value)
+    {
         this.setValue(_value);
     }
-    public getValue() {
+    public getValue()
+    {
         if (this.element && this.visible)
             this._value = (<any>this.element).value;
         return this._value;
     }
-    public setValue(_value) {
-        if (this._value !== _value) {
+    public setValue(_value)
+    {
+        if (this._value !== _value)
+        {
             this._value = _value;
             if (this.element && this.visible)
                 (<any>this.element).value = this._value;
         }
     }
 
-    protected beforeUpdateView() {
+    protected beforeUpdateView()
+    {
         super.beforeUpdateView();
         this.getValue(); // storing control's value            
     }
-   
-    protected afterUpdateView() {
+
+    protected afterUpdateView()
+    {
         super.afterUpdateView();
         if (this._element && typeof this._value !== 'undefined')
             (<any>this._element).value = this._value;
     }
-    
+
 }
 

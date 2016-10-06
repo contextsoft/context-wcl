@@ -1,14 +1,14 @@
 /** 
  * Standart Controls 
  **/
-import * as utils from './utils';
+import { utils } from './utils';
 import { resources } from './resources';
 import { IVoidEvent } from './component';
 import { Align, View, ValueView } from './view';
 import { CSSTransition } from './transitions';
 import { FieldDataLink, IDataSource, EventType } from './data';
 
-resources.register('context.vcl',
+resources.register('context-wcl',
     [
         'css/std.controls.css',
         'images/expand.png'

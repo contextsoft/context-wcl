@@ -1,17 +1,19 @@
 /**
  * Application object
  */
-import * as utils from './utils';
-import {resources} from './resources';
+import { utils } from './utils';
+import { resources } from './resources';
 import { IVoidEvent, IDOMEvent } from './component';
 
-export interface IAppConfig {
+export interface IAppConfig
+{
     appUrl: string;
     libraries?: any;
 }
 
 /** Application control and config */
-export class Application {
+export class Application
+{
     /** Locales supported by application */
     static locales = {
         en: {
@@ -20,7 +22,8 @@ export class Application {
     };
 
     /** Returns WebBrowser info */
-    public static getAgentInfo() {
+    public static getAgentInfo()
+    {
         let r: any = {};
         r.vendor = (/webkit/i).test(navigator.appVersion) ? 'webkit' : (/firefox/i).test(navigator.userAgent) ? 'moz' : (/trident/i).test(navigator.userAgent) ? 'ms' : 'opera' in window ? 'o' : '';
         // Browser capabilities
@@ -67,7 +70,8 @@ export class Application {
 
     protected _agentInfo;
 
-    constructor(config?: IAppConfig, onReady?: IVoidEvent) {
+    constructor(config?: IAppConfig, onReady?: IVoidEvent)
+    {
         if (config)
             this.config = config;
         if (onReady)
@@ -82,7 +86,8 @@ export class Application {
 
             if (localeStr)
                 return localeStr;
-            else {
+            else
+            {
                 if (this.settings['debug'])
                     utils.log('NOT TRANSLATED: [' + str + ']');
                 return str;
@@ -96,7 +101,8 @@ export class Application {
         this.init();
     }
 
-    protected initLibraries() {
+    protected initLibraries()
+    {
         let libs = this.config.libraries;
         for (let id in libs)
             if (libs.hasOwnProperty(id))
@@ -104,19 +110,22 @@ export class Application {
     }
 
     /** Information about Browser */
-    public get agentInfo() {
+    public get agentInfo()
+    {
         if (!this._agentInfo)
             this._agentInfo = Application.getAgentInfo();
         return this._agentInfo;
     }
 
     /** Save options to localStorage */
-    public saveSettings() {
+    public saveSettings()
+    {
         localStorage['settings'] = JSON.stringify(this.settings);
     }
 
     /** Load options from localStorage */
-    public loadSettings() {
+    public loadSettings()
+    {
         if (localStorage['settings'])
             this.settings = JSON.parse(localStorage['settings']);
         else
@@ -125,25 +134,29 @@ export class Application {
 
 
     /** Shows localized alert */
-    public showMessage(msg: string) {
+    public showMessage(msg: string)
+    {
         if (msg && msg !== '')
             alert(this.L(msg));
     }
 
     /** Throws localized exception */
-    public error(msg: string) {
+    public error(msg: string)
+    {
         if (msg && msg !== '')
             throw (this.L(msg));
     }
 
     /** Inits application instance */
-    public init() {
+    public init()
+    {
         this.getBody().onresize = this.handleBodyResize;
         resources.loadResources(this.config.appUrl, (): void => { this.afterResourcesLoaded(); });
     };
 
     /** Returns DOM body element*/
-    public getBody() {
+    public getBody()
+    {
         return document.getElementsByTagName('body')[0];
     }
 
@@ -154,10 +167,12 @@ export class Application {
     }
 
     /** Makes DOM body unmovable on mobile devices */
-    public makeBodyUnmoveable() {
+    public makeBodyUnmoveable()
+    {
         let body = this.getBody();
 
-        let bodyTouchMove = function (event) {
+        let bodyTouchMove = function (event)
+        {
             event.preventDefault();
         };
 
@@ -166,26 +181,31 @@ export class Application {
     };
 
     /** Returns body's size as {width, height}  */
-    public getViewportSize() {
+    public getViewportSize()
+    {
         let e: any = window, a: any = 'inner';
-        if (!('innerWidth' in window)) {
+        if (!('innerWidth' in window))
+        {
             a = 'client';
             e = document.documentElement || document.body;
         }
         return { width: e[a + 'Width'], height: e[a + 'Height'] };
     }
 
-    protected run() {
+    protected run()
+    {
         // inherit to implement 
     }
 
-    protected afterResourcesLoaded() {
+    protected afterResourcesLoaded()
+    {
         if (this.onReady)
             this.onReady();
         this.run();
     }
 
-    protected handleBodyResize(event: Event) {
+    protected handleBodyResize(event: Event)
+    {
         if (this.onWindowResize)
             for (let i = 0; i < this.onWindowResize.length; i++)
                 this.onWindowResize[i](event);

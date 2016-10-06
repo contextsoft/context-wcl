@@ -1,7 +1,7 @@
 /**
  * Resources & resource loader classes
  */
-import * as utils from './utils';
+import { utils } from './utils';
 import { IVoidEvent, IDOMEvent } from './component';
 
 interface ILibraryResource {

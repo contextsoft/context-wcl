@@ -1,10 +1,10 @@
-import * as utils from './utils';
+import {utils} from './utils';
 import {resources} from './resources';
 import {View} from "./view";
 import {ListView} from './list.controls';
 import {ButtonType, ButtonView, ContainerView, PanelView, TextView} from './std.controls';
 
-resources.register('context.vcl',
+resources.register('context-wcl',
     [
         'css/ext.controls.css'
     ]

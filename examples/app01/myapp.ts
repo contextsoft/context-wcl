@@ -4,10 +4,10 @@
 import * as breeze from 'breeze-client';
 
 // example of how to use jquery - this is because of default export of $
-import 'jquery/dist/jquery';
+import 'jquery';
 
 // we can import particular file
-import { Application } from 'context.vcl/application';
+import { Application } from 'context-wcl';
 
 // or we can import from index file (all library)
 import
@@ -17,10 +17,10 @@ import
     ButtonType, InputView, TextAreaView, SelectView, ListView, LookupView, DatePicker,
     TabsView, PageView
 }
-    from 'context.vcl/index';
+    from 'context-wcl';
 
 // or we can import a particular file as namespace
-import * as utils from 'context.vcl/utils';
+import {utils} from 'context-wcl';
 
 // this is just importing one export from project's unit
 import { config } from './config';
@@ -61,16 +61,13 @@ class MyApp extends Application
 
 class MainScreen extends ScreenView
 {
-    constructor(name?: string)
+    protected initComponents()
     {
-        super(name);
-        
-        let pages = new PageView(this, 'pages');
-        
+        // let pages = new PageView(this, 'pages');        
         this.testHeaderFooter();
-        this.testEdit(this.pages);
-        this.testList(this.pages);
-        this.testTabs(this.pages);
+        this.testEdit();
+        this.testList();
+        this.testTabs();
     }
 
     // Header, Footer    

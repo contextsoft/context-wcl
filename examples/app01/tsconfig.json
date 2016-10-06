@@ -6,10 +6,15 @@
         "outFile": "myapp.js",
         // "outDir": "./dist",        
         "moduleResolution": "node",
-        "sourceMap": true
+        "sourceMap": true,
+        "baseUrl": "./../../../../node_modules",
+        "paths": {
+          "jquery": ["jquery/dist/jquery"],
+          "context-wcl": ["context-wcl/src/index"]
+        }
     },
     "include": [
-        "../../node_modules/context.vcl/*",
+        "../../src/*",
         "./*"
     ]
 }
