@@ -1,0 +1,13 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    // Defines whether an open brace is put onto a new line for functions or not
+    "typescript.format.placeOpenBraceOnNewLineForFunctions": false,
+
+    // Defines whether an open brace is put onto a new line for control blocks or not
+    "typescript.format.placeOpenBraceOnNewLineForControlBlocks": false,
+
+    
+    "files.associations": {
+        "*.view":"json"
+    }
+}
