@@ -1,0 +1,13 @@
+{
+    "MainScreen":
+    {
+        "header": {
+            "class": "HeaderView",
+            "text": "Header text",
+            "onClick": "headerOnClick"
+        },
+        "css": {
+            
+        }
+    }
+}
