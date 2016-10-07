@@ -1,3 +1,4 @@
+import { utils } from './utils';
 import { Component, IFuture } from './component';
 
 /** 
@@ -255,44 +256,55 @@ export class FieldDataLink extends SimpleDataLink
 }
 
 /**
- * CollectionLink - generic implementation of a data link for list controls
+ * SimpleSource - generic implementation of a data source for objects
  */
 export class SimpleSource implements IRecordSource
 {
     protected _state: RecordState;
+    protected _links: IDataLink[] = [];
+
+    constructor(public current: IRecord)
+    {
+    }
 
     addLink(link: IDataLink): void
     {
-
+        this._links.push(link);
     }
     removeLink(link: IDataLink): void
     {
-
+        let num = this._links.indexOf(link);
+        if (num >= 0)
+            this._links.splice(num);
     }
     notifyLinks(eventType: EventType, data: any): void
     {
-
-    }    
-    current: IRecord;
+        /*
+        for (let i = 0; i < this._links.length; i++)
+            this._links[i].onChange(eventType, data);
+            */
+    }
     insert(append?: boolean): void
     {
-
+        // throw 'insert is not supported';
     }
     edit(): void
     {
-
+        this.current.old = null;
+        this.current.old = utils.extend(this.current, {});
+        this._state = RecordState.Edit;
     }
     post(): void
     {
-
+        this._state = RecordState.Browse;
     }
     cancel(): void
     {
-
+        this._state = RecordState.Browse;
     }
     delete(): void
     {
-
+        throw 'delete is not supported';
     }
     getState(): RecordState
     {
