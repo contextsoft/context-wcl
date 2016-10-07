@@ -6,8 +6,9 @@
             "text": "Header text",
             "onClick": "headerOnClick"
         },
-        "css": {
-            
+        "styles": {
+            "class": "styles",
+            "css": "{maring: 0px}"
         }
     }
 }
