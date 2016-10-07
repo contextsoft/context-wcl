@@ -6,7 +6,7 @@ import { resources } from './resources';
 import { IVoidEvent } from './component';
 import { Align, View, ValueView } from './view';
 import { CSSTransition } from './transitions';
-import { FieldDataLink, IDataSource, EventType } from './data';
+import { FieldDataLink, EventType } from './data';
 
 resources.register('context-wcl',
     [

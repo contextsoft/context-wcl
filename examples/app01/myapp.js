@@ -793,14 +793,14 @@ define("src/data", ["require", "exports"], function (require, exports) {
     var EventType = exports.EventType;
     ;
     /**
-     * FieldDataLink - a generic implementation of a data link for single field controls
+     * SimpleDataLink - a generic implementation of a data link for single field controls
      */
-    var FieldDataLink = (function () {
-        function FieldDataLink(onChangeEvent, converter) {
+    var SimpleDataLink = (function () {
+        function SimpleDataLink(onChangeEvent, converter) {
             this.onChangeEvent = onChangeEvent;
             this.converter = converter;
         }
-        Object.defineProperty(FieldDataLink.prototype, "dataSource", {
+        Object.defineProperty(SimpleDataLink.prototype, "dataSource", {
             get: function () { return this._dataSource; },
             set: function (value) {
                 if (this._dataSource != value) {
@@ -814,10 +814,21 @@ define("src/data", ["require", "exports"], function (require, exports) {
             enumerable: true,
             configurable: true
         });
-        FieldDataLink.prototype.onChange = function (eventType, data) {
-            if (eventType != EventType.StateChanged && this.onChangeEvent)
+        SimpleDataLink.prototype.onChange = function (eventType, data) {
+            if (this.onChangeEvent)
                 this.onChangeEvent(eventType, data);
         };
+        return SimpleDataLink;
+    }());
+    exports.SimpleDataLink = SimpleDataLink;
+    /**
+     * FieldDataLink - a generic implementation of a data link for single field controls
+     */
+    var FieldDataLink = (function (_super) {
+        __extends(FieldDataLink, _super);
+        function FieldDataLink() {
+            _super.apply(this, arguments);
+        }
         Object.defineProperty(FieldDataLink.prototype, "value", {
             get: function () {
                 var res = null;
@@ -842,22 +853,36 @@ define("src/data", ["require", "exports"], function (require, exports) {
             configurable: true
         });
         return FieldDataLink;
-    }());
+    }(SimpleDataLink));
     exports.FieldDataLink = FieldDataLink;
     /**
      * CollectionLink - generic implementation of a data link for list controls
      */
-    var CollectionLink // implements ICollectionSource
-     = (function () {
-        function CollectionLink // implements ICollectionSource
-            () {
+    var SimpleSource = (function () {
+        function SimpleSource() {
         }
-        return CollectionLink // implements ICollectionSource
-        ;
+        SimpleSource.prototype.addLink = function (link) {
+        };
+        SimpleSource.prototype.removeLink = function (link) {
+        };
+        SimpleSource.prototype.notifyLinks = function (eventType, data) {
+        };
+        SimpleSource.prototype.insert = function (append) {
+        };
+        SimpleSource.prototype.edit = function () {
+        };
+        SimpleSource.prototype.post = function () {
+        };
+        SimpleSource.prototype.cancel = function () {
+        };
+        SimpleSource.prototype.delete = function () {
+        };
+        SimpleSource.prototype.getState = function () {
+            return this._state;
+        };
+        return SimpleSource;
     }());
-    exports.CollectionLink // implements ICollectionSource
-     = CollectionLink // implements ICollectionSource
-    ;
+    exports.SimpleSource = SimpleSource;
 });
 define("src/actions", ["require", "exports", "src/component"], function (require, exports, component_1) {
     "use strict";
@@ -1530,6 +1555,8 @@ define("src/view", ["require", "exports", "src/utils", "src/component", "src/dat
             },
             set: function (_value) {
                 this.setValue(_value);
+                // update data link
+                this.data.value = this._value;
             },
             enumerable: true,
             configurable: true

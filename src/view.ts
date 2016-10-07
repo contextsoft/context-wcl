@@ -1,6 +1,6 @@
 import { utils } from './utils';
 import { Component, IInterface } from './component';
-import { IDataLink, FieldDataLink, IDataSource, EventType } from './data';
+import { FieldDataLink, EventType } from './data';
 
 interface IVoidEvent extends IInterface
 {
@@ -838,6 +838,8 @@ export class ValueView extends View
     public set value(_value)
     {
         this.setValue(_value);
+        // update data link
+        this.data.value = this._value;
     }
     public getValue()
     {
