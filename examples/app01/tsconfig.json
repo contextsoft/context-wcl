@@ -6,7 +6,8 @@
         "outFile": "myapp.js",
         // "outDir": "./dist",        
         "moduleResolution": "node",
-        "sourceMap": true,
+        "inlineSourceMap": true,
+        //"sourceMap": true,
         "baseUrl": "./../../../../node_modules",
         "paths": {
           "jquery": ["jquery/dist/jquery"],

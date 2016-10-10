@@ -6,14 +6,13 @@ import { resources } from './resources';
 import { IVoidEvent } from './component';
 import { Align, View, ValueView } from './view';
 import { CSSTransition } from './transitions';
-import { FieldDataLink, EventType } from './data';
+//import { FieldDataLink, EventType } from './data';
 
 resources.register('context-wcl',
     [
-        'css/std.controls.css',
-        'images/expand.png'
+        'css/std.controls.css'
     ]
-);
+); 
 
 /** 
  * Topmost control containg other controls, used for layouting 
@@ -277,40 +276,50 @@ export class ContainerView extends View {
     public static directionForward = 1;
     public static directionBack = -1;
 
-    public static slideHorizontal: ICSSTransitionType = {
-        transition: ContainerView.cssSlideHorizontal,
-        properties: ['opacity', '-webkit-transform'],
-        duration: 0.5
-        // we may additionally specify To transition
-        // transitionTo: transitionSlideHorizontal,
-        // propertiesTo: ['opacity', '-webkit-transform'],
-    };
-    public static slideVertical: ICSSTransitionType = {
-        transition: ContainerView.cssSlideVertical,
-        properties: ['opacity', '-webkit-transform'],
-        duration: 0.5
-    };
-    public static fadeInOut: ICSSTransitionType = {
-        transition: ContainerView.cssFadeInOut,
-        properties: ['opacity'],
-        duration: 0.5
-    };
-    public static rotateY: ICSSTransitionType = {
-        transition: ContainerView.cssRotateY,
-        properties: ['opacity', '-webkit-transform'],
-        duration: 0.5
-    };
-    public static rotateX: ICSSTransitionType = {
-        transition: ContainerView.cssRotateX,
-        properties: ['opacity', '-webkit-transform'],
-        duration: 0.5
-    };    
-    
+    public static animSlideHorizontal(): ICSSTransitionType {
+        return {
+            transition: ContainerView.cssSlideHorizontal,
+            properties: ['opacity', '-webkit-transform'],
+            duration: 0.5
+            // we may additionally specify To transition
+            // transitionTo: transitionSlideHorizontal,
+            // propertiesTo: ['opacity', '-webkit-transform'],
+        };
+    }
+    public static animSlideVertical(): ICSSTransitionType {
+        return {
+            transition: ContainerView.cssSlideVertical,
+            properties: ['opacity', '-webkit-transform'],
+            duration: 0.5
+        };
+    }
+    public static animFadeInOut(): ICSSTransitionType {
+        return {
+            transition: ContainerView.cssFadeInOut,
+            properties: ['opacity'],
+            duration: 0.5
+        };
+    }
+    public static animRotateY(): ICSSTransitionType {
+        return {
+            transition: ContainerView.cssRotateY,
+            properties: ['opacity', '-webkit-transform'],
+            duration: 0.5
+        };
+    }
+    public static animRotateX(): ICSSTransitionType {
+        return {
+            transition: ContainerView.cssRotateX,
+            properties: ['opacity', '-webkit-transform'],
+            duration: 0.5
+        };
+    }
+
     protected static cssSlideHorizontal(direction) {
         return (direction === 0) ? ['1', 'translate3d(0,0,0)'] : ['0', 'translate3d(' + (direction * 100) + '%,0,0)'];
     }
     protected static cssSlideVertical(direction) {
-        return (direction === 0) ? ['1', 'translate3d(0,0,0)'] : ['0', 'translate3d(0, ' + (direction * 100) + '%,0)'];
+         return (direction === 0) ? ['1', 'translate3d(0,0,0)'] : ['0', 'translate3d(0, ' + (direction * 100) + '%,0)'];
     }
     protected static cssRotateX(direction) {
         return (direction === 0) ? ['1', 'rotateX(0deg)'] : ['0', 'rotateX(' + (direction * 180) + 'deg)'];
@@ -321,7 +330,7 @@ export class ContainerView extends View {
     protected static cssFadeInOut(direction) {
         return (direction === 0) ? ['1'] : ['0'];
     }
-    
+
     public animation: ICSSTransitionType;
     public beforeHideView: (view: View, direction: number) => boolean;
     public beforeShowView: (view: View, direction: number) => boolean;
@@ -334,7 +343,7 @@ export class ContainerView extends View {
     constructor(parent, name) {
         super(parent, name);
         this.currentView = null;
-        this.animation = ContainerView.slideHorizontal;
+        this.animation = ContainerView.animSlideHorizontal();
     }
 
 
@@ -395,7 +404,7 @@ export class ContainerView extends View {
         this.currentView = nextView;
         direction = direction || ContainerView.directionForward;
 
-        // update next view, make sure it's out child and is visible
+        // update next view, make sure it's our child and is visible
         if (nextView) {
             if (nextView.parent !== _this || !nextView.visible || !nextView.element)
                 nextView.update(function () {
@@ -554,10 +563,9 @@ export class Splitter extends View {
         if (this.element && this.visible) {
             this.handleEvent('onmousedown', this.handleMouseDown);
             this.handleEvent('ontouchstart', this.handleMouseDown);
-            //TODO: make sure that "this" in the handlers is correct
-            utils.addEvent(document, 'mouseup', this.handleMouseUp);
-            utils.addEvent(document, 'touchend', this.handleMouseUp);
-            utils.addEvent(document, 'mousemove', this.handleMouseMove);
+            document.addEventListener('mouseup', this.handleMouseUp);
+            document.addEventListener('touchend', this.handleMouseUp);
+            document.addEventListener('mousemove', this.handleMouseMove);
         }
 
         this.internalTriggerReady();

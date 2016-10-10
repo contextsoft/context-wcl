@@ -1,8 +1,8 @@
-import {utils} from './utils';
-import {resources} from './resources';
-import {View} from "./view";
-import {ListView} from './list.controls';
-import {ButtonType, ButtonView, ContainerView, PanelView, TextView} from './std.controls';
+//import {utils} from './utils';
+import { resources } from './resources';
+import { View } from "./view";
+import { ListView } from './list.controls';
+import { ButtonType, ButtonView, ContainerView, PanelView, TextView } from './std.controls';
 
 resources.register('context-wcl',
     [
@@ -10,9 +10,9 @@ resources.register('context-wcl',
     ]
 );
 
-
 /**
  * Tabs switch control
+ * Additional CSS classes: flat
  */
 export class TabsView extends ListView {
     protected dropDownButton: ButtonView;
@@ -83,7 +83,7 @@ export class TabsView extends ListView {
 
 export interface IPageViewPage {
     text: string;
-    value: View; 
+    value: View;
 }
 
 /**
@@ -123,9 +123,10 @@ export class PageView extends View {
 
         // Container for pages
         this.pagesContainer = new ContainerView(this, 'pagesContainer');
-        this.pagesContainer.animation = ContainerView.fadeInOut;
+        this.pagesContainer.animation = null;
+
         var _this = this;
-        this.pagesSwitcher.onSelectionChange = function(index) {
+        this.pagesSwitcher.onSelectionChange = function (index) {
             _this.pagesContainer.showView(_this.pagesSwitcher.getValue(), ContainerView.directionForward);
         };
     }
@@ -148,6 +149,15 @@ export class PageView extends View {
         this.updateView();
     }
 
+    protected renderChildren(nonClientArea = false): string {
+        let contentHtml = '';
+        for (let i = 0; i < this.children.length; i++)
+            if (nonClientArea == this.children[i].renderInNonClientArea)
+                if (this.children[i] == this.pagesSwitcher || this.children[i] == this.pagesContainer)
+                    contentHtml += this.children[i].internalRender();
+        return contentHtml;
+    }
+
 }
 
 /** 
@@ -164,76 +174,99 @@ export class ModalView extends View {
     }
 }
 
+interface IDialogButton {
+    id?: string;
+    text: string;
+    buttonType?: ButtonType;
+    onClick?: (dialog: Dialog) => void;
+}
+
 /**
  * Dialog control
  */
 export class Dialog extends ModalView {
-    //TODO: refactor this
-    static buttonType = {
-        ok: {
+    public static buttonOk(): IDialogButton {
+        return {
             id: 'ctxOkButton',
             text: 'OK',
             buttonType: ButtonType.primary,
             onClick: null
-        },
-        cancel: {
+        };
+    }
+    public static buttonCancel(): IDialogButton {
+        return {
             id: 'ctxCancelButton',
             text: 'Cancel',
             buttonType: ButtonType.default,
             onClick: null
+        };
+    }
+
+    public static showOkCancelDialog(caption: string, onOkClick: (dialog: Dialog) => void, onCancelClick?: (dialog: Dialog) => void) {
+        let dlg = new Dialog();
+        let btn, buttons = [];
+        dlg.captionView.text = caption;
+        if (typeof onCancelClick === 'function') {
+            btn = Dialog.buttonCancel();
+            btn.onClick = onCancelClick;
+            buttons.push(btn);
         }
-    };
+        if (typeof onOkClick === 'function') {
+            btn = Dialog.buttonOk();
+            btn.onClick = onOkClick;
+            buttons.push(btn);
+        }
+        dlg.buttons = buttons;
+        dlg.show();
+    }
+
+    public static showDialog(caption: string, buttons?: IDialogButton[]) {
+        let dlg = new Dialog();
+        if (!buttons || buttons.length == 0)
+            buttons = [Dialog.buttonOk()];
+        dlg.buttons = buttons;
+        dlg.show();
+    }
+
 
     /** Set/gets dialog's buttons set */
-    public get buttons(): any[] {
+    public get buttons(): IDialogButton[] {
         return this._buttons;
     }
-    public set buttons(buttons: any[]) {
+    public set buttons(buttons: IDialogButton[]) {
         if (buttons)
             this._buttons = buttons;
-        this.buttonsContainer.children = [];
+
+        for (let i = 0; i < this.buttonsContainer.children.length; i++)
+            this.buttonsContainer.children[i].destroy();
+        //this.buttonsContainer.children = [];
+
         for (let i = 0; i < this._buttons.length; i++) {
-            let btn = new ButtonView(this.buttonsContainer, this.buttons[i].id);
-            btn.text = this.buttons[i].buttonType.text;
-            btn.buttonType = this.buttons[i].buttonType;
+            let btn = new ButtonView(this.buttonsContainer, this._buttons[i].id);
+            btn.text = this._buttons[i].text;
+            btn.buttonType = this._buttons[i].buttonType;
+            (<any>btn).onClick = this._buttons[i].onClick;
             (<any>btn).parentDialog = this;
-            btn.events.onclick = function(event) {
+            btn.events.onclick = function (event) {
                 if (this.onClick)
-                    this.onClick();
+                    this.onClick(this.parentDialog);
                 else
-                    this.parentDialog.hide();    
+                    this.parentDialog.hide();
             };
         }
     }
 
     protected captionView: TextView;
     protected buttonsContainer: PanelView;
-    protected _buttons = [];
+    protected _buttons: IDialogButton[] = [];
 
-    constructor(parent: View, name?: string) {
-        super(parent, name);
+    constructor(name?: string) {
+        super(null, name);
         this.captionView = new TextView(this.modalContainer, 'ctxCaption');
         this.buttonsContainer = new PanelView(this.modalContainer, 'ctxButtonsContainer');
-        this.buttons = [Dialog.buttonType.ok];
+        this.buttons = [Dialog.buttonOk()];
     }
 
-    //TODO: make static variant
-    public showMessage(caption, onOkClick, onCancelClick) {
-        let btn, buttons = [];
-        this.captionView.text = caption;
-        if (typeof onCancelClick === 'function') {
-            btn = Dialog.buttonType.cancel;
-            btn.onClick = onCancelClick;
-            buttons.push(btn);
-        }
-        if (typeof onOkClick === 'function') {
-            btn = Dialog.buttonType.cancel;
-            btn.onClick = onOkClick;
-            buttons.push(btn);
-        }
-        this.buttons = buttons;
-        this.show();
-    }
 }
 
 

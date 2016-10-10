@@ -56,7 +56,7 @@ export class CSSTransition {
         // set up properties
         let properties = (params.properties) ? params.properties : CSSTransition.DEFAULTS.properties;
         // set up durations
-        let duration = ((params.duration) ? params.duration : CSSTransition.DEFAULTS.duration) + 's';
+        let duration = ((params.duration !== undefined) ? params.duration : CSSTransition.DEFAULTS.duration) + 's';
         let durations = [];
         for (let i = 0; i < properties.length; i++) {
             durations.push(duration);

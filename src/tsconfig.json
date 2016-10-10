@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "module": "amd",
-        // "outFile": "index.js",
+        "outDir": "../dist",
         "target": "es5",
         "sourceMap": true
     }

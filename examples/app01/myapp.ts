@@ -10,24 +10,22 @@ import 'jquery';
 import { Application } from 'context-wcl';
 
 // or we can import from index file (all library)
-import
-{
-    resources, ScreenView, TextView, PanelView,
+import {
+    resources, View, ScreenView, TextView, PanelView,
     HeaderView, FooterView, GroupBoxView, ButtonView,
     ButtonType, InputView, TextAreaView, SelectView, ListView, LookupView, DatePicker,
-    TabsView, PageView
+    TabsView, PageView, Dialog, TreeView
 }
     from 'context-wcl';
 
 // or we can import a particular file as namespace
-import {utils} from 'context-wcl';
+import { utils } from 'context-wcl';
 
 // this is just importing one export from project's unit
 import { config } from './config';
 
 /* Example of using breeze and jquery */
-function test()
-{
+function test() {
     var c = $('#myid');
     var c2 = breeze.core;
 }
@@ -38,8 +36,7 @@ resources.register('MyApp', [
 ]);
 
 /** Main routine that's called by requirejs script in index.html */
-export function main()
-{
+export function main() {
     new MyApp(config);
 }
 
@@ -47,32 +44,42 @@ export function main()
  * Our application class. It's sufficient to override method run. 
  * In reality there's no need to subclass Application, but we can do it anyway.
  */
-class MyApp extends Application
-{
+class MyApp extends Application {
 
-    mainScreen = new MainScreen('mainScreen');
-
-    run()
-    {
+    public mainScreen;
+    public run() {
+        this.mainScreen = new MainScreen('mainScreen');
         this.mainScreen.show();
         test();
     }
 }
 
-class MainScreen extends ScreenView
-{
-    protected initComponents()
-    {
-        // let pages = new PageView(this, 'pages');        
+class MainScreen extends ScreenView {
+    public initComponents() {
         this.testHeaderFooter();
-        this.testEdit();
-        this.testList();
-        this.testTabs();
-    }
+        
+        let pages = new PageView(this);
+        let stdPage = new PanelView(pages);
+        let listPage = new PanelView(pages);
+        let extPage = new PanelView(pages);
+        let treePage = new PanelView(pages);
+        pages.items = [
+            { text: 'std.controls', value: stdPage },
+            { text: 'list.controls', value: listPage },
+            { text: 'ext.controls', value: extPage },
+            { text: 'tree.controls', value: treePage }
+        ];
+        pages.setPageIndex(0);
 
+        this.testEdit(stdPage);
+        this.testList(listPage);
+        this.testTabs(extPage);
+        this.testDlg(extPage);
+        this.testTree(treePage);
+    }    
+    
     // Header, Footer    
-    public testHeaderFooter()
-    {
+    public testHeaderFooter() {
         let header = new HeaderView(this, 'header');
         header.text = 'Context Web Components Library - Test Project';
         let footer = new FooterView(this, 'footer');
@@ -80,10 +87,9 @@ class MainScreen extends ScreenView
     }
 
     // GroupBoxView, InputView, TextAreaView, ButtonView
-    public testEdit()
-    {
-        let grpBox = new GroupBoxView(this);
-        grpBox.caption = 'Input Test';
+    public testEdit(parent: View) {
+        let grpBox = new GroupBoxView(parent);
+        grpBox.caption = 'Inputs';
         grpBox.style = 'margin-bottom: 10px';
 
         let inputLabel = new TextView(grpBox);
@@ -97,16 +103,13 @@ class MainScreen extends ScreenView
         let enableInputBtn = new ButtonView(grpBox);
         enableInputBtn.text = 'Disable';
         enableInputBtn.buttonType = ButtonType.danger;
-        enableInputBtn.events.onclick = (event) =>
-        {
-            if (input.enabled)
-            {
+        enableInputBtn.events.onclick = (event) => {
+            if (input.enabled) {
                 input.enabled = false;
                 enableInputBtn.text = 'Enable';
                 enableInputBtn.buttonType = ButtonType.primary;
             }
-            else
-            {
+            else {
                 input.enabled = true;
                 enableInputBtn.text = 'Disable';
                 enableInputBtn.buttonType = ButtonType.danger;
@@ -116,16 +119,13 @@ class MainScreen extends ScreenView
         let readOnlyBtn = new ButtonView(grpBox);
         readOnlyBtn.text = 'Read Only';
         readOnlyBtn.buttonType = ButtonType.warning;
-        readOnlyBtn.events.onclick = function (event)
-        {
-            if (input.attributes.readonly)
-            {
+        readOnlyBtn.events.onclick = function (event) {
+            if (input.attributes.readonly) {
                 delete input.attributes.readonly;
                 readOnlyBtn.buttonType = ButtonType.warning;
                 readOnlyBtn.text = 'Read Only';
             }
-            else
-            {
+            else {
                 input.attributes.readonly = true;
                 readOnlyBtn.buttonType = ButtonType.info;
                 readOnlyBtn.text = 'Writable';
@@ -141,11 +141,10 @@ class MainScreen extends ScreenView
     }
 
     // ListView, LookupView, DatePicker
-    public testList()
-    {
-        let grpBox = new GroupBoxView(this);
+    public testList(parent: View) {
+        let grpBox = new GroupBoxView(parent);
         grpBox.style = 'margin-bottom: 10px';
-        grpBox.caption = 'List Test';
+        grpBox.caption = 'Lists';
 
         let label1 = new TextView(grpBox);
         label1.style = 'margin-bottom: 10px';
@@ -171,8 +170,7 @@ class MainScreen extends ScreenView
         label4.text = 'ListView:';
         let list = new ListView(grpBox);
 
-        list.onGetItems = (addItem) =>
-        {
+        list.onGetItems = (addItem) => {
             addItem('added item 1');
             addItem('added item 2');
             addItem('added item 3');
@@ -190,14 +188,14 @@ class MainScreen extends ScreenView
         ];
     }
 
-    public testTabs() {
-        let grpBox = new GroupBoxView(this);
+    public testTabs(parent: View) {
+        let grpBox = new GroupBoxView(parent);
         grpBox.style = 'margin-bottom: 10px';
-        grpBox.caption = 'Tabs Test';
+        grpBox.caption = 'Tabs';
 
         let tabs = new TabsView(grpBox);
+        tabs.additionalCSSClass = 'flat';
         tabs.items = ['Tab 1', 'Tab 2', 'Tab 3'];
-        tabs.selectedIndex = 0;
 
         let label = new TextView(grpBox);
         label.style = 'margin-top: 10px; margin-bottom: 20px';
@@ -206,22 +204,57 @@ class MainScreen extends ScreenView
             label.text = utils.formatStr('Tab {0} selected.', [index + 1]);
         };
 
+        tabs.selectedIndex = 0;
+
         let pages = new PageView(grpBox);
 
-        let page1 = new PanelView(null);
+        let page1 = new PanelView(pages);
         page1.text = 'This is Page 1';
 
-        let page2 = new PanelView(null);
+        let page2 = new PanelView(pages);
         page2.text = 'This is Page 2';
 
-        page1.style = page2.style = "padding: 10px"; 
-        
+        page1.style = page2.style = "padding: 10px";
+
         pages.items = [
-            { text: 'Page 1', value: page1},
-            { text: 'Page 2', value: page2}
+            { text: 'Page 1', value: page1 },
+            { text: 'Page 2', value: page2 }
         ];
 
         pages.setPageIndex(0);
-        
     }
+
+    public testDlg(parent: View) {
+        let grpBox = new GroupBoxView(parent);
+        grpBox.style = 'margin-bottom: 10px';
+        grpBox.caption = 'Dialog';
+        let btn = new ButtonView(grpBox);
+        btn.text = 'Show Dialog';
+        btn.events.onclick = function() {
+            Dialog.showOkCancelDialog('Some message', function(dialog) {
+                dialog.hide();
+            });
+        };
+    }
+
+    public testTree(parent: View) {
+        let grpBox = new GroupBoxView(parent);
+        grpBox.style = 'margin-bottom: 10px';
+        grpBox.caption = 'Tree';
+
+        let tree = new TreeView(grpBox);
+
+        tree.nodes = [
+            { text: 'node 1' },
+            { text: 'node 2' },
+            { text: 'node 3',
+              nodes: [
+                  { text: 'subnode 1' },
+                  { text: 'subnode 2' },
+                  { text: 'subnode 3' },
+              ]  
+            }
+        ];
+    }    
+
 }

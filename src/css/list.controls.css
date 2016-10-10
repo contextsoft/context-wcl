@@ -1,5 +1,14 @@
+/*
+    ListView
+*/
+
+.CtxListView > div.selected {
+    color: #262626;
+    background-color: #e4e4e4;
+}
+
 /* 
-    CtxLookupView 
+    LookupView 
 */
 
 .CtxLookupView {

@@ -441,6 +441,22 @@ body {
     clear: both;
 }
 
+/* Splitter */
+
+.CtxSplitter {
+    background-color: #dddddd;
+}
+
+.CtxSplitter[vertical="true"] {
+    cursor: ew-resize;
+    width: 2px;
+}
+
+.CtxSplitter[vertical="false"] {
+    cursor: ns-resize;
+    height: 2px;
+}
+
 
 
 

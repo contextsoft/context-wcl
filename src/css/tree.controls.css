@@ -1,0 +1,71 @@
+/* TreeView */
+
+.CtxTreeView {
+    overflow: auto;
+}
+
+.CtxTreeView .ctx_tree {
+    list-style-type: none;
+    /*background: url(../images/vline.png) repeat-y;*/
+    margin: 0;
+    padding: 0;
+    padding-left: 16px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    cursor: default;
+    background-position-x: 9px;
+    background-color: #fff;
+    text-align: left;
+}
+
+.CtxTreeView .ctx_node {
+    margin: 0;
+    padding: 0 8px;
+    /*line-height: 22px;*/
+    /*background: url(../images/node.png) no-repeat;*/
+    white-space: nowrap;
+}
+
+.CtxTreeView .ctx_node .ctx_node_text{
+    display: inline-block;
+    padding: 3px 4px;
+}
+
+.CtxTreeView .ctx_node[active] .ctx_node_text{
+    background-color: #3e96ff;
+    color: #fff;
+}
+
+.CtxTreeView .ctx_node .ctx_icon {
+    margin-bottom: -2px;
+    margin-right: 2px;
+}
+
+
+/*.CtxTreeView .ctx_last_node {
+    margin: 0;
+    padding: 0 20px;
+    line-height: 22px;
+    background: #fff url(../images/lastnode.png) no-repeat;
+}*/
+
+.CtxTreeView .ctx_expand_node {
+    position: absolute;
+    margin-top: 4px;
+    margin-left: -22px;
+    vertical-align: sub;
+    background: url(../images/expand.png) no-repeat;
+    height: 16px;
+    width: 16px;
+}
+
+.CtxTreeView .ctx_collapse_node {
+    position: absolute;
+    margin-top: 4px;
+    margin-left: -22px;
+    vertical-align: sub;
+    background: url(../images/collapse.png) no-repeat;
+    height: 16px;
+    width: 16px;
+}

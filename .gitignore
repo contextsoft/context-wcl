@@ -1,0 +1,7 @@
+.vscode
+context.vcl.legacy
+*.js.map
+*.js
+!dist/*
+DS_Store
+

@@ -2,44 +2,47 @@
  * Controls displaying tree
  */
 import { utils } from './utils';
+import { resources } from './resources';
 import { View } from './view';
 
-export interface INode
-{
+resources.register('context-wcl',
+    [
+        'css/tree.controls.css'
+    ]
+);
+
+
+export interface INode {
     text: string;
     icon?: string;
     attr?: string;
+    nodes?: INode[];
     // properties mantained internally 
     id?: string;
     expanded?: boolean;
     canExpand?: boolean;
     isLast?: boolean;
     parent?: INode;
-    nodes?: INode[];
 }
 
 /**
  * Base class for tree-like controls
  **/
-export abstract class Nodes extends View
-{
+export abstract class Nodes extends View {
     protected static nodeCounter = 0;
     public nodes: INode[] = [];
 
     /**
      * Call this after assigning nodes array
      */
-    public initNodes()
-    {
-        for (let i = 0; i < this.nodes.length; i++)
-        {
+    public initNodes() {
+        for (let i = 0; i < this.nodes.length; i++) {
             this.nodes[i].isLast = i == this.nodes.length - 1;
             this.internalInitNode(this.nodes[i]);
         }
     }
 
-    public expandNode(node: INode, expand = true, recursive = false)
-    {
+    public expandNode(node: INode, expand = true, recursive = false) {
         if (node.canExpand)
             node.expanded = expand;
         else
@@ -49,31 +52,25 @@ export abstract class Nodes extends View
                 this.expandNode(node.nodes[i], expand, recursive);
     }
 
-    public collapseNode(node: INode)
-    {
+    public collapseNode(node: INode) {
         this.expandNode(node, false);
     }
 
 
-    public expandAll(expand = true)
-    {
+    public expandAll(expand = true) {
         for (let i = 0; i < this.nodes.length; i++)
             this.expandNode(this.nodes[i], expand, true);
     }
 
-    public collapseAll()
-    {
+    public collapseAll() {
         this.expandAll(false);
     }
 
-    public getNodeById(id): INode
-    {
-        var getChildById = function (node: INode, id: string)
-        {
+    public getNodeById(id): INode {
+        var getChildById = function (node: INode, id: string) {
             if (node.id == id)
                 return node;
-            else if (Array.isArray(node.nodes))
-            {
+            else if (Array.isArray(node.nodes)) {
                 var result = null;
                 for (let i = 0; result == null && i < node.nodes.length; i++)
                     result = getChildById(node.nodes[i], id);
@@ -90,16 +87,13 @@ export abstract class Nodes extends View
         return result;
     }
 
-    public deleteNode(node: INode)
-    {
+    public deleteNode(node: INode) {
         var idx;
-        if (node.parent)
-        {
+        if (node.parent) {
             idx = node.parent.nodes.indexOf(node);
             node.parent.nodes.splice(idx, 1);
         }
-        else
-        {
+        else {
             idx = this.nodes.indexOf(node);
             this.nodes.splice(idx, 1);
         }
@@ -107,10 +101,8 @@ export abstract class Nodes extends View
     }
 
     /** Sorts nodes with compareCallback */
-    public sort(compareCallback)
-    {
-        var sortNodes = function (nodes)
-        {
+    public sort(compareCallback) {
+        var sortNodes = function (nodes) {
             nodes.sort(compareCallback);
             for (let i = 0; i < nodes.length - 1; i++)
                 if (nodes[i].nodes)
@@ -119,16 +111,14 @@ export abstract class Nodes extends View
         sortNodes(this.nodes);
     }
 
-    protected internalInitNode(node: INode)
-    {
+    protected internalInitNode(node: INode) {
         node.canExpand = (node.nodes !== null) && Array.isArray(node.nodes) && node.nodes.length > 0;
         if (!node.id)
             node.id = (Nodes.nodeCounter++).toString();
         if ((node.expanded == null) || !node.canExpand)
             node.expanded = false;
         if (node.canExpand)
-            for (let i = 0; i < node.nodes.length; i++)
-            {
+            for (let i = 0; i < node.nodes.length; i++) {
                 node.nodes[i].parent = node;
                 node.nodes[i].isLast = i == node.nodes.length - 1;
                 this.internalInitNode(node.nodes[i]);
@@ -140,8 +130,7 @@ export abstract class Nodes extends View
 /**
  * Displays tree
  **/
-export class TreeView extends Nodes
-{
+export class TreeView extends Nodes {
     /** Fires when node text rendered */
     public onGetNodeText: (node: INode) => string;
     /** Fires on node click */
@@ -152,15 +141,13 @@ export class TreeView extends Nodes
     protected activeNodeElement: HTMLElement;
     protected activeNode: INode;
 
-    public render()
-    {
+    public render() {
         this.initNodes();
         return this.renderTag(this.internalRenderNodes());
     }
 
     /** Returns node and it's element for DOM event */
-    public getEventNode(event): { node: INode, element: HTMLElement }
-    {
+    public getEventNode(event): { node: INode, element: HTMLElement } {
         // active element is the one being currently touched
         var nodeElement = event.toElement || event.target;
         if (!nodeElement)
@@ -172,8 +159,7 @@ export class TreeView extends Nodes
         return { node: this.getNodeById(id), element: nodeElement };
     }
 
-    protected getNodeHtml(node: INode)
-    {
+    protected getNodeHtml(node: INode) {
         var nodeAttr = node.attr || '';
         var text = node.text || '';
         var innerHtml = '';
@@ -203,16 +189,13 @@ export class TreeView extends Nodes
         return View.getTag('li', attr + nodeAttr + utils.formatStr('ctx_node_id="{0}"', [node.id]), innerHtml + text) + '\n';
     }
 
-    protected internalRenderNode(html: { html }, node: INode)
-    {
+    protected internalRenderNode(html: { html }, node: INode) {
         var style = '';
         html.html += this.getNodeHtml(node);
         if (!node.nodes)
             return;
-        for (var i = 0; i < node.nodes.length; i++)
-        {
-            if (i == 0)
-            {
+        for (let i = 0; i < node.nodes.length; i++) {
+            if (i == 0) {
                 if (node.expanded)
                     style = 'style="display: block"';
                 else
@@ -225,8 +208,7 @@ export class TreeView extends Nodes
         }
     }
 
-    protected internalRenderNodes()
-    {
+    protected internalRenderNodes() {
         var html = { html: '', level: 0 };
         for (var i = 0; i < this.nodes.length; i++)
             this.internalRenderNode(html, this.nodes[i]);
@@ -234,20 +216,16 @@ export class TreeView extends Nodes
         return html.html;
     }
 
-    protected afterUpdateView()
-    {
-        this.internalAfterUpdateView();
-        if (this.element && this.visible)
-        {
+    protected afterUpdateView() {
+        super.afterUpdateView();
+        if (this.element && this.visible) {
             this.handleEvent('onclick', this.handleClick);
             this.handleEvent('ondblclick', this.handleDblClick);
             //this.handleEvent('onkeydown', this.handleKeyDown);
         }
-        this.internalTriggerReady();
     }
 
-    protected setActiveNodeElement(node: INode, element: HTMLElement)
-    {
+    protected setActiveNodeElement(node: INode, element: HTMLElement) {
         if (this.activeNodeElement)
             this.activeNodeElement.removeAttribute('active');
         this.activeNodeElement = element;
@@ -255,15 +233,13 @@ export class TreeView extends Nodes
         this.activeNode = node;
     }
 
-    protected handleClick(event)
-    {
+    protected handleClick(event) {
         var n = this.getEventNode(event);
         if (!n.node)
             return;
 
         var cl = (event.toElement || event.target).getAttribute('class');
-        if (cl == 'ctx_collapse_node' || cl == 'ctx_expand_node')
-        {
+        if (cl == 'ctx_collapse_node' || cl == 'ctx_expand_node') {
             this.expandNode(n.node, !n.node.expanded);
             this.updateView();
             return;
@@ -275,12 +251,10 @@ export class TreeView extends Nodes
             this.onNodeClick(n.node);
     }
 
-    protected handleDblClick(event)
-    {
+    protected handleDblClick(event) {
         if (!this.activeNode)
             return;
-        if (this.activeNode.canExpand)
-        {
+        if (this.activeNode.canExpand) {
             this.expandNode(this.activeNode, !this.activeNode.expanded);
             this.updateView();
         }
