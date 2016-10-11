@@ -460,6 +460,15 @@ export namespace utils {
         return result;
     }
 
+    /** Assign @src to @dest */
+    export function assign<T, U>(src: T, dest: U): void {
+        for (let id in src) {
+            if (src.hasOwnProperty(id)) {
+                (<any>dest)[id] = (<any>src)[id];
+            } 
+        }
+    }
+
 
     export interface IStringFunc {
         (str: string): string;
