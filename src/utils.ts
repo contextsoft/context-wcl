@@ -469,6 +469,9 @@ export namespace utils {
         }
     }
 
+    export function RaiseError(msg: string): void {
+        throw new Error(msg);
+    }
 
     export interface IStringFunc {
         (str: string): string;

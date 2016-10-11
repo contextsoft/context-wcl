@@ -281,7 +281,7 @@ export class SimpleSource extends BaseSource implements IRecordSource {
 
     checkCurrent() {
         if (!this._current)
-            throw 'Record does not exist';
+            utils.RaiseError('Record does not exist');
     }
 
     get current(): IRecord { return this._current; }
@@ -399,12 +399,12 @@ export class ListSource extends BaseSource implements IRecordSetSource, IUpdatab
     }
     checkList(): void {
         if (!this._list)
-            throw 'List is not assigned';
+            utils.RaiseError('List is not assigned');
     }
     checkCurrent(): void {
         this.checkList();
         if (!this.current)
-            throw 'Record does not exist';
+            utils.RaiseError('Record does not exist');
     }
 
     // Editable methods
@@ -450,7 +450,7 @@ export class ListSource extends BaseSource implements IRecordSetSource, IUpdatab
     }
 
     // Cursor methods
-    
+
     eof(): boolean {
         return this.currentIndex >= this._list.length;
     }
