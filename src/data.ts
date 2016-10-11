@@ -234,6 +234,9 @@ export class FieldDataLink extends SimpleDataLink {
     }
 }
 
+/**
+ * getObjectFields(obj: any) - creates a list of geenric field definitions based on object structure
+ */
 export function getObjectFields(obj: any): IField[] {
     let res: IField[] = [];
     for (let id in obj)
@@ -245,6 +248,9 @@ export function getObjectFields(obj: any): IField[] {
     return res;
 }
 
+/**
+ * BaseSource - base data source implementation, handling data links
+ */
 export class BaseSource implements IDataSource {
     protected _links: IDataLink[] = [];
 
