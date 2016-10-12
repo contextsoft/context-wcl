@@ -465,7 +465,7 @@ export namespace utils {
         for (let id in src) {
             if (src.hasOwnProperty(id)) {
                 (<any>dest)[id] = (<any>src)[id];
-            } 
+            }
         }
     }
 

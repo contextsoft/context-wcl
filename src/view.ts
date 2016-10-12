@@ -3,17 +3,15 @@ import { IVoidEvent, Component } from './component';
 import { FieldDataLink, EventType } from './data';
 
 /** Views's Align */
-export class Align implements IAlign {
+export class Align {
     static left: IAlign = { id: 'left', style: 'position: absolute; left: 0; top: 0; bottom: 0' };
     static top: IAlign = { id: 'top', style: 'position: absolute; left: 0; top: 0; right: 0' };
     static right: IAlign = { id: 'right', style: 'position: absolute; top: 0; right: 0; bottom: 0' };
     static bottom: IAlign = { id: 'bottom', style: 'position: absolute; left: 0; right: 0; bottom: 0' };
     static client: IAlign = { id: 'client', style: 'position: absolute; left: 0; top: 0; right: 0; bottom: 0' };
-    id: string;
-    style: string;
 }
 
-interface IAlign {
+export interface IAlign {
     id: string;
     style: string;
 }
@@ -28,7 +26,7 @@ interface IAlign {
 /** 
  * Root for all controls 
  **/
-export class View extends Component {
+export abstract class View extends Component {
     /** Returns html <tag attr>innerHtml</tag>
      * leaveOpen means close or not tag
      */
@@ -454,6 +452,9 @@ export class View extends Component {
         if (!this.alignChildren)
             return;
 
+        // this needed for absolute position in the control to work properly
+        this._element.style.position = 'relative';
+
         offset = offset || {
             'left': { left: 0, top: 0, bottom: 0 },
             'top': { left: 0, top: 0, right: 0 },
@@ -520,11 +521,7 @@ export class View extends Component {
     //         this.children[i].updateActionShortcuts(value);
     // }
 
-    public isSplitter(): boolean {
-        return false;
-    }
-
-    public initComponents() {
+    protected initComponents() {
         // Implement in descendants to init internal components 
     }
 
@@ -582,8 +579,7 @@ export class View extends Component {
 
     protected internalAfterUpdateView() {
         this.afterUpdateView();
-        this.initSplitter();
-        this.realignChildren();
+        //this.initSplitters();
         setTimeout(() => {
             this.realignChildren();
         }, 0);
@@ -706,25 +702,12 @@ export class View extends Component {
                 contentHtml += this.children[i].internalRender();
         return contentHtml;
     }
-
-    /** Splitter support */
-    protected initSplitter() {
-        let c = null, prevc = null;
-        for (let i = 0; i < this.children.length; i++) {
-            prevc = c;
-            c = this.children[i];
-            if (c.isSplitter()) {
-                c.control = prevc;
-                c.setVertical(c.align.id == Align.left.id || c.align.id == Align.right.id);
-            }
-        }
-    }    
 }
 
 /** 
  * Control with a value 
  **/
-export class ValueView extends View {
+export abstract class ValueView extends View {
     public data = new FieldDataLink((eventType: EventType, data: any): void => {
         this.setValue((this.data).value);
     });

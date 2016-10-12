@@ -1,0 +1,62 @@
+/* WorkAreaLayout */
+
+.CtxWorkAreaLayout {
+    margin-left: auto;
+    margin-right: auto;
+    padding-right: 15px;
+    padding-left: 15px;
+    /*height: 100%;*/
+}
+
+.CtxWorkAreaLayout:before,
+.CtxWorkAreaLayout:after {
+    display: table;
+    content: " ";
+}
+
+.CtxWorkAreaLayout:after {
+    clear: both;
+}
+
+@media (min-width: 768px) {
+    .CtxWorkAreaLayout {
+        width: 750px;
+    }
+}
+
+@media (min-width: 992px) {
+    .CtxWorkAreaLayout {
+        width: 970px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .CtxWorkAreaLayout {
+        width: 1170px;
+    }
+}
+
+/* GridLayout */
+
+.ctx_transparent {
+    display: none;
+}
+
+.CtxGridLayout {
+    width: 100%;
+}
+
+@media (min-width: 768px)
+{
+    .CtxGridLayout {
+        display: table;
+    }
+
+    .ctx_row {
+        display: table-row;
+    }
+
+    .ctx_cell {
+        display: table-cell;
+    }
+}

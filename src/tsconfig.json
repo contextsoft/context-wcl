@@ -3,6 +3,7 @@
         "module": "amd",
         "outDir": "../dist",
         "target": "es5",
-        "sourceMap": true
+        //"sourceMap": true
+        "inlineSourceMap": true
     }
 }

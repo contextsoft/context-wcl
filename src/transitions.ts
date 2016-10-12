@@ -88,12 +88,12 @@ export class CSSTransition {
             });
         }
     }
-    
+
     /** Called in order to launch the current group of transitions */
     public apply() {
         this.instantOperations();
         setTimeout(this.deferredOperations, 0);
-    }    
+    }
 
     /** Adds a new operation to the set of instant operations */
     protected addInstantOperation(newOperation) {

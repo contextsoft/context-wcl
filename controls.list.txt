@@ -20,7 +20,7 @@ std.controls.ts:
     FormView
     InputView
     TextAreaView
-    ContainerView ( => ContainerLayout ??? )
+    ContainerView 
     Splitter
 
 ext.controls.ts:
@@ -43,40 +43,6 @@ tree.controls.ts:
 grid.controls.ts:
 
 
-----------------------------------
-Tested:
-----------------------------------
 
-layout.controls.ts:
-    WorkAreaLayout
-    GridLayout
 
-std.controls.ts:
-    ScreenView +
-    TextView +
-    HeaderView +
-    FooterView +
-    PanelView +
-    GroupBoxView + 
-    ButtonView +
-    FormView +
-    InputView +
-    TextAreaView +
-    ContainerView +
-    Splitter
-
-ext.controls.ts:
-    TabsView +
-    PageView +
-    ModalView +   
-    Dialog +
-
-list.controls.ts:
-    SelectView +
-    ListView +
-    LookupView +
-    DatePicker +
-
-tree.controls.ts:
-    TreeView + 
 

@@ -11,11 +11,12 @@ import { Application } from 'context-wcl';
 
 // or we can import from index file (all library)
 import {
-    resources, View, ScreenView, TextView, PanelView,
-    HeaderView, FooterView, GroupBoxView, ButtonView,
+    resources, Align, View, ScreenView, TextView, PanelView,
+    HeaderView, FooterView, GroupBoxView, ButtonView, Splitter,
     ButtonType, InputView, TextAreaView, SelectView, ListView, LookupView, DatePicker,
-    TabsView, PageView, Dialog, TreeView
+    TabsView, PageView, Dialog, TreeView, WorkAreaLayout, GridLayout
 }
+
     from 'context-wcl';
 
 // or we can import a particular file as namespace
@@ -55,31 +56,39 @@ class MyApp extends Application {
 }
 
 class MainScreen extends ScreenView {
-    public initComponents() {
+    protected initComponents() {
         this.testHeaderFooter();
-        
-        let pages = new PageView(this);
+
+        let workarea = new WorkAreaLayout(this);
+
+        let pages = new PageView(workarea);
         let stdPage = new PanelView(pages);
         let listPage = new PanelView(pages);
         let extPage = new PanelView(pages);
         let treePage = new PanelView(pages);
+        let layoutPage = new PanelView(pages);
         pages.items = [
             { text: 'std.controls', value: stdPage },
             { text: 'list.controls', value: listPage },
             { text: 'ext.controls', value: extPage },
-            { text: 'tree.controls', value: treePage }
+            { text: 'tree.controls', value: treePage },
+            { text: 'layout.controls', value: layoutPage }
         ];
         pages.setPageIndex(0);
 
-        this.testEdit(stdPage);
-        this.testList(listPage);
+        this.testEdits(stdPage);
+        this.testButtons(stdPage);
+        this.testAligning(stdPage);
+
+        this.testLists(listPage);
         this.testTabs(extPage);
         this.testDlg(extPage);
         this.testTree(treePage);
-    }    
-    
+        this.testLayouts(layoutPage);
+    }
+
     // Header, Footer    
-    public testHeaderFooter() {
+    protected testHeaderFooter() {
         let header = new HeaderView(this, 'header');
         header.text = 'Context Web Components Library - Test Project';
         let footer = new FooterView(this, 'footer');
@@ -87,7 +96,7 @@ class MainScreen extends ScreenView {
     }
 
     // GroupBoxView, InputView, TextAreaView, ButtonView
-    public testEdit(parent: View) {
+    protected testEdits(parent: View) {
         let grpBox = new GroupBoxView(parent);
         grpBox.caption = 'Inputs';
         grpBox.style = 'margin-bottom: 10px';
@@ -140,8 +149,54 @@ class MainScreen extends ScreenView {
         textarea.style = "display: block; width: 355px; height: 60px";
     }
 
+    // ButtonView
+    protected testButtons(parent: View) {
+        let grpBox = new GroupBoxView(parent);
+        grpBox.style = 'margin-bottom: 10px';
+        grpBox.caption = 'Button types';
+
+        for (let t in ButtonType) {
+            if (ButtonType.hasOwnProperty(t) && !/^\d+$/.test(t)) {
+                let b = new ButtonView(grpBox, 'btn_' + t);
+                if (t !== 'chevronLeft' && t !== 'chevronRight')
+                    b.text = t;
+                b.buttonType = <any>ButtonType[t];
+            }
+        }
+
+    }
+
+    // View.alignChildren = true, Splitter
+    protected testAligning(parent: View) {
+        let grpBox = new GroupBoxView(parent);
+        grpBox.style = 'margin-bottom: 10px';
+        grpBox.caption = 'Aligning and Splitter';
+
+        let container = new PanelView(grpBox, 'Container');
+        container.style = 'width: 100%; height: 200px';
+        container.alignChildren = true;
+
+        let leftPanel = new PanelView(container);
+        leftPanel.align = Align.left;
+        leftPanel.style = "background-color: #c9eaff; width: 200px";
+
+        let leftSplitter = new Splitter(container);
+        leftSplitter.align = Align.left;
+
+        let centerPanel = new PanelView(container);
+        centerPanel.align = Align.client;
+        centerPanel.style = "background-color: #bbfcc5";
+
+        let rightPanel = new PanelView(container);
+        rightPanel.align = Align.right;
+        rightPanel.style = "background-color: #fcbbbb; width: 200px";
+
+        let rightSplitter = new Splitter(container);
+        rightSplitter.align = Align.right;
+    }
+
     // ListView, LookupView, DatePicker
-    public testList(parent: View) {
+    protected testLists(parent: View) {
         let grpBox = new GroupBoxView(parent);
         grpBox.style = 'margin-bottom: 10px';
         grpBox.caption = 'Lists';
@@ -188,7 +243,8 @@ class MainScreen extends ScreenView {
         ];
     }
 
-    public testTabs(parent: View) {
+    // TabsView, PageView
+    protected testTabs(parent: View) {
         let grpBox = new GroupBoxView(parent);
         grpBox.style = 'margin-bottom: 10px';
         grpBox.caption = 'Tabs';
@@ -224,20 +280,22 @@ class MainScreen extends ScreenView {
         pages.setPageIndex(0);
     }
 
-    public testDlg(parent: View) {
+    // Dialog
+    protected testDlg(parent: View) {
         let grpBox = new GroupBoxView(parent);
         grpBox.style = 'margin-bottom: 10px';
         grpBox.caption = 'Dialog';
         let btn = new ButtonView(grpBox);
         btn.text = 'Show Dialog';
-        btn.events.onclick = function() {
-            Dialog.showOkCancelDialog('Some message', function(dialog) {
+        btn.events.onclick = function () {
+            Dialog.showOkCancelDialog('Some message', function (dialog) {
                 dialog.hide();
             });
         };
     }
 
-    public testTree(parent: View) {
+    // TreeView
+    protected testTree(parent: View) {
         let grpBox = new GroupBoxView(parent);
         grpBox.style = 'margin-bottom: 10px';
         grpBox.caption = 'Tree';
@@ -247,14 +305,37 @@ class MainScreen extends ScreenView {
         tree.nodes = [
             { text: 'node 1' },
             { text: 'node 2' },
-            { text: 'node 3',
-              nodes: [
-                  { text: 'subnode 1' },
-                  { text: 'subnode 2' },
-                  { text: 'subnode 3' },
-              ]  
+            {
+                text: 'node 3',
+                nodes: [
+                    { text: 'subnode 1' },
+                    { text: 'subnode 2' },
+                    { text: 'subnode 3' },
+                ]
             }
         ];
-    }    
+    }
+
+    // GridLayout
+    protected testLayouts(parent: View) {
+        let grpBox = new GroupBoxView(parent);
+        grpBox.style = 'margin-bottom: 10px';
+        grpBox.caption = 'GridLayout';
+
+        let gridLayout = new GridLayout(grpBox);
+
+        let c1 = new TextView(gridLayout);
+        c1.text = "Edit 1";
+        let e1 = new InputView(gridLayout);
+
+        let c2 = new TextView(gridLayout);
+        c2.text = "Edit 2";
+        let e2 = new InputView(gridLayout);
+
+        gridLayout.rows = [
+            [c1, e1],
+            [c2, e2]
+        ];
+    }
 
 }

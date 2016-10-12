@@ -2,24 +2,31 @@
  * Controls that layouts its content 
  */
 
-import {utils} from './utils';
-import {View} from './view';
+import { utils } from './utils';
+import { View } from './view';
+import { resources } from './resources';
+
+resources.register('context-wcl',
+    [
+        'css/layout.controls.css'
+    ]
+);
+
 
 /**
  * Cotrols layouter that discretely/responsively changes its size
  **/
 export class WorkAreaLayout extends View {
-    constructor(parent, name) {
+    constructor(parent, name?) {
         super(parent, name);
         this.renderClientArea = false;
     }
 }
 
-
 /**
  *  Layouts controls within grid
  */
-class GridLayout extends View {
+export class GridLayout extends View {
     public rows = [];
 
     public render() {

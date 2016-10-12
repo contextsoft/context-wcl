@@ -3,5 +3,5 @@ context.vcl.legacy
 *.js.map
 *.js
 !dist/*
-DS_Store
+.DS_Store
 

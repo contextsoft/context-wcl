@@ -4,7 +4,7 @@
 import { utils } from './utils';
 import { resources } from './resources';
 import { IVoidEvent } from './component';
-import { Align, View, ValueView } from './view';
+import { Align, IAlign, View, ValueView } from './view';
 import { CSSTransition } from './transitions';
 //import { FieldDataLink, EventType } from './data';
 
@@ -12,7 +12,7 @@ resources.register('context-wcl',
     [
         'css/std.controls.css'
     ]
-); 
+);
 
 /** 
  * Topmost control containg other controls, used for layouting 
@@ -111,10 +111,10 @@ export enum ButtonType {
     info,
     warning,
     danger,
-    //TODO: does these types needed?
+    //TODO: does these types needed here?
+    toggle,
     chevronLeft,
-    chevronRight,
-    toggle
+    chevronRight
 }
 
 /**
@@ -319,7 +319,7 @@ export class ContainerView extends View {
         return (direction === 0) ? ['1', 'translate3d(0,0,0)'] : ['0', 'translate3d(' + (direction * 100) + '%,0,0)'];
     }
     protected static cssSlideVertical(direction) {
-         return (direction === 0) ? ['1', 'translate3d(0,0,0)'] : ['0', 'translate3d(0, ' + (direction * 100) + '%,0)'];
+        return (direction === 0) ? ['1', 'translate3d(0,0,0)'] : ['0', 'translate3d(0, ' + (direction * 100) + '%,0)'];
     }
     protected static cssRotateX(direction) {
         return (direction === 0) ? ['1', 'rotateX(0deg)'] : ['0', 'rotateX(' + (direction * 180) + 'deg)'];
@@ -487,6 +487,11 @@ export class Splitter extends View {
         this.setVertical(false);
     }
 
+    public init(control: View, align: IAlign) {
+        this.control = control;
+        this.setVertical(align.id == Align.left.id || align.id == Align.right.id);
+    }
+
     public setVisible(value) {
         if (this._visible === value)
             return;
@@ -505,15 +510,42 @@ export class Splitter extends View {
         }
     }
 
-    public isSplitter(): boolean {
-        return true;
-    }
-
     protected setVertical(vertical) {
         this.vertical = vertical;
         this.attributes.vertical = vertical;
-        if (this.element)
-            this.element.setAttribute('vertical', vertical);
+        if (this._element)
+            this._element.setAttribute('vertical', vertical);
+    }
+
+    protected afterUpdateView() {
+        super.afterUpdateView();
+
+        // associating splitter with a control
+        let c: View = null, prevC: View = null;
+        for (let i = 0; i < this.parent.children.length; i++) {
+            c = this.parent.children[i];
+            if (c instanceof Splitter && c === this) {
+                c.control = prevC;
+                c.setVertical(c.align.id == Align.left.id || c.align.id == Align.right.id);
+            }
+            prevC = this.parent.children[i];
+        }
+
+        if (this._element && this.visible) {
+            this.handleEvent('onmousedown', this.handleMouseDown);
+            this.handleEvent('ontouchstart', this.handleMouseDown);
+            document.addEventListener('mouseup', (event) => {
+                this.handleMouseUp(event);
+            });
+            document.addEventListener('touchend', (event) => {
+                this.handleMouseUp(event);
+            });
+            document.addEventListener('mousemove', (event) => {
+                this.handleMouseMove(event);
+            });
+        }
+
+        this.internalTriggerReady();
     }
 
     protected handleMouseDown(event) {
@@ -556,19 +588,6 @@ export class Splitter extends View {
 
         if (event)
             event.preventDefault();
-    }
-
-    protected afterUpdateView() {
-        this.internalAfterUpdateView();
-        if (this.element && this.visible) {
-            this.handleEvent('onmousedown', this.handleMouseDown);
-            this.handleEvent('ontouchstart', this.handleMouseDown);
-            document.addEventListener('mouseup', this.handleMouseUp);
-            document.addEventListener('touchend', this.handleMouseUp);
-            document.addEventListener('mousemove', this.handleMouseMove);
-        }
-
-        this.internalTriggerReady();
     }
 
     protected setControlSize(size) {
