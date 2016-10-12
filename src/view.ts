@@ -452,9 +452,6 @@ export abstract class View extends Component {
         if (!this.alignChildren)
             return;
 
-        // this needed for absolute position in the control to work properly
-        this._element.style.position = 'relative';
-
         offset = offset || {
             'left': { left: 0, top: 0, bottom: 0 },
             'top': { left: 0, top: 0, right: 0 },
@@ -579,7 +576,7 @@ export abstract class View extends Component {
 
     protected internalAfterUpdateView() {
         this.afterUpdateView();
-        //this.initSplitters();
+        //this.realignChildren();
         setTimeout(() => {
             this.realignChildren();
         }, 0);
@@ -661,6 +658,10 @@ export abstract class View extends Component {
         let e = this.element;
         let s = (e && e.className !== this.hiddenViewClass) ? e.style.cssText : (typeof this.style == 'string' ? this.style : '');
         let align = '';
+
+        if (this.alignChildren)
+            s += (s ? '; ' : '') + 'position: relative';
+
         if (this.align) {
             s += s ? ('; ' + this.align.style) : this.align.style;
             align = utils.formatStr(' ctx_align="{0}"', [this.align.id]);
