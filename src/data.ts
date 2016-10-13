@@ -181,7 +181,7 @@ export interface IDataLink {
  * IOnChangeEvent - event raised when something changes in the data source
  */
 export interface IOnChangeEvent {
-    (eventType: EventType, data: any): void;
+    (eventType: EventType, data?: any): void;
 }
 
 /**
@@ -189,7 +189,7 @@ export interface IOnChangeEvent {
  */
 export class SimpleDataLink implements IDataLink {
     protected _dataSource: IRecordSource;
-    dataField: string;
+    protected _dataField: string;
 
     constructor(public onChangeEvent: IOnChangeEvent, public converter?: IValueConverter) { }
 
@@ -201,9 +201,18 @@ export class SimpleDataLink implements IDataLink {
             this._dataSource = value;
             if (this._dataSource)
                 this._dataSource.addLink(this);
+            this.onChange(EventType.Refreshed);
         }
     }
-    onChange(eventType: EventType, data: any): void {
+    get dataField() { return this._dataField; }
+    set dataField(value: string) {
+        if (this._dataField != value) {
+            this._dataField = value;
+            if (this.dataSource)
+                this.onChange(EventType.Refreshed);
+        }
+    }
+    onChange(eventType: EventType, data?: any): void {
         if (this.onChangeEvent)
             this.onChangeEvent(eventType, data);
     }
@@ -294,7 +303,8 @@ export class SimpleSource extends BaseSource implements IRecordSource {
 
     set current(value: IRecord) {
         if (value != this._current) {
-            this.cancel();
+            if (this._current)
+                this.cancel();
             this._current = value;
             this._fields = getObjectFields(value);
             this._state = (value) ? RecordState.Browse : RecordState.Empty;

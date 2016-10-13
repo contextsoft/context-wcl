@@ -85,7 +85,7 @@ export class GroupBoxView extends View {
 
     /** Sets/Gets GroupBox header */
     public get caption() {
-        return this.text;
+        return this.getText();
     }
     public set caption(value) {
         this.text = value;
@@ -149,7 +149,7 @@ export class ButtonView extends View {
         if (this.buttonType == ButtonType.toggle)
             return '<span class="ctx_icon-bar"></span><span class="ctx_icon-bar"></span><span class="ctx_icon-bar"></span>';
         else
-            return this.renderIcon() + this.text;
+            return this.renderIcon() + this.getText();
     }
 }
 

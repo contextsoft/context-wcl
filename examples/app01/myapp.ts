@@ -14,10 +14,10 @@ import {
     resources, Align, View, ScreenView, TextView, PanelView,
     HeaderView, FooterView, GroupBoxView, ButtonView, Splitter,
     ButtonType, InputView, TextAreaView, SelectView, ListView, LookupView, DatePicker,
-    TabsView, PageView, Dialog, TreeView, WorkAreaLayout, GridLayout
+    TabsView, PageView, Dialog, TreeView, WorkAreaLayout, GridLayout,
+    SimpleSource, EditAction, PostAction, CancelAction
 }
-
-    from 'context-wcl';
+from 'context-wcl';
 
 // or we can import a particular file as namespace
 import { utils } from 'context-wcl';
@@ -57,6 +57,14 @@ class MyApp extends Application {
     }
 }
 
+class MyDataClass {
+    constructor(public firstName: string, public lastName: string) {
+
+    };
+    get fullName() { return this.firstName + ' ' + this.lastName; }
+    set fullName(value) { }    
+}
+
 class MainScreen extends ScreenView {
     protected initComponents() {
         this.testHeaderFooter();
@@ -69,12 +77,14 @@ class MainScreen extends ScreenView {
         let extPage = new PanelView(pages);
         let treePage = new PanelView(pages);
         let layoutPage = new PanelView(pages);
+        let dataPage = new PanelView(pages);
         pages.items = [
             { text: 'std.controls', value: stdPage },
             { text: 'list.controls', value: listPage },
             { text: 'ext.controls', value: extPage },
             { text: 'tree.controls', value: treePage },
-            { text: 'layout.controls', value: layoutPage }
+            { text: 'layout.controls', value: layoutPage },
+            { text: 'data', value: dataPage }
         ];
         pages.setPageIndex(0);
 
@@ -87,6 +97,7 @@ class MainScreen extends ScreenView {
         this.testDlg(extPage);
         this.testTree(treePage);
         this.testLayouts(layoutPage);
+        this.testDataSource(dataPage);
     }
 
     // Header, Footer    
@@ -338,6 +349,41 @@ class MainScreen extends ScreenView {
             [c1, e1],
             [c2, e2]
         ];
+    }
+
+    protected testDataSource(parent: View) {
+
+        let ds = new SimpleSource();
+        let dataObj = new MyDataClass('john', 'smith'); 
+        ds.current = dataObj;
+        
+        let gridLayout = new GridLayout(parent);
+        
+        let edit1 = new InputView(gridLayout);
+        let edit2 = new InputView(gridLayout);
+        let pnlButtons = new PanelView(gridLayout);        
+        
+        let btnEdit = new ButtonView(pnlButtons);
+        let btnPost = new ButtonView(pnlButtons);
+        let btnCancel = new ButtonView(pnlButtons);
+
+        btnEdit.action = new EditAction(ds);
+        btnPost.action = new PostAction(ds);
+        btnCancel.action = new CancelAction(ds);
+
+        gridLayout.rows = [
+            [edit1],
+            [edit2],
+            [pnlButtons]
+        ];
+
+        edit1.data.dataSource = ds;
+        edit1.data.dataField = 'firstName';
+
+        edit2.data.dataSource = ds;
+        edit2.data.dataField = 'fullName';
+
+
     }
 
 }

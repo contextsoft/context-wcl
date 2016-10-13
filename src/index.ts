@@ -3,6 +3,7 @@ export * from './resources';
 export * from './component';
 export * from './data';
 export * from './actions';
+export * from './data.actions'
 export * from './application';
 export * from './std.controls';
 export * from './ext.controls';

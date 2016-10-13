@@ -572,7 +572,7 @@ export class LookupView extends ListView {
     }
 
     protected doInputChange(forceShow: boolean) {
-        if (this.updatingValue || !this.enabled)
+        if (this.updatingValue || !this.getEnabled())
             return;
         let item, value, pos;
 
@@ -624,7 +624,7 @@ export class LookupView extends ListView {
 
     protected onInputKeyPress(event) {
         let lookup: LookupView = <LookupView>this.parent;
-        if (!lookup.enabled) {
+        if (!lookup.getEnabled()) {
             event.preventDefault();
             return;
         }
@@ -638,7 +638,7 @@ export class LookupView extends ListView {
 
     protected onInputBtnClick(event) {
         let lookup: LookupView = <LookupView>this.parent;
-        if (!lookup.enabled)
+        if (!lookup.getEnabled())
             return;
         if (!lookup.listVisible)
             lookup.doInputChange(true);

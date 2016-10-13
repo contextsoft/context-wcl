@@ -1,6 +1,7 @@
 import { utils } from './utils';
 import { IVoidEvent, Component } from './component';
 import { FieldDataLink, EventType } from './data';
+import { IAction } from './actions';
 
 /** Views's Align */
 export class Align {
@@ -34,7 +35,7 @@ export abstract class View extends Component {
         let t = tag || 'div';
         let res = '<' + t + ' ' + (attr || '');
         res += (t === 'input') ? '/' : '';
-        res += '>' + (innerHtml != 'undefined' ? innerHtml : '');
+        res += '>' + (innerHtml || '');
         res += (!leaveOpen) ? '</' + t + '>' : '';
         return res;
     }
@@ -59,8 +60,6 @@ export abstract class View extends Component {
     public clientAreaStyle = '';
     /** Indicates is control rendered in client area of parent control or not */
     public renderInNonClientArea = false;
-
-    //public actions: any = {};
 
     /** Control's child controls */
     public children: Array<View> = [];
@@ -130,19 +129,17 @@ export abstract class View extends Component {
 
     /** Enables or disabled controls */
     public get enabled() {
-        //let a = this.getAction();
-        //return (a) ? (a.getEnabled() && a.execute) : this._enabled;
         return this._enabled;
     }
     public set enabled(value) {
         if (value !== this._enabled) {
             this._enabled = value;
-            // let a = this.getAction();
-            // if(a)
-            //     a.setEnabled(value);
-            if (this.element)
+            if (this.element && !this._action)
                 this.updateView();
         }
+    }
+    public getEnabled(): boolean { 
+        return (this._action) ? this._action.enabled : this.enabled; 
     }
 
     /** Sets/Gets CSS class in addition to generated one e.g. 'TextView View additionalCSSClass'  */
@@ -152,7 +149,7 @@ export abstract class View extends Component {
     public set additionalCSSClass(value) {
         if (this._additionalCSSClass !== value) {
             this._additionalCSSClass = value;
-            if (this.visible && this.element)
+            if (this.getVisible() && this.element)
                 this.element.className = this.getCSSClass();
         }
     }
@@ -166,21 +163,21 @@ export abstract class View extends Component {
         return this._bodyElement;
     };
 
-
     /** Shows or hides control */
     public get visible() {
-        // return (this.action) ? this.action.visible : this._visible;
         return this._visible;
     }
     public set visible(value: boolean) {
         this.setVisible(value);
     }
-
+    public getVisible(): boolean { return (this._action) ? this._action.visible : this.visible; }
     public setVisible(value) {
         if (value !== this._visible) {
             this._visible = value;
-            this.updateView();
-            this.visibleChanged();
+            if (!this._action) {
+                this.updateView();
+                this.visibleChanged();
+            }
         }
     };
 
@@ -190,18 +187,7 @@ export abstract class View extends Component {
     }
 
     /** Sets/Gets content which will be rendered */
-    public get text() {
-        let result;
-        if (typeof this.onGetText === "function")
-            result = this.onGetText();
-        else
-            result = this.L(this._text);
-
-        if (result && !this.doNotEscapeHtml)
-            result = utils.escapeHTML(result);
-
-        return (result) ? String(result) : '';
-    }
+    public get text() { return this._text; } 
     public set text(value) {
         if (value !== this._text) {
             this._text = value;
@@ -209,33 +195,42 @@ export abstract class View extends Component {
                 this.updateView();
         }
     }
-
+    public getText(): string {
+        let result = '';
+        if (typeof this.onGetText === "function")
+            result = this.onGetText();
+        else if (this._text)
+            result = this.L(this._text);
+        else if (this.action && this.action.caption) 
+            result = this.L(this.action.caption);
+        if (result && !this.doNotEscapeHtml)
+            result = utils.escapeHTML(result);
+        return result;
+    }
     /** Class path for css, e.g. "CtxView CtxTextView" */
     public get classPath(): string {
         return this._classPath;
     }
 
     /** Control's Action  */
-    // public public get action() {
-    //     return this.action;
-    // }    
-    // public public set action(value: Action) {
-    //     if (this.action !== value) {
-    //         // if (this.action)
-    //         //     this.action.removeView(this);
+    protected _action: IAction;
 
-    //         this._action = value;
-
-    //         // if (this.action)
-    //         //     this.action.addView(this);
-
-    //         this.updateView();
-    //     }
-    // }
-    // protected _action: Action;
-
-
-
+    public onActionChanged(action: IAction) {
+        this.updateView();
+    }
+    public get action() {
+        return this._action;
+    }
+    public set action(value: IAction) {
+        if (this._action !== value) {
+            if (this._action)
+                this._action.removeTarget(this);
+            this._action = value;
+            if (this._action)
+                this._action.addTarget(this);
+            this.updateView();
+        }
+    }
     /** Returns control's DOM element */
     public getElement() {
         return document.getElementById(this.id);
@@ -269,7 +264,7 @@ export abstract class View extends Component {
 
                 // destroy element if it exists within parent view
                 if (this.element && this.parent.element) {
-                    if (this.parent.visible) {
+                    if (this.parent.getVisible()) {
                         // let parent redraw itself
                         this._element = null;
                         this.parent.updateView();
@@ -294,7 +289,7 @@ export abstract class View extends Component {
             this._parent = value;
 
             // update new parent to create it if it's visible - this will keep status quo
-            if (this.visible) {
+            if (this.getVisible()) {
                 if (this.parent)
                     this.parent.updateView();
                 else
@@ -388,27 +383,26 @@ export abstract class View extends Component {
 
     /** Returns control's DOM element attribute */
     public getElementAttribute(name) {
-        if (this.element && this.visible)
+        if (this.element && this.getVisible())
             return this.element.getAttribute(name);
         else return this.attributes[name];
     }
 
     /** Sets control's DOM element attribute */
     public setElementAttribute(name, value) {
-        if (this.element && this.visible)
+        if (this.element && this.getVisible())
             this.element.setAttribute(name, value);
         return this.attributes[name] = value;
     }
 
     /** Returns control's or its action's icon url */
-    public getIcon() {
-        return this.icon || '';
-        // else {
-        //     if (this.action && this.action.icon)
-        //         return this.action.icon;
-        //     else
-        //         return '';
-        // }
+    public getIcon(): string {
+        if (this.icon)
+            return this.icon;
+        else if (this.action && this.action.icon)
+            return this.action.icon;
+        else 
+            return '';
     }
 
     /** Return icon withing <img> tag */
@@ -440,7 +434,7 @@ export abstract class View extends Component {
 
     /** Returns control's html accouting it's visibility */
     public internalRender(): string {
-        if (this.visible)
+        if (this.getVisible())
             return this.render();
 
         else
@@ -500,7 +494,7 @@ export abstract class View extends Component {
 
     /** Focuses control's DOM element */
     public setFocus() {
-        if (this.element && this.visible)
+        if (this.element && this.getVisible())
             this.element.focus();
     }
 
@@ -539,7 +533,7 @@ export abstract class View extends Component {
 
     /** Assigns event handler to control's DOM-element in addition to control.events handlers */
     protected handleEvent(eventName: string, handler: any) {
-        if (this.element && this.visible) {
+        if (this.element && this.getVisible()) {
             if (handler)
                 this.element[eventName] = (event) => {
                     handler.call(this, event);
@@ -566,7 +560,7 @@ export abstract class View extends Component {
     // }
 
     protected internalTriggerReady() {
-        if (this.visible && this.element && this.onReady)
+        if (this.getVisible() && this.element && this.onReady)
             this.onReady();
     }
 
@@ -587,7 +581,7 @@ export abstract class View extends Component {
         // assign DOM element
         this._element = this.getElement();
 
-        if (!this.visible || !this.element) {
+        if (!this.getVisible() || !this.element) {
             // clear elements for all children
             this.resetChildrenElements();
             return;
@@ -613,15 +607,14 @@ export abstract class View extends Component {
                     this.element[e] = (event) => { this.events[e].call(this, event); };
 
         // handle on click if we have action assigned
-        // if (this.action || this.events.onclick)
-        //     this.handleEvent('onclick', this.handleClick);
+        if (this.action)
+            this.handleEvent('onclick', this.handleClick);
     }
 
-    // protected handleClick(event: Event) {
-    //     if (this.enabled) {
-    //         return (this.action) ? this.action.execute(this, event) : false;
-    //     }
-    // }
+    protected handleClick(event: Event) {
+        if (this.getEnabled())
+            return (this.action) ? this.action.execute(this, event) : false;
+    }
 
     protected internalInsertChild(child) {
         this.updateView();
@@ -645,7 +638,7 @@ export abstract class View extends Component {
         let a = this.additionalCSSClass;
         if (a)
             c += ' ' + a;
-        c += !this.enabled ? ' disabled' : '';
+        c += !this.getEnabled() ? ' disabled' : '';
         // c += this.float? ' float-' + this.float : '';
         // c += this.position? ' position-' + this.position : '';
         // c += this.scrollbars? ' scrollbars-' + this.scrollbars : '';
@@ -672,7 +665,7 @@ export abstract class View extends Component {
         else
             delete this.attributes.style;
 
-        return 'class="' + this.getCSSClass() + '" ' + this.getTagAttr() + (this.enabled ? '' : 'disabled') + ' id="' + this.id + '"' + align;
+        return 'class="' + this.getCSSClass() + '" ' + this.getTagAttr() + (this.getEnabled() ? '' : 'disabled') + ' id="' + this.id + '"' + align;
     }
 
     /** Return control element's this.attrubutes */
@@ -690,7 +683,7 @@ export abstract class View extends Component {
 
     /** Returns control's content html */
     protected renderSelf(): string {
-        return this.renderIcon() + this.text;
+        return this.renderIcon() + this.getText();
     }
 
     /** Returns control's childs html 
@@ -725,14 +718,14 @@ export abstract class ValueView extends View {
         this.data.value = this._value;
     }
     public getValue() {
-        if (this.element && this.visible)
+        if (this.element && this.getVisible())
             this._value = (<any>this.element).value;
         return this._value;
     }
     public setValue(_value) {
         if (this._value !== _value) {
             this._value = _value;
-            if (this.element && this.visible)
+            if (this.element && this.getVisible())
                 (<any>this.element).value = this._value;
         }
     }
