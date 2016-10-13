@@ -1,10 +1,10 @@
 
 
 // exmaple of how to include breeze
-import * as breeze from 'breeze-client';
+// import * as breeze from 'breeze-client';
 
 // example of how to use jquery - this is because of default export of $
-import 'jquery';
+// import 'jquery';
 
 // we can import particular file
 import { Application } from 'context-wcl';
@@ -26,10 +26,12 @@ import { utils } from 'context-wcl';
 import { config } from './config';
 
 /* Example of using breeze and jquery */
+
 function test() {
-    var c = $('#myid');
-    var c2 = breeze.core;
+//    var c = $('#myid');
+//    var c2 = breeze.core;
 }
+
 
 /* add resource files to resource boundle/library, they will be loaded when app initializes */
 resources.register('MyApp', [
