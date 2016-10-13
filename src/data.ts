@@ -129,8 +129,10 @@ export interface ICursor extends IReference {
     prior();
     first();
     last();
-    count(): number;
+    recordCount(): number;
+    getRecord(index: number): IRecord;
     locate(values: any): boolean;
+    currentIndex: number;
 }
 
 /**
@@ -279,9 +281,9 @@ export class BaseSource implements IDataSource {
 }
 
 /**
- * SimpleSource - generic implementation of a data source for objects
+ * RecordSource - generic implementation of a data source for objects
  */
-export class SimpleSource extends BaseSource implements IRecordSource {
+export class RecordSource extends BaseSource implements IRecordSource {
     protected _state: RecordState;
     protected _current: IRecord;
     protected _oldValue: IRecord = {};
@@ -341,11 +343,11 @@ export class SimpleSource extends BaseSource implements IRecordSource {
 }
 
 /**
- * ListSource - implementation of record set source for an array of objects 
+ * RecordSetSource - implementation of record set source for an array of objects 
  */
-export class ListSource extends BaseSource implements IRecordSetSource, IUpdatable {
+export class RecordSetSource extends BaseSource implements IRecordSetSource, IUpdatable {
 
-    protected _list = [];
+    protected _records = [];
     protected _curIndex = -1;
     protected _state: RecordState;
     protected _oldValue: IRecord = {};
@@ -378,8 +380,8 @@ export class ListSource extends BaseSource implements IRecordSetSource, IUpdatab
 
     set currentIndex(value) {
         this.checkList();
-        if (value >= this._list.length)
-            value = this._list.length - 1;
+        if (value >= this._records.length)
+            value = this._records.length - 1;
         if (value != this._curIndex) {
             this.post();
             this._curIndex = value;
@@ -395,13 +397,13 @@ export class ListSource extends BaseSource implements IRecordSetSource, IUpdatab
     }
 
     get current(): IRecord {
-        return ((this._curIndex >= 0)) ? this._list[this._curIndex] : null;
+        return ((this._curIndex >= 0)) ? this._records[this._curIndex] : null;
     }
 
-    set list(value: any[]) {
-        if (value != this._list) {
+    set records(value: any[]) {
+        if (value != this._records) {
             this.post();
-            this._list = value;
+            this._records = value;
             this._curIndex = (value && value.length > 0) ? 0 : -1;
             this.notifyLinks(EventType.Refreshed);
         }
@@ -414,7 +416,7 @@ export class ListSource extends BaseSource implements IRecordSetSource, IUpdatab
         return this._state;
     }
     checkList(): void {
-        if (!this._list)
+        if (!this._records)
             utils.RaiseError('List is not assigned');
     }
     checkCurrent(): void {
@@ -451,24 +453,24 @@ export class ListSource extends BaseSource implements IRecordSetSource, IUpdatab
     insert(): void {
         this.checkList();
         this.post();
-        this._list.push({});
-        this._curIndex = this.list.length - 1;
+        this._records.push({});
+        this._curIndex = this._records.length - 1;
         this._oldValue = {};
         this.setState(RecordState.Insert);
     }
     delete(): void {
         this.checkCurrent();
         this.cancel();
-        this._list.splice(this._curIndex);
-        if (this._curIndex >= this.list.length)
-            this._curIndex = this.list.length - 1;
+        this._records.splice(this._curIndex);
+        if (this._curIndex >= this._records.length)
+            this._curIndex = this._records.length - 1;
         this.notifyLinks(EventType.CursorMoved);
     }
 
     // Cursor methods
 
     eof(): boolean {
-        return this.currentIndex >= this._list.length;
+        return this.currentIndex >= this._records.length;
     }
     next(): void {
         if (!this.eof())
@@ -482,10 +484,10 @@ export class ListSource extends BaseSource implements IRecordSetSource, IUpdatab
         this.currentIndex = 0;
     }
     last(): void {
-        this.currentIndex = this.count() - 1;
+        this.currentIndex = this.recordCount() - 1;
     }
-    count(): number {
-        return (this._list) ? this._list.length : 0;
+    recordCount(): number {
+        return (this._records) ? this._records.length : 0;
     }
     compareRecord(obj, values) {
         for (let id in obj) {
@@ -495,12 +497,15 @@ export class ListSource extends BaseSource implements IRecordSetSource, IUpdatab
         return true;
     }
     locate(values: any): boolean {
-        for (let i = 0; i < this.count(); i++) {
-            if (this.compareRecord(this._list[i], values)) {
+        for (let i = 0; i < this.recordCount(); i++) {
+            if (this.compareRecord(this._records[i], values)) {
                 this.currentIndex = i;
                 return true;
             }
         }
         return false;
+    }
+    public getRecord(index: number): IRecord { 
+        return this._records[index]; 
     }
 }

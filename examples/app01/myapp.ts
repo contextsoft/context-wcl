@@ -15,7 +15,7 @@ import {
     HeaderView, FooterView, GroupBoxView, ButtonView, Splitter,
     ButtonType, InputView, TextAreaView, SelectView, ListView, LookupView, DatePicker,
     TabsView, PageView, Dialog, TreeView, WorkAreaLayout, GridLayout,
-    SimpleSource, EditAction, PostAction, CancelAction
+    RecordSource, RecordSetSource, EditAction, PostAction, CancelAction
 }
 from 'context-wcl';
 
@@ -210,6 +210,15 @@ class MainScreen extends ScreenView {
 
     // ListView, LookupView, DatePicker
     protected testLists(parent: View) {
+        let rs = new RecordSetSource();
+        rs.records = [
+            'item 1',
+            'item 2',
+            'item 3',
+            'item 4',
+            'item 5',
+        ];
+
         let grpBox = new GroupBoxView(parent);
         grpBox.style = 'margin-bottom: 10px';
         grpBox.caption = 'Lists';
@@ -353,7 +362,7 @@ class MainScreen extends ScreenView {
 
     protected testDataSource(parent: View) {
 
-        let ds = new SimpleSource();
+        let ds = new RecordSource();
         let dataObj = new MyDataClass('john', 'smith'); 
         ds.current = dataObj;
         
