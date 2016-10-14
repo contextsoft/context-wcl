@@ -233,16 +233,18 @@ class MainScreen extends ScreenView {
         let label2 = new TextView(grpBox);
         label2.style = 'margin-bottom: 10px';
         label2.text = 'DatePicker:';
-        /*let datePicker =*/ new DatePicker(grpBox);
+        new DatePicker(grpBox);
 
         let label3 = new TextView(grpBox);
         label3.style = 'margin-bottom: 10px';
         label3.text = 'SelectView:';
 
-        //let selectLayout = new GridLayout(grpBox);
         let select = new SelectView(grpBox);
         select.listSource = recSetSrc;
-        //select.dataLink.dataSource
+        select.dataLink.dataSource = new RecordSource();
+        select.dataLink.dataSource.current = {
+            value: ''
+        };
 
         let selectEdit = new InputView(grpBox);
         selectEdit.style = 'display: block-inline; margin-left: 10px';

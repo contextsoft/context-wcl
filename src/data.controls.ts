@@ -1,6 +1,6 @@
 import { utils } from './utils';
 import { View, ValueView } from './view';
-import { RecordSource, RecordSetSource } from './data';
+import { RecordSetSource } from './data';
 
 /**
  * <select> wrapper
