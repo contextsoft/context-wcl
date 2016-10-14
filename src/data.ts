@@ -187,13 +187,12 @@ export interface IOnChangeEvent {
 }
 
 /**
- * SimpleDataLink - a generic implementation of a data link for single field controls
+ * BaseDataLink - a generic implementation of a data link for single field controls
  */
-export class SimpleDataLink implements IDataLink {
+export class BaseDataLink implements IDataLink {
     protected _dataSource: IRecordSource;
-    protected _dataField: string;
 
-    constructor(public onChangeEvent: IOnChangeEvent, public converter?: IValueConverter) { }
+    constructor(public onChangeEvent: IOnChangeEvent) { }
 
     get dataSource(): IRecordSource { return this._dataSource; }
     set dataSource(value: IRecordSource) {
@@ -206,14 +205,6 @@ export class SimpleDataLink implements IDataLink {
             this.onChange(EventType.Refreshed);
         }
     }
-    get dataField() { return this._dataField; }
-    set dataField(value: string) {
-        if (this._dataField != value) {
-            this._dataField = value;
-            if (this.dataSource)
-                this.onChange(EventType.Refreshed);
-        }
-    }
     onChange(eventType: EventType, data?: any): void {
         if (this.onChangeEvent)
             this.onChangeEvent(eventType, data);
@@ -223,24 +214,43 @@ export class SimpleDataLink implements IDataLink {
 /**
  * FieldDataLink - a generic implementation of a data link for single field controls
  */
-export class FieldDataLink extends SimpleDataLink {
+export class FieldDataLink extends BaseDataLink {
+    protected _dataField: string;
+
+    constructor(public onChangeEvent: IOnChangeEvent, public converter?: IValueConverter) {
+        super(onChangeEvent);
+    }
+    get dataField() { return this._dataField; }
+    set dataField(value: string) {
+        if (this._dataField != value) {
+            this._dataField = value;
+            if (this.dataSource)
+                this.onChange(EventType.Refreshed);
+        }
+    }
     get value(): any {
         let res = null;
-        if (this.dataSource && this.dataSource.current && this.dataField != '') {
-            res = this.dataSource.current[this.dataField];
+        if (this._dataSource && this._dataSource.current && this._dataField != '') {
+            if (this._dataField == '*')
+                res = utils.extend(this._dataSource.current, {});
+            else
+                res = this._dataSource.current[this._dataField];
             if (this.converter)
                 res = this.converter.decode(this, res);
         }
         return res;
     }
     set value(val: any) {
-        if (this.dataSource && this.dataSource.current && this.dataField != '') {
-            if (this.dataSource.getState() == RecordState.Browse)
-                this.dataSource.edit();
+        if (this._dataSource && this._dataSource.current && this._dataField != '') {
+            if (this._dataSource.getState() == RecordState.Browse)
+                this._dataSource.edit();
             if (this.converter)
                 val = this.converter.decode(this, val);
-            this.dataSource.current[this.dataField] = val;
-            this.dataSource.notifyLinks(EventType.DataChanged, this.dataField);
+            if (this._dataField == '*')
+                utils.assign(val, this._dataSource.current);
+            else
+                this._dataSource.current[this.dataField] = val;
+            this._dataSource.notifyLinks(EventType.DataChanged, this._dataField);
         }
     }
 }
