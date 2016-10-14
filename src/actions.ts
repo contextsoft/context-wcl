@@ -2,6 +2,10 @@ import { Component } from './component';
 
 /** Action handling component */
 
+/** TODO:
+ * 1. Keyboard shortcuts
+ */
+
 export interface IOnActionExecute {
     (sender: any): void;
 }
