@@ -43,6 +43,8 @@ export abstract class View extends Component {
     /** Global controls counter */
     protected static nextViewId = 1;
 
+    /** Standard events */
+    public onClick: IVoidEvent;
 
     /** Controls's id for DOM */
     public get id() {
@@ -702,8 +704,11 @@ export abstract class View extends Component {
  * Control with a value 
  **/
 export abstract class ValueView extends View {
-    public dataLink = new FieldDataLink((eventType: EventType, data: any): void => {
-        this.setValue((this.dataLink).value);
+    /** Fires on input's value changed */
+    public onChange: IVoidEvent;
+
+    public data = new FieldDataLink((eventType: EventType, data: any): void => {
+        this.setValue((this.data).value);
     });
 
     protected _value: string;
@@ -715,7 +720,7 @@ export abstract class ValueView extends View {
     public set value(_value) {
         this.setValue(_value);
         // update data link
-        this.dataLink.value = this._value;
+        this.data.value = this._value;
     }
     public getValue() {
         if (this.element && this.getVisible())
@@ -729,12 +734,10 @@ export abstract class ValueView extends View {
                 (<any>this.element).value = this._value;
         }
     }
-
     protected beforeUpdateView() {
         super.beforeUpdateView();
         this.getValue(); // storing control's value            
     }
-
     protected afterUpdateView() {
         super.afterUpdateView();
         if (this._element && typeof this._value !== 'undefined')

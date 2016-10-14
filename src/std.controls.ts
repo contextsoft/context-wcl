@@ -168,8 +168,6 @@ export class FormView extends View {
  * <input> wrapper
  **/
 export class InputView extends ValueView {
-    /** Fires on input's value changed */
-    public onChange: IVoidEvent;
     /** Indicates will keypress fire onChange or not, default true */
     public keyPressFireOnChange = true;
 
@@ -210,7 +208,7 @@ export class InputView extends ValueView {
         // retrieve value from element
         this.getValue();
         // update data link
-        this.dataLink.value = this._value;
+        this.data.value = this._value;
         // invoke event if assigned
         if (typeof this.onChange === 'function')
             this.onChange();

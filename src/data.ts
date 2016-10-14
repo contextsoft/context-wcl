@@ -26,6 +26,13 @@ export interface IField {
     required?: boolean;
 }
 
+/**
+ * IExpression - generic expression function
+ */
+export interface IExpression {
+    (value: any): string;
+}
+
 /** 
  * IFields - defines a list of fields
  */
@@ -189,13 +196,12 @@ export interface IOnChangeEvent {
 /**
  * BaseDataLink - a generic implementation of a data link for single field controls
  */
-export class BaseDataLink implements IDataLink {
-    protected _dataSource: IRecordSource;
+export class BaseDataLink<T extends IRecordSource | IRecordSetSource> implements IDataLink {
+    protected _dataSource: T;
 
     constructor(public onChangeEvent: IOnChangeEvent) { }
 
-    get dataSource(): IRecordSource { return this._dataSource; }
-    set dataSource(value: IRecordSource) {
+    protected setDataSource(value: T) {
         if (this._dataSource != value) {
             if (this._dataSource)
                 this._dataSource.removeLink(this);
@@ -205,6 +211,9 @@ export class BaseDataLink implements IDataLink {
             this.onChange(EventType.Refreshed);
         }
     }
+
+    get dataSource(): T { return this._dataSource; }
+    set dataSource(value: T) { this.setDataSource(value); }
     onChange(eventType: EventType, data?: any): void {
         if (this.onChangeEvent)
             this.onChangeEvent(eventType, data);
@@ -214,7 +223,7 @@ export class BaseDataLink implements IDataLink {
 /**
  * FieldDataLink - a generic implementation of a data link for single field controls
  */
-export class FieldDataLink extends BaseDataLink {
+export class FieldDataLink extends BaseDataLink<IRecordSource> {
     protected _dataField: string;
 
     constructor(public onChangeEvent: IOnChangeEvent, public converter?: IValueConverter) {
@@ -251,6 +260,54 @@ export class FieldDataLink extends BaseDataLink {
             else
                 this._dataSource.current[this.dataField] = val;
             this._dataSource.notifyLinks(EventType.DataChanged, this._dataField);
+        }
+    }
+}
+
+/**
+ * RecordSetDataLink - a generic implementation of data link for record sets (list or grid controls)
+ */
+export class RecordSetDataLink extends BaseDataLink<IRecordSetSource> {
+}
+
+/**
+ * LookupDataLink - a generic implementation of a data link for lookup controls
+ */
+export class LookupDataLink extends RecordSetDataLink {
+    protected _keyField: string;
+    protected _displayField: string;
+    protected _displayExpression: IExpression;
+
+    get keyField() { return this._keyField; }
+    set keyField(value: string) {
+        if (this._keyField != value) {
+            this._keyField = value;
+            if (this.dataSource)
+                this.onChange(EventType.Refreshed);
+        }
+    }
+    get displayField() { return this._displayField; }
+    set displayField(value: string) {
+        if (this._displayField != value) {
+            this._displayField = value;
+            if (this.dataSource)
+                this.onChange(EventType.Refreshed);
+        }
+    }
+    get displayExpression() { return this._displayExpression; }
+    set displayExpression(value: IExpression) {
+        if (this._displayExpression != value) {
+            this._displayExpression = value;
+            if (this.dataSource)
+                this.onChange(EventType.Refreshed);
+        }
+    }
+    public getDisplayValue(record: IRecord): string {
+        if (this._displayExpression)
+            return this._displayExpression(record);
+        else {
+            let fld = (this._displayField)? this._displayField : this._keyField;
+            return record[fld];
         }
     }
 }

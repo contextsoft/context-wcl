@@ -178,13 +178,13 @@ export class SelectViewLegacy extends Items {
             (<any>this.element).selectedIndex = this._selectedIndex;
     }
 
-    protected internalRenderItems = function () {
+    protected internalRenderItems () {
         let html = '';
         this.updateItems();
         let selIdx = this.getSelectedIndex();
 
         for (let i = 0; i < this.items.getRowCount(); i++) {
-            let comboItem = /*this._currentItem =*/ this.items.getRow(i);
+            let comboItem: any = /*this._currentItem =*/ this.items.getRow(i);
 
             let attr = '';
             if (selIdx === i)
@@ -414,7 +414,7 @@ export class ListView extends Items {
         this.updateActiveIndex(this.selectedIndex);
     }
 
-    protected updateActiveIndex = function (newIndex) {
+    protected updateActiveIndex(newIndex) {
         let obj = {
             selectedElement: this.activeElement,
             selectedIndex: this.activeIndex,
@@ -468,7 +468,7 @@ export class ListView extends Items {
         return html;
     }
 
-    protected getItemHtml = function (item, index, attr, text) {
+    protected getItemHtml(item, index, attr, text) {
         let r = View.getTag('div', attr, text) + '\n';
         return r;
     };

@@ -85,6 +85,7 @@ export namespace utils {
     /** Replaces < and > with  &lt; and &gt; */
     export function escapeHTML(str: string) {
         let result = "";
+        str = anyToString(str);
         for (let i = 0; i < str.length; i++) {
             if (str.charAt(i) == "<")
                 result = result + "&lt;";
@@ -345,7 +346,16 @@ export namespace utils {
         let res = '';
         for (let i in style)
             res += i + ' = ' + style[i] + '\n';
-        return res;
+        return res;        
+    }
+
+    /** Convert any value to string if necessary */
+    export function anyToString(val: any): string {
+        if (typeof val === 'string')
+            return val;
+        else if (val)
+            return val.toString();
+        else return '';
     }
 
     // Cookies

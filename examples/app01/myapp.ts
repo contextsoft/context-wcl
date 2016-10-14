@@ -210,11 +210,11 @@ class MainScreen extends ScreenView {
     protected testLists(parent: View) {
         let recSetSrc = new RecordSetSource();
         recSetSrc.records = [
-            { text: 'item 1' },
-            { text: 'item 2' },
-            { text: 'item 3' },
-            { text: 'item 4' },
-            { text: 'item 5' },
+            { id: 1, text: 'item 1' },
+            { id: 2, text: 'item 2' },
+            { id: 3, text: 'item 3' },
+            { id: 4, text: 'item 4' },
+            { id: 5, text: 'item 5' }
         ];
 
         let grpBox = new GroupBoxView(parent);
@@ -240,14 +240,21 @@ class MainScreen extends ScreenView {
         label3.text = 'SelectView:';
 
         let select = new SelectView(grpBox);
-        select.listSource = recSetSrc;
-        select.dataLink.dataSource = new RecordSource();
-        select.dataLink.dataSource.current = {
+        select.lookupData.dataSource = recSetSrc;
+        select.lookupData.keyField = 'id';
+        select.lookupData.displayField = 'text';
+
+        let ds = new RecordSource();
+        ds.current = {
             value: ''
         };
+        select.data.dataSource = ds;
+        select.data.dataField = 'value';
 
         let selectEdit = new InputView(grpBox);
         selectEdit.style = 'display: block-inline; margin-left: 10px';
+        selectEdit.data.dataSource = ds;
+        selectEdit.data.dataField = 'value';
 
         let label4 = new TextView(grpBox);
         label4.style = 'margin-bottom: 10px';
@@ -395,10 +402,10 @@ class MainScreen extends ScreenView {
             [pnlButtons]
         ];
 
-        edit1.dataLink.dataSource = ds;
-        edit1.dataLink.dataField = 'firstName';
+        edit1.data.dataSource = ds;
+        edit1.data.dataField = 'firstName';
 
-        edit2.dataLink.dataSource = ds;
-        edit2.dataLink.dataField = 'fullName';
+        edit2.data.dataSource = ds;
+        edit2.data.dataField = 'fullName';
     }
 }
