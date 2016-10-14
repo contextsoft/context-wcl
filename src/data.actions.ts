@@ -2,11 +2,11 @@ import { BaseDataLink, IRecordSource, IRecordSetSource, EventType, RecordState }
 import { BaseAction } from './actions';
 
 export class RecordSourceAction extends BaseAction {
-    protected link: BaseDataLink;
+    protected link: BaseDataLink<IRecordSource>;
 
     constructor(dataSource?: IRecordSource) {
         super();
-        this.link = new BaseDataLink((eventType: EventType, data?: any): void => {
+        this.link = new BaseDataLink<IRecordSource>((eventType: EventType, data?: any): void => {
             this.updateAction();
         });
         this.link.dataSource = dataSource;
@@ -31,11 +31,11 @@ export class RecordSourceAction extends BaseAction {
 }
 
 export class RecordSetSourceAction extends BaseAction {
-    protected link: BaseDataLink;
+    protected link: BaseDataLink<IRecordSetSource>;
 
     constructor(dataSource?: IRecordSetSource) {
         super();
-        this.link = new BaseDataLink((eventType: EventType, data?: any): void => {
+        this.link = new BaseDataLink<IRecordSetSource>((eventType: EventType, data?: any): void => {
             this.updateAction();
         });
         this.link.dataSource = dataSource;
@@ -44,7 +44,7 @@ export class RecordSetSourceAction extends BaseAction {
         if (this.timeToUpdateTargets())
             this.notifyTargets()
     };
-    get dataSource(): IRecordSetSource { return <IRecordSetSource>this.link.dataSource; }
+    get dataSource(): IRecordSetSource { return this.link.dataSource; }
     set dataSource(value: IRecordSetSource) { this.link.dataSource = value; }
     public timeToUpdateTargets(): boolean {
         return this.dataSource != null;
