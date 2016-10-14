@@ -138,8 +138,8 @@ export abstract class View extends Component {
                 this.updateView();
         }
     }
-    public getEnabled(): boolean { 
-        return (this._action) ? this._action.enabled : this.enabled; 
+    public getEnabled(): boolean {
+        return (this._action) ? this._action.enabled : this.enabled;
     }
 
     /** Sets/Gets CSS class in addition to generated one e.g. 'TextView View additionalCSSClass'  */
@@ -187,7 +187,7 @@ export abstract class View extends Component {
     }
 
     /** Sets/Gets content which will be rendered */
-    public get text() { return this._text; } 
+    public get text() { return this._text; }
     public set text(value) {
         if (value !== this._text) {
             this._text = value;
@@ -201,7 +201,7 @@ export abstract class View extends Component {
             result = this.onGetText();
         else if (this._text)
             result = this.L(this._text);
-        else if (this.action && this.action.caption) 
+        else if (this.action && this.action.caption)
             result = this.L(this.action.caption);
         if (result && !this.doNotEscapeHtml)
             result = utils.escapeHTML(result);
@@ -401,7 +401,7 @@ export abstract class View extends Component {
             return this.icon;
         else if (this.action && this.action.icon)
             return this.action.icon;
-        else 
+        else
             return '';
     }
 
@@ -702,8 +702,8 @@ export abstract class View extends Component {
  * Control with a value 
  **/
 export abstract class ValueView extends View {
-    public data = new FieldDataLink((eventType: EventType, data: any): void => {
-        this.setValue((this.data).value);
+    public dataLink = new FieldDataLink((eventType: EventType, data: any): void => {
+        this.setValue((this.dataLink).value);
     });
 
     protected _value: string;
@@ -715,7 +715,7 @@ export abstract class ValueView extends View {
     public set value(_value) {
         this.setValue(_value);
         // update data link
-        this.data.value = this._value;
+        this.dataLink.value = this._value;
     }
     public getValue() {
         if (this.element && this.getVisible())

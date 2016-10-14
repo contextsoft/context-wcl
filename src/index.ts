@@ -5,9 +5,10 @@ export * from './data';
 export * from './actions';
 export * from './data.actions'
 export * from './application';
+export * from './view';
 export * from './std.controls';
 export * from './ext.controls';
 export * from './list.controls';
 export * from './tree.controls';
 export * from './layout.controls';
-export * from './view';
+export * from './data.controls';

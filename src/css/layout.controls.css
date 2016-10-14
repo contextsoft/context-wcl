@@ -60,3 +60,10 @@
         display: table-cell;
     }
 }
+
+@media (max-width: 767px) {
+    .CtxGridLayout > .ctx_row > .ctx_cell > .CtxTextView {
+        padding-bottom: 4px;
+    }
+}
+

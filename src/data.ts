@@ -187,9 +187,9 @@ export interface IOnChangeEvent {
 }
 
 /**
- * SimpleDataLink - a generic implementation of a data link for single field controls
+ * DataLink - a generic implementation of a data link for single field controls
  */
-export class SimpleDataLink implements IDataLink {
+export class DataLink implements IDataLink {
     protected _dataSource: IRecordSource;
     protected _dataField: string;
 
@@ -223,7 +223,7 @@ export class SimpleDataLink implements IDataLink {
 /**
  * FieldDataLink - a generic implementation of a data link for single field controls
  */
-export class FieldDataLink extends SimpleDataLink {
+export class FieldDataLink extends DataLink {
     get value(): any {
         let res = null;
         if (this.dataSource && this.dataSource.current && this.dataField != '') {
@@ -255,7 +255,7 @@ export function getObjectFields(obj: any): IField[] {
             res.push({
                 fieldName: id,
                 dataType: DataType.String
-            })
+            });
     return res;
 }
 
@@ -347,7 +347,7 @@ export class RecordSource extends BaseSource implements IRecordSource {
  */
 export class RecordSetSource extends BaseSource implements IRecordSetSource, IUpdatable {
 
-    protected _records = [];
+    protected _records: IRecord[] = [];
     protected _curIndex = -1;
     protected _state: RecordState;
     protected _oldValue: IRecord = {};
@@ -400,7 +400,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
         return ((this._curIndex >= 0)) ? this._records[this._curIndex] : null;
     }
 
-    set records(value: any[]) {
+    set records(value: IRecord[]) {
         if (value != this._records) {
             this.post();
             this._records = value;
@@ -436,14 +436,14 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
         }
     }
     post(): void {
-        if (this._state != RecordState.Browse) {
+        if (this._state && this._state != RecordState.Browse) {
             this.checkCurrent();
             this._oldValue = {};
             this.setState(RecordState.Browse);
         }
     }
     cancel(): void {
-        if (this._state != RecordState.Browse) {
+        if (this._state && this._state != RecordState.Browse) {
             this.checkCurrent();
             utils.assign(this._oldValue, this.current);
             this._oldValue = {};
@@ -505,7 +505,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
         }
         return false;
     }
-    public getRecord(index: number): IRecord { 
-        return this._records[index]; 
+    public getRecord(index: number): IRecord {
+        return this._records[index];
     }
 }

@@ -210,7 +210,7 @@ export class InputView extends ValueView {
         // retrieve value from element
         this.getValue();
         // update data link
-        this.data.value = this._value;
+        this.dataLink.value = this._value;
         // invoke event if assigned
         if (typeof this.onChange === 'function')
             this.onChange();

@@ -153,7 +153,7 @@ export abstract class Items extends View {
 /**
  * <select> wrapper
  **/
-export class SelectView extends Items {
+export class SelectViewLegacy extends Items {
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.tag = 'select';

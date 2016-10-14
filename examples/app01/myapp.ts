@@ -17,7 +17,7 @@ import {
     TabsView, PageView, Dialog, TreeView, WorkAreaLayout, GridLayout,
     RecordSource, RecordSetSource, EditAction, PostAction, CancelAction
 }
-from 'context-wcl';
+    from 'context-wcl';
 
 // or we can import a particular file as namespace
 import { utils } from 'context-wcl';
@@ -28,8 +28,8 @@ import { config } from './config';
 /* Example of using breeze and jquery */
 
 function test() {
-//    var c = $('#myid');
-//    var c2 = breeze.core;
+    //    var c = $('#myid');
+    //    var c2 = breeze.core;
 }
 
 
@@ -62,7 +62,7 @@ class MyDataClass {
 
     };
     get fullName() { return this.firstName + ' ' + this.lastName; }
-    set fullName(value) { }    
+    set fullName(value) { }
 }
 
 class MainScreen extends ScreenView {
@@ -119,8 +119,6 @@ class MainScreen extends ScreenView {
 
         let input = new InputView(grpBox);
         input.style = 'margin-right: 10px';
-        input.data.dataSource = null; // on data change and on state change events
-        input.data.dataField = 'lastName';
 
         let enableInputBtn = new ButtonView(grpBox);
         enableInputBtn.text = 'Disable';
@@ -210,13 +208,13 @@ class MainScreen extends ScreenView {
 
     // ListView, LookupView, DatePicker
     protected testLists(parent: View) {
-        let rs = new RecordSetSource();
-        rs.records = [
-            'item 1',
-            'item 2',
-            'item 3',
-            'item 4',
-            'item 5',
+        let recSetSrc = new RecordSetSource();
+        recSetSrc.records = [
+            { text: 'item 1' },
+            { text: 'item 2' },
+            { text: 'item 3' },
+            { text: 'item 4' },
+            { text: 'item 5' },
         ];
 
         let grpBox = new GroupBoxView(parent);
@@ -235,12 +233,19 @@ class MainScreen extends ScreenView {
         let label2 = new TextView(grpBox);
         label2.style = 'margin-bottom: 10px';
         label2.text = 'DatePicker:';
-        let datePicker = new DatePicker(grpBox);
+        /*let datePicker =*/ new DatePicker(grpBox);
 
         let label3 = new TextView(grpBox);
         label3.style = 'margin-bottom: 10px';
         label3.text = 'SelectView:';
+
+        //let selectLayout = new GridLayout(grpBox);
         let select = new SelectView(grpBox);
+        select.listSource = recSetSrc;
+        //select.dataLink.dataSource
+
+        let selectEdit = new InputView(grpBox);
+        selectEdit.style = 'display: block-inline; margin-left: 10px';
 
         let label4 = new TextView(grpBox);
         label4.style = 'margin-bottom: 10px';
@@ -256,13 +261,13 @@ class MainScreen extends ScreenView {
             addItem('added item 6');
         };
 
-        select.items = [
+        /*select.items = [
             'item 1',
             'item 2',
             'item 3',
             'item 4',
             'item 5',
-        ];
+        ];*/
     }
 
     // TabsView, PageView
@@ -361,17 +366,19 @@ class MainScreen extends ScreenView {
     }
 
     protected testDataSource(parent: View) {
-
         let ds = new RecordSource();
-        let dataObj = new MyDataClass('john', 'smith'); 
+        let dataObj = new MyDataClass('john', 'smith');
         ds.current = dataObj;
-        
-        let gridLayout = new GridLayout(parent);
-        
+
+        let grpBox = new GroupBoxView(parent);
+        grpBox.text = 'Data Binding';
+
+        let gridLayout = new GridLayout(grpBox);
+
         let edit1 = new InputView(gridLayout);
         let edit2 = new InputView(gridLayout);
-        let pnlButtons = new PanelView(gridLayout);        
-        
+        let pnlButtons = new PanelView(gridLayout);
+
         let btnEdit = new ButtonView(pnlButtons);
         let btnPost = new ButtonView(pnlButtons);
         let btnCancel = new ButtonView(pnlButtons);
@@ -386,13 +393,10 @@ class MainScreen extends ScreenView {
             [pnlButtons]
         ];
 
-        edit1.data.dataSource = ds;
-        edit1.data.dataField = 'firstName';
+        edit1.dataLink.dataSource = ds;
+        edit1.dataLink.dataField = 'firstName';
 
-        edit2.data.dataSource = ds;
-        edit2.data.dataField = 'fullName';
-
-
+        edit2.dataLink.dataSource = ds;
+        edit2.dataLink.dataField = 'fullName';
     }
-
 }
