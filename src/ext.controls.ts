@@ -1,7 +1,7 @@
 //import {utils} from './utils';
 import { resources } from './resources';
 import { View } from "./view";
-import { ListView } from './list.controls';
+import { ListViewLegacy } from './list.controls';
 import { ButtonType, ButtonView, ContainerView, PanelView, TextView } from './std.controls';
 
 resources.register('context-wcl',
@@ -14,7 +14,7 @@ resources.register('context-wcl',
  * Tabs switch control
  * Additional CSS classes: flat
  */
-export class TabsView extends ListView {
+export class TabsView extends ListViewLegacy {
     protected dropDownButton: ButtonView;
     protected droppedDown = '';
 

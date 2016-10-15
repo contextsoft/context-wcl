@@ -178,7 +178,7 @@ export class SelectViewLegacy extends Items {
             (<any>this.element).selectedIndex = this._selectedIndex;
     }
 
-    protected internalRenderItems () {
+    protected internalRenderItems() {
         let html = '';
         this.updateItems();
         let selIdx = this.getSelectedIndex();
@@ -219,7 +219,7 @@ export class SelectViewLegacy extends Items {
 /**
  * Displays list
  **/
-export class ListView extends Items {
+export class ListViewLegacy extends Items {
     public onItemClick: (item) => void;
 
     /** Fires when item's text need */
@@ -492,7 +492,7 @@ export class ListView extends Items {
 /**
  * Lookup control
  */
-export class LookupView extends ListView {
+export class LookupView extends ListViewLegacy {
     protected static listIdCounter = 1;
 
     /** Lookup at value beginning or anywhere, default true */

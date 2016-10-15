@@ -15,7 +15,7 @@ import {
     HeaderView, FooterView, GroupBoxView, ButtonView, Splitter,
     ButtonType, InputView, TextAreaView, SelectView, ListView, LookupView, DatePicker,
     TabsView, PageView, Dialog, TreeView, WorkAreaLayout, GridLayout,
-    RecordSource, RecordSetSource, EditAction, PostAction, CancelAction
+    RecordSource, RecordSetSource, EditAction, PostAction, CancelAction, IRecord
 }
     from 'context-wcl';
 
@@ -216,6 +216,10 @@ class MainScreen extends ScreenView {
             { id: 4, text: 'item 4' },
             { id: 5, text: 'item 5' }
         ];
+        let recSrc = new RecordSource();
+        recSrc.current = {
+            value: ''
+        };
 
         let grpBox = new GroupBoxView(parent);
         grpBox.style = 'margin-bottom: 10px';
@@ -243,40 +247,23 @@ class MainScreen extends ScreenView {
         select.lookupData.dataSource = recSetSrc;
         select.lookupData.keyField = 'id';
         select.lookupData.displayField = 'text';
-
-        let ds = new RecordSource();
-        ds.current = {
-            value: ''
-        };
-        select.data.dataSource = ds;
+        select.data.dataSource = recSrc;
         select.data.dataField = 'value';
 
         let selectEdit = new InputView(grpBox);
         selectEdit.style = 'display: block-inline; margin-left: 10px';
-        selectEdit.data.dataSource = ds;
+        selectEdit.data.dataSource = recSrc;
         selectEdit.data.dataField = 'value';
 
         let label4 = new TextView(grpBox);
         label4.style = 'margin-bottom: 10px';
         label4.text = 'ListView:';
         let list = new ListView(grpBox);
-
-        list.onGetItems = (addItem) => {
-            addItem('added item 1');
-            addItem('added item 2');
-            addItem('added item 3');
-            addItem('added item 4');
-            addItem('added item 5');
-            addItem('added item 6');
+        list.listData.dataSource = recSetSrc;
+        list.listData.displayExpression = function (rec: any) {
+            return utils.escapeHTML(utils.formatStr('{0}. {1}', [rec.id, rec.text]));
         };
-
-        /*select.items = [
-            'item 1',
-            'item 2',
-            'item 3',
-            'item 4',
-            'item 5',
-        ];*/
+        list.listData.displayField = 'value';
     }
 
     // TabsView, PageView

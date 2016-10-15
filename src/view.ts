@@ -707,6 +707,7 @@ export abstract class ValueView extends View {
     /** Fires on input's value changed */
     public onChange: IVoidEvent;
 
+    /** FieldDataLink used as value store */
     public data = new FieldDataLink((eventType: EventType, data: any): void => {
         this.setValue((this.data).value);
     });

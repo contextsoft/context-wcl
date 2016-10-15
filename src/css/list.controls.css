@@ -2,7 +2,7 @@
     ListView
 */
 
-.CtxListView > div.selected {
+.CtxListView > div.ctx_selected {
     color: #262626;
     background-color: #e4e4e4;
 }
