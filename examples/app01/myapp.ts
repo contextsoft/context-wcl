@@ -208,43 +208,59 @@ class MainScreen extends ScreenView {
 
     // ListView, LookupView, DatePicker
     protected testLists(parent: View) {
-        let recSetSrc = new RecordSetSource();
-        recSetSrc.records = [
+        let grpBox = new GroupBoxView(parent);
+        grpBox.style = 'margin-bottom: 10px';
+        grpBox.caption = 'Lists';
+
+
+        // DataSource for lookup list
+        let records = [];
+        for (let i = 0; i < 500; i++)
+            records.push({
+                value: i,
+                text: 'item ' + i
+            });
+        let listSource = new RecordSetSource();
+        listSource.records = records;
+
+        let label1 = new TextView(grpBox);
+        label1.style = 'margin-bottom: 10px';
+        label1.text = 'LookupView:';
+        let lookup = new LookupView(grpBox);
+        lookup.listData.dataSource = listSource;
+        lookup.listData.displayField = 'text';
+        lookup.listData.keyField = 'value';
+
+
+        // DatePicker
+        /*let label2 = new TextView(grpBox);
+        label2.style = 'margin-bottom: 10px';
+        label2.text = 'DatePicker:';
+        new DatePicker(grpBox);*/
+
+        // SelectView and ListView
+
+        // DataSource for SelectView and ListView lists
+        let listRecSetSrc = new RecordSetSource();
+        listRecSetSrc.records = [
             { id: 1, text: 'item 1' },
             { id: 2, text: 'item 2' },
             { id: 3, text: 'item 3' },
             { id: 4, text: 'item 4' },
             { id: 5, text: 'item 5' }
         ];
+        // DataSource for value
         let recSrc = new RecordSource();
         recSrc.current = {
             value: ''
         };
-
-        let grpBox = new GroupBoxView(parent);
-        grpBox.style = 'margin-bottom: 10px';
-        grpBox.caption = 'Lists';
-
-        let label1 = new TextView(grpBox);
-        label1.style = 'margin-bottom: 10px';
-        label1.text = 'LookupView:';
-        let lookup = new LookupView(grpBox);
-        for (let i = 0; i < 200; i++)
-            lookup.items.push({
-                text: 'item ' + i
-            });
-
-        let label2 = new TextView(grpBox);
-        label2.style = 'margin-bottom: 10px';
-        label2.text = 'DatePicker:';
-        new DatePicker(grpBox);
 
         let label3 = new TextView(grpBox);
         label3.style = 'margin-bottom: 10px';
         label3.text = 'SelectView:';
 
         let select = new SelectView(grpBox);
-        select.lookupData.dataSource = recSetSrc;
+        select.lookupData.dataSource = listRecSetSrc;
         select.lookupData.keyField = 'id';
         select.lookupData.displayField = 'text';
         select.data.dataSource = recSrc;
@@ -259,7 +275,8 @@ class MainScreen extends ScreenView {
         label4.style = 'margin-bottom: 10px';
         label4.text = 'ListView:';
         let list = new ListView(grpBox);
-        list.listData.dataSource = recSetSrc;
+        list.listData.dataSource = listRecSetSrc;
+        list.listData.keyField = 'id';
         list.listData.displayExpression = function (rec: any) {
             return utils.escapeHTML(utils.formatStr('{0}. {1}', [rec.id, rec.text]));
         };

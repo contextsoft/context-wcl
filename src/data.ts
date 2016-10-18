@@ -212,9 +212,9 @@ export class BaseDataLink<T extends IRecordSource | IRecordSetSource> implements
         }
     }
 
-    get dataSource(): T { return this._dataSource; }
-    set dataSource(value: T) { this.setDataSource(value); }
-    onChange(eventType: EventType, data?: any): void {
+    public get dataSource(): T { return this._dataSource; }
+    public set dataSource(value: T) { this.setDataSource(value); }
+    public onChange(eventType: EventType, data?: any): void {
         if (this.onChangeEvent)
             this.onChangeEvent(eventType, data);
     }
@@ -229,15 +229,15 @@ export class FieldDataLink extends BaseDataLink<IRecordSource> {
     constructor(public onChangeEvent: IOnChangeEvent, public converter?: IValueConverter) {
         super(onChangeEvent);
     }
-    get dataField() { return this._dataField; }
-    set dataField(value: string) {
+    public get dataField() { return this._dataField; }
+    public set dataField(value: string) {
         if (this._dataField != value) {
             this._dataField = value;
             if (this.dataSource)
                 this.onChange(EventType.Refreshed);
         }
     }
-    get value(): any {
+    public get value(): any {
         let res = null;
         if (this._dataSource && this._dataSource.current && this._dataField != '') {
             if (this._dataField == '*')
@@ -249,7 +249,7 @@ export class FieldDataLink extends BaseDataLink<IRecordSource> {
         }
         return res;
     }
-    set value(val: any) {
+    public set value(val: any) {
         if (this._dataSource && this._dataSource.current && this._dataField != '') {
             if (this._dataSource.getState() == RecordState.Browse)
                 this._dataSource.edit();
@@ -278,24 +278,24 @@ export class LookupDataLink extends RecordSetDataLink {
     protected _displayField: string;
     protected _displayExpression: IExpression;
 
-    get keyField() { return this._keyField; }
-    set keyField(value: string) {
+    public get keyField() { return this._keyField; }
+    public set keyField(value: string) {
         if (this._keyField != value) {
             this._keyField = value;
             if (this.dataSource)
                 this.onChange(EventType.Refreshed);
         }
     }
-    get displayField() { return this._displayField; }
-    set displayField(value: string) {
+    public get displayField() { return this._displayField; }
+    public set displayField(value: string) {
         if (this._displayField != value) {
             this._displayField = value;
             if (this.dataSource)
                 this.onChange(EventType.Refreshed);
         }
     }
-    get displayExpression() { return this._displayExpression; }
-    set displayExpression(value: IExpression) {
+    public get displayExpression() { return this._displayExpression; }
+    public set displayExpression(value: IExpression) {
         if (this._displayExpression != value) {
             this._displayExpression = value;
             if (this.dataSource)
@@ -332,15 +332,15 @@ export function getObjectFields(obj: any): IField[] {
 export class BaseSource implements IDataSource {
     protected _links: IDataLink[] = [];
 
-    addLink(link: IDataLink): void {
+    public addLink(link: IDataLink): void {
         this._links.push(link);
     }
-    removeLink(link: IDataLink): void {
+    public removeLink(link: IDataLink): void {
         let num = this._links.indexOf(link);
         if (num >= 0)
             this._links.splice(num);
     }
-    notifyLinks(eventType: EventType, data?: any): void {
+    public notifyLinks(eventType: EventType, data?: any): void {
         for (let i = 0; i < this._links.length; i++) {
             this._links[i].onChange(eventType, data);
         }
@@ -363,14 +363,14 @@ export class RecordSource extends BaseSource implements IRecordSource {
         }
     }
 
-    checkCurrent() {
+    public checkCurrent() {
         if (!this._current)
             utils.RaiseError('Record does not exist');
     }
 
-    get current(): IRecord { return this._current; }
+    public get current(): IRecord { return this._current; }
 
-    set current(value: IRecord) {
+    public set current(value: IRecord) {
         if (value != this._current) {
             if (this._current)
                 this.cancel();
@@ -381,30 +381,30 @@ export class RecordSource extends BaseSource implements IRecordSource {
         }
     }
 
-    get oldValue(): IRecord {
+    public get oldValue(): IRecord {
         this.checkCurrent();
         return this._oldValue;
     }
 
-    get fields(): IField[] { return this._fields; }
+    public get fields(): IField[] { return this._fields; }
 
-    edit(): void {
+    public edit(): void {
         this.checkCurrent();
         this._oldValue = {};
         utils.assign(this.current, this._oldValue);
         this.setState(RecordState.Edit);
     }
-    post(): void {
+    public post(): void {
         this.checkCurrent();
         this.setState(RecordState.Browse);
     }
-    cancel(): void {
+    public cancel(): void {
         this.checkCurrent();
         utils.assign(this._oldValue, this.current);
         this._oldValue = {};
         this.setState(RecordState.Browse);
     }
-    getState(): RecordState {
+    public getState(): RecordState {
         return this._state;
     }
 }
@@ -413,7 +413,6 @@ export class RecordSource extends BaseSource implements IRecordSource {
  * RecordSetSource - implementation of record set source for an array of objects 
  */
 export class RecordSetSource extends BaseSource implements IRecordSetSource, IUpdatable {
-
     protected _records: IRecord[] = [];
     protected _curIndex = -1;
     protected _state: RecordState;
@@ -421,31 +420,31 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
     protected _fields: IField[] = [];
     protected _updateCounter = 0;
 
-    notifyLinks(eventType: EventType, data?: any): void {
+    public notifyLinks(eventType: EventType, data?: any): void {
         if (this._updateCounter == 0)
             for (let i = 0; i < this._links.length; i++) {
                 this._links[i].onChange(eventType, data);
             }
     }
 
-    beginUpdate(): void {
+    public beginUpdate(): void {
         this._updateCounter++;
     }
 
-    endUpdate(): void {
+    public endUpdate(): void {
         this._updateCounter--;
         if (this._updateCounter == 0)
             this.notifyLinks(EventType.Refreshed);
     }
 
-    isUpdating(): boolean { return this._updateCounter != 0; }
+    public isUpdating(): boolean { return this._updateCounter != 0; }
 
-    get currentIndex(): number {
+    public get currentIndex(): number {
         this.checkList();
         return this._curIndex;
     }
 
-    set currentIndex(value) {
+    public set currentIndex(value) {
         this.checkList();
         if (value >= this._records.length)
             value = this._records.length - 1;
@@ -463,11 +462,11 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
         }
     }
 
-    get current(): IRecord {
+    public get current(): IRecord {
         return ((this._curIndex >= 0)) ? this._records[this._curIndex] : null;
     }
 
-    set records(value: IRecord[]) {
+    public set records(value: IRecord[]) {
         if (value != this._records) {
             this.post();
             this._records = value;
@@ -475,18 +474,18 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
             this.notifyLinks(EventType.Refreshed);
         }
     }
-    get oldValue(): IRecord { return this._oldValue; }
+    public get oldValue(): IRecord { return this._oldValue; }
 
-    get fields(): IField[] { return this._fields; }
+    public get fields(): IField[] { return this._fields; }
 
-    getState(): RecordState {
+    public getState(): RecordState {
         return this._state;
     }
-    checkList(): void {
+    public checkList(): void {
         if (!this._records)
             utils.RaiseError('List is not assigned');
     }
-    checkCurrent(): void {
+    public checkCurrent(): void {
         this.checkList();
         if (!this.current)
             utils.RaiseError('Record does not exist');
@@ -494,7 +493,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
 
     // Editable methods
 
-    edit(): void {
+    public edit(): void {
         if (this._state == RecordState.Browse) {
             this.checkCurrent();
             this._oldValue = {};
@@ -502,14 +501,14 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
             this.setState(RecordState.Edit);
         }
     }
-    post(): void {
+    public post(): void {
         if (this._state && this._state != RecordState.Browse) {
             this.checkCurrent();
             this._oldValue = {};
             this.setState(RecordState.Browse);
         }
     }
-    cancel(): void {
+    public cancel(): void {
         if (this._state && this._state != RecordState.Browse) {
             this.checkCurrent();
             utils.assign(this._oldValue, this.current);
@@ -517,7 +516,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
             this.setState(RecordState.Browse);
         }
     }
-    insert(): void {
+    public insert(): void {
         this.checkList();
         this.post();
         this._records.push({});
@@ -525,7 +524,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
         this._oldValue = {};
         this.setState(RecordState.Insert);
     }
-    delete(): void {
+    public delete(): void {
         this.checkCurrent();
         this.cancel();
         this._records.splice(this._curIndex);
@@ -536,34 +535,34 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
 
     // Cursor methods
 
-    eof(): boolean {
+    public eof(): boolean {
         return this.currentIndex >= this._records.length;
     }
-    next(): void {
+    public next(): void {
         if (!this.eof())
             this.currentIndex++;
     }
-    prior(): void {
+    public prior(): void {
         if (this.currentIndex > 0)
             this.currentIndex--;
     }
-    first(): void {
+    public first(): void {
         this.currentIndex = 0;
     }
-    last(): void {
+    public last(): void {
         this.currentIndex = this.recordCount() - 1;
     }
-    recordCount(): number {
+    public recordCount(): number {
         return (this._records) ? this._records.length : 0;
     }
-    compareRecord(obj, values) {
+    public compareRecord(obj, values) {
         for (let id in obj) {
             if (obj.hasOwnProperty(id) && values.hasOwnProperty(id) && values[id] != obj)
                 return false;
         }
         return true;
     }
-    locate(values: any): boolean {
+    public locate(values: any): boolean {
         for (let i = 0; i < this.recordCount(); i++) {
             if (this.compareRecord(this._records[i], values)) {
                 this.currentIndex = i;

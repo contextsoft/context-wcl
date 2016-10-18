@@ -492,7 +492,7 @@ export class ListViewLegacy extends Items {
 /**
  * Lookup control
  */
-export class LookupView extends ListViewLegacy {
+export class LookupViewLegacy extends ListViewLegacy {
     protected static listIdCounter = 1;
 
     /** Lookup at value beginning or anywhere, default true */
@@ -527,7 +527,7 @@ export class LookupView extends ListViewLegacy {
     }
 
     public render() {
-        this.listId = 'ctxLookupView' + LookupView.listIdCounter++;
+        this.listId = 'ctxLookupView' + LookupViewLegacy.listIdCounter++;
         return this.renderTag('<div class="ctxInputBlock">' + this.input.internalRender() +
             '<div class="ctxInputBtnGroup">' + this.inputBtn.internalRender() + '</div></div>' +
             View.getTag('div', 'class="ctxInnerList" id="' + this.listId + '"', this.internalRenderItems()));
@@ -568,7 +568,7 @@ export class LookupView extends ListViewLegacy {
     };
 
     protected onInputChange() {
-        (<LookupView>this.parent).doInputChange(false);
+        (<LookupViewLegacy>this.parent).doInputChange(false);
     }
 
     protected doInputChange(forceShow: boolean) {
@@ -616,14 +616,14 @@ export class LookupView extends ListViewLegacy {
     }
 
     protected onInputBlur(event) {
-        let lookup: LookupView = <LookupView>this.parent;
+        let lookup: LookupViewLegacy = <LookupViewLegacy>this.parent;
         if (event.relatedTarget && event.relatedTarget.className.indexOf('ctxInternalInputButton') >= 0)
             return;
         lookup.showDropdown(false);
     }
 
     protected onInputKeyPress(event) {
-        let lookup: LookupView = <LookupView>this.parent;
+        let lookup: LookupViewLegacy = <LookupViewLegacy>this.parent;
         if (!lookup.getEnabled()) {
             event.preventDefault();
             return;
@@ -637,7 +637,7 @@ export class LookupView extends ListViewLegacy {
     }
 
     protected onInputBtnClick(event) {
-        let lookup: LookupView = <LookupView>this.parent;
+        let lookup: LookupViewLegacy = <LookupViewLegacy>this.parent;
         if (!lookup.getEnabled())
             return;
         if (!lookup.listVisible)
@@ -662,7 +662,7 @@ export class LookupView extends ListViewLegacy {
 /**
  *  Date select control
  */
-export class DatePicker extends LookupView {
+export class DatePicker extends LookupViewLegacy {
     /** First day of week, 0 - sunday, 1 - monday, default 0 */
     public firstDayOfWeek = 0;
 
