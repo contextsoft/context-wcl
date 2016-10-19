@@ -1,8 +1,9 @@
 //import {utils} from './utils';
 import { resources } from './resources';
-import { View } from "./view";
+import { utils } from './utils';
+import { View, ValueView } from "./view";
 import { ListViewLegacy } from './list.controls';
-import { ButtonType, ButtonView, ContainerView, PanelView, TextView } from './std.controls';
+import { ButtonType, ButtonView, ContainerView, PanelView, TextView, InputView } from './std.controls';
 
 resources.register('context-wcl',
     [
@@ -268,5 +269,4 @@ export class Dialog extends ModalView {
     }
 
 }
-
 

@@ -662,7 +662,7 @@ export class LookupViewLegacy extends ListViewLegacy {
 /**
  *  Date select control
  */
-export class DatePicker extends LookupViewLegacy {
+export class DatePickerLegacy extends LookupViewLegacy {
     /** First day of week, 0 - sunday, 1 - monday, default 0 */
     public firstDayOfWeek = 0;
 
@@ -763,7 +763,7 @@ export class DatePicker extends LookupViewLegacy {
             || event.relatedTarget.className.indexOf('ctxPrevMonthBtn') >= 0
             || event.relatedTarget.className.indexOf('ctxNextMonthBtn') >= 0))
             return;
-        (<DatePicker>this.parent).showDropdown(false);
+        (<DatePickerLegacy>this.parent).showDropdown(false);
     }
 
     protected onInputKeyPress(event) {
@@ -774,7 +774,7 @@ export class DatePicker extends LookupViewLegacy {
     }
 
     protected onInputBtnClick(event) {
-        let picker = (<DatePicker>this.parent);
+        let picker = (<DatePickerLegacy>this.parent);
         if (!picker.listVisible)
             picker.showDropdown(true);
         else
@@ -783,13 +783,13 @@ export class DatePicker extends LookupViewLegacy {
     }
 
     protected onPrevMonthBtnClick(event) {
-        let picker = (<DatePicker>this.parent);
+        let picker = (<DatePickerLegacy>this.parent);
         picker.monthToShow.setMonth(picker.monthToShow.getMonth() - 1);
         picker.updateCalendar(true);
     }
 
     protected onNextMonthBtnClick(event) {
-        let picker = (<DatePicker>this.parent);
+        let picker = (<DatePickerLegacy>this.parent);
         picker.monthToShow.setMonth(picker.monthToShow.getMonth() + 1);
         picker.updateCalendar(true);
     }

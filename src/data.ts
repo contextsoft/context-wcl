@@ -140,6 +140,9 @@ export interface ICursor extends IReference {
     getRecord(index: number): IRecord;
     locate(values: any): boolean;
     currentIndex: number;
+    /** Array of records indexes used in cursor navigation */
+    getFilteredRecords(): number[];
+    setFilteredRecords(indexed: number[]);
 }
 
 /**
@@ -419,6 +422,8 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
     protected _oldValue: IRecord = {};
     protected _fields: IField[] = [];
     protected _updateCounter = 0;
+    /** Array of records indexes used in cursor navigation */
+    protected _filteredRecords: number[] = [];
 
     public notifyLinks(eventType: EventType, data?: any): void {
         if (this._updateCounter == 0)
@@ -463,7 +468,15 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
     }
 
     public get current(): IRecord {
-        return ((this._curIndex >= 0)) ? this._records[this._curIndex] : null;
+        if (this._curIndex >= 0) {
+            if (this._filteredRecords.length > 0)
+                return this._records[this._filteredRecords[this._curIndex]];
+            else
+                return this._records[this._curIndex];
+        }
+        else
+            return null;
+        //return ((this._curIndex >= 0)) ? this._records[this._curIndex] : null;
     }
 
     public set records(value: IRecord[]) {
@@ -534,7 +547,6 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
     }
 
     // Cursor methods
-
     public eof(): boolean {
         return this.currentIndex >= this._records.length;
     }
@@ -553,7 +565,10 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
         this.currentIndex = this.recordCount() - 1;
     }
     public recordCount(): number {
-        return (this._records) ? this._records.length : 0;
+        if (this._records && this._filteredRecords.length > 0)
+            return this._filteredRecords.length;
+        else
+            return (this._records) ? this._records.length : 0;
     }
     public compareRecord(obj, values) {
         for (let id in obj) {
@@ -572,6 +587,18 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
         return false;
     }
     public getRecord(index: number): IRecord {
-        return this._records[index];
+        if (this._filteredRecords.length > 0)
+            return this._records[this._filteredRecords[index]];
+        else
+            return this._records[index];
     }
+    public getFilteredRecords(): number[] {
+        return this._filteredRecords;
+    }
+    public setFilteredRecords(indexes: number[]) {
+        this._filteredRecords = indexes;
+        this._curIndex = 0;
+        //this.notifyLinks(EventType.Refreshed);
+    }
+
 }
