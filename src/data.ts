@@ -30,7 +30,7 @@ export interface IField {
  * IExpression - generic expression function
  */
 export interface IExpression {
-    (value: IRecord): any;
+    (value: IRecord): string;
 }
 
 /** 

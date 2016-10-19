@@ -231,7 +231,6 @@ class MainScreen extends ScreenView {
         lookup.listData.displayField = 'text';
         lookup.listData.keyField = 'value';
 
-
         // DatePicker
         /*let label2 = new TextView(grpBox);
         label2.style = 'margin-bottom: 10px';
@@ -274,13 +273,20 @@ class MainScreen extends ScreenView {
         let label4 = new TextView(grpBox);
         label4.style = 'margin-bottom: 10px';
         label4.text = 'ListView:';
+
         let list = new ListView(grpBox);
         list.listData.dataSource = listRecSetSrc;
         list.listData.keyField = 'id';
         list.listData.displayExpression = function (rec: any) {
             return utils.escapeHTML(utils.formatStr('{0}. {1}', [rec.id, rec.text]));
         };
-        list.listData.displayField = 'value';
+        // list.listData.displayField = 'value';
+
+        let listEdit = new InputView(grpBox);
+        listEdit.style = 'display: block; margin-top: 10px';
+        listEdit.data.dataSource = listRecSetSrc;
+        listEdit.data.dataField = 'text';      
+        listEdit.attributes.readonly = true;          
     }
 
     // TabsView, PageView
