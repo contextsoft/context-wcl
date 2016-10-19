@@ -1,7 +1,7 @@
 import { utils } from './utils';
 import { View, ValueView } from './view';
 import { InputView, ButtonView } from './std.controls';
-import { IRecord, LookupDataLink, EventType, RecordSetSource } from './data';
+import { IRecord, IExpression, LookupDataLink, EventType, RecordSetSource } from './data';
 
 
 /**
@@ -175,8 +175,8 @@ export class LookupView extends ListView {
     /** Max items count that will be shown in the lookup list */
     public maxItemsToRender = 100;
 
-    // TODO: filtering throw dataSource;
-    protected filteredRecords = [];
+    /** filter function used to filter records when user types into input box */
+    protected _filter: IExpression = null;
 
     protected listId;
     protected input: InputView;
@@ -222,14 +222,15 @@ export class LookupView extends ListView {
     }
 
     protected renderItems() {
-        let html = '', renderedCnt = 0, rec: IRecord;
+        let html = '', renderedCnt = 0;
         for (let i = 0; i < this.listData.dataSource.recordCount(); i++) {
-            if (this.filteredRecords.indexOf(i) >= 0)
-                continue;
-            if (++renderedCnt > this.maxItemsToRender)
-                break;
-            rec = this.listData.dataSource.getRecord(i);
-            html += this.getRecordHtml(rec, i, this.listData.dataSource.currentIndex == i) + '\n';
+            let rec = this.listData.dataSource.getRecord(i);
+            if (!this._filter || this._filter(rec))
+            {
+                if (++renderedCnt > this.maxItemsToRender)
+                    break;
+                html += this.getRecordHtml(rec, i, this.listData.dataSource.currentIndex == i) + '\n';
+            }
         }
         return html;
     }
@@ -259,18 +260,26 @@ export class LookupView extends ListView {
         (<LookupView>this.parent).doInputChange(false);
     }
 
+
     protected doInputChange(forceShow: boolean) {
         if (this.updatingValue || !this.getEnabled())
             return;
-        let rec, value, pos;
 
-        this.filteredRecords = [];
+        this._filter = null;
 
         if (!forceShow) {
             let inputVal = this.input.value;
             if (!this.caseSensitive)
                 inputVal = inputVal.toLowerCase();
 
+            this._filter = (rec: IRecord): any => {
+                let value = this.listData.getDisplayValue(rec);
+                if (!this.caseSensitive)
+                    value = value.toLowerCase();
+                let pos = value.indexOf(inputVal);
+                return (this.partialLookup && pos >= 0) || (!this.partialLookup && pos == 0);
+            } 
+            /*
             for (let i = 0; i < this.listData.dataSource.recordCount(); i++) {
                 rec = this.listData.dataSource.getRecord(i);
                 value = this.listData.getDisplayValue(rec);
@@ -280,6 +289,7 @@ export class LookupView extends ListView {
                 if ((this.partialLookup && pos < 0) || (this.partialLookup && pos != 0))
                     this.filteredRecords.push(i);
             }
+            */
         }
         let el = document.getElementById(this.listId);
         el.innerHTML = this.renderItems();

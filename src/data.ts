@@ -30,7 +30,7 @@ export interface IField {
  * IExpression - generic expression function
  */
 export interface IExpression {
-    (value: IRecord): string;
+    (value: IRecord): any;
 }
 
 /** 
@@ -304,7 +304,7 @@ export class LookupDataLink extends RecordSetDataLink {
     }
     public getDisplayValue(record: IRecord): string {
         if (this._displayExpression)
-            return this._displayExpression(record);
+            return this._displayExpression(record).toString();
         else {
             let fld = (this._displayField) ? this._displayField : this._keyField;
             return record[fld];
