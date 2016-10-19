@@ -380,7 +380,6 @@ export class DatePicker extends LookupView {
     public highlightWeekends = true;
 
     protected monthToShow: Date = new Date;
-    protected selectedDate: Date;
 
     protected input: InputView;
     protected inputBtn: ButtonView;
@@ -416,13 +415,13 @@ export class DatePicker extends LookupView {
     }
 
     public getValue(): Date {
-        return this.selectedDate;
+        return this._value;
     }
 
     public setValue(value: Date) {
-        this.selectedDate = value;
+        this._value = value;
         if (value)
-            this.input.setValue(utils.formatDate(this.selectedDate, this.dateFormat));
+            this.input.setValue(utils.formatDate(this._value, this.dateFormat));
         else
             this.input.setValue('');
         this.updateCalendar(false);
@@ -553,9 +552,9 @@ export class DatePicker extends LookupView {
         let el = this.getEventListElement(event);
         if (!el)
             return;
-
         this.updatingValue = true;
-        this.setValue(new Date(el.getAttribute('value')));
+        //this.setValue(new Date(el.getAttribute('value')));
+        this.value = new Date(el.getAttribute('value'));
         this.showDropdown(false);
         this.updatingValue = false;
     }

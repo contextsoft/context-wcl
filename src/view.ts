@@ -712,7 +712,7 @@ export abstract class ValueView extends View {
         this.setValue((this.data).value);
     });
 
-    protected _value: string;
+    protected _value: any;
 
     /** Gets/sets controls's value */
     public get value() {
