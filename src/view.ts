@@ -19,7 +19,6 @@ export interface IAlign {
 
 
 /* TODO:
-   * Actions
    * IScroll???
    * Serialization
 */
@@ -43,7 +42,8 @@ export abstract class View extends Component {
     /** Global controls counter */
     protected static nextViewId = 1;
 
-    /** Standard events */
+    // Standard events 
+
     public onClick: IVoidEvent;
 
     /** Controls's id for DOM */
@@ -328,7 +328,7 @@ export abstract class View extends Component {
         this.endUpdate();
     }
 
-    /** Add param view to controls children */
+    /** Add view to control's children */
     public addView(view) {
         if (view && this.children.indexOf(view) < 0)
             this.children.push(view);

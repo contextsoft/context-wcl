@@ -1,7 +1,7 @@
 import { utils } from './utils';
 import { View, ValueView } from './view';
 import { InputView, ButtonView } from './std.controls';
-import { IRecord, IExpression, LookupDataLink, EventType, IUpdatable, RecordSetSource } from './data';
+import { IRecord, IExpression, LookupDataLink, EventType } from './data';
 
 
 /**
@@ -225,11 +225,6 @@ export class LookupView extends ListView {
         let html = '', renderedCnt = 0;
         for (let i = 0; i < this.listData.dataSource.recordCount(); i++) {
             let rec = this.listData.dataSource.getRecord(i);
-            /*if (!this._filter || this._filter(rec)) {
-                if (++renderedCnt > this.maxItemsToRender)
-                    break;
-                html += this.getRecordHtml(rec, i, this.listData.dataSource.currentIndex == i) + '\n';
-            }*/
             if (++renderedCnt > this.maxItemsToRender)
                 break;
             html += this.getRecordHtml(rec, i, this.listData.dataSource.currentIndex == i) + '\n';
@@ -270,32 +265,16 @@ export class LookupView extends ListView {
         this._filter = null;
 
         if (!forceShow) {
-            let inputVal = this.input.value;
-            if (!this.caseSensitive)
-                inputVal = inputVal.toLowerCase();
-
-            /*this._filter = (rec: IRecord): any => {
+            this.listData.dataSource.setFilter((rec: IRecord): boolean => {
+                let inputVal = this.input.value;
+                if (!this.caseSensitive)
+                    inputVal = inputVal.toLowerCase();
                 let value = this.listData.getDisplayValue(rec);
                 if (!this.caseSensitive)
                     value = value.toLowerCase();
                 let pos = value.indexOf(inputVal);
-                return (this.partialLookup && pos >= 0) || (!this.partialLookup && pos == 0);
-            };*/
-
-            //(<RecordSetSource>this.listData.dataSource).beginUpdate();
-            let rec: IRecord, value: string, filteredItems: number[] = [];
-            this.listData.dataSource.setFilteredRecords([]);
-            for (let i = 0; i < this.listData.dataSource.recordCount(); i++) {
-                rec = this.listData.dataSource.getRecord(i);
-                value = this.listData.getDisplayValue(rec);
-                if (!this.caseSensitive)
-                    value = value.toLowerCase();
-                let pos = value.indexOf(inputVal);
-                if ((this.partialLookup && pos >= 0) || (!this.partialLookup && pos == 0))
-                    filteredItems.push(i);
-            }
-            this.listData.dataSource.setFilteredRecords(filteredItems);
-            //(<RecordSetSource>this.listData.dataSource).endUpdate();
+                return ((this.partialLookup && pos >= 0) || (!this.partialLookup && pos == 0))
+            });
         }
 
         let el = document.getElementById(this.listId);

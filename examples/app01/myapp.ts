@@ -227,10 +227,12 @@ class MainScreen extends ScreenView {
         datePicker.data.dataField = 'value';
 
         let dateEdit = new InputView(grpBox);
-        dateEdit.style = 'margin-left: 10px; width: 300px';
+        dateEdit.style = 'display: block; width: 350px';
         dateEdit.attributes.readonly = true;
         dateEdit.data.dataSource = dateSrc;
         dateEdit.data.dataField = 'value';
+
+        // Lookup
 
         // DataSource for lookup list
         let records = [];
@@ -267,6 +269,8 @@ class MainScreen extends ScreenView {
             value: ''
         };
 
+        // SelectView
+
         let label3 = new TextView(grpBox);
         label3.style = 'margin-bottom: 10px';
         label3.text = 'SelectView:';
@@ -287,13 +291,14 @@ class MainScreen extends ScreenView {
         label4.style = 'margin-bottom: 10px';
         label4.text = 'ListView:';
 
+        // ListView
+
         let list = new ListView(grpBox);
         list.listData.dataSource = listRecSetSrc;
         list.listData.keyField = 'id';
         list.listData.displayExpression = function (rec: any) {
             return utils.escapeHTML(utils.formatStr('{0}. {1}', [rec.id, rec.text]));
         };
-        // list.listData.displayField = 'value';
 
         let listEdit = new InputView(grpBox);
         listEdit.style = 'display: block; margin-top: 10px';

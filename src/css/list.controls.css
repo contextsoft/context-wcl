@@ -12,8 +12,8 @@
 */
 
 .CtxLookupView {
-    display: inline-flex;
-    position: static;
+    display: inline-block;
+    /*position: static;*/
     width: 200px;
     margin-bottom: 9px;
 }
