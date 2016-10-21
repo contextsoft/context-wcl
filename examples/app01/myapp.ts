@@ -15,7 +15,7 @@ import {
     HeaderView, FooterView, GroupBoxView, ButtonView, Splitter,
     ButtonType, InputView, TextAreaView, SelectView, ListView, LookupView, DatePicker,
     TabsView, PageView, Dialog, TreeView, WorkAreaLayout, GridLayout,
-    RecordSource, RecordSetSource, EditAction, PostAction, CancelAction, IRecord
+    RecordSource, RecordSetSource, EditAction, PostAction, CancelAction
 }
     from 'context-wcl';
 
@@ -78,13 +78,13 @@ class MainScreen extends ScreenView {
         let treePage = new PanelView(pages);
         let layoutPage = new PanelView(pages);
         let dataPage = new PanelView(pages);
-        pages.items = [
-            { text: 'std.controls', value: stdPage },
-            { text: 'list.controls', value: listPage },
-            { text: 'ext.controls', value: extPage },
-            { text: 'tree.controls', value: treePage },
-            { text: 'layout.controls', value: layoutPage },
-            { text: 'data', value: dataPage }
+        pages.pages = [
+            { text: 'std.controls', view: stdPage },
+            { text: 'list.controls', view: listPage },
+            { text: 'ext.controls', view: extPage },
+            { text: 'tree.controls', view: treePage },
+            { text: 'layout.controls', view: layoutPage },
+            { text: 'data', view: dataPage }
         ];
         pages.setPageIndex(0);
 
@@ -315,16 +315,16 @@ class MainScreen extends ScreenView {
 
         let tabs = new TabsView(grpBox);
         tabs.additionalCSSClass = 'flat';
-        tabs.items = ['Tab 1', 'Tab 2', 'Tab 3'];
 
         let label = new TextView(grpBox);
         label.style = 'margin-top: 10px; margin-bottom: 20px';
 
-        tabs.onSelectionChange = function (index) {
-            label.text = utils.formatStr('Tab {0} selected.', [index + 1]);
+        tabs.onChange = function (value) {
+            label.text = utils.formatStr('Tab {0} selected.', [value]);
         };
 
-        tabs.selectedIndex = 0;
+        tabs.tabs = ['Tab 1', 'Tab 2', 'Tab 3'];
+
 
         let pages = new PageView(grpBox);
 
@@ -336,12 +336,10 @@ class MainScreen extends ScreenView {
 
         page1.style = page2.style = "padding: 10px";
 
-        pages.items = [
-            { text: 'Page 1', value: page1 },
-            { text: 'Page 2', value: page2 }
+        pages.pages = [
+            { text: 'Page 1', view: page1 },
+            { text: 'Page 2', view: page2 }
         ];
-
-        pages.setPageIndex(0);
     }
 
     // Dialog

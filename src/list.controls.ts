@@ -3,8 +3,9 @@
  **/
 import { utils } from './utils';
 import { resources } from './resources';
-import { View } from './view';
+import { View, ValueView } from './view';
 import { InputView, ButtonView } from './std.controls';
+import { IRecord, IExpression, LookupDataLink, EventType } from './data';
 
 resources.register('context-wcl',
     [
@@ -13,292 +14,123 @@ resources.register('context-wcl',
 );
 
 /**
- * Parent for list-like controls
- * TODO: when Array.isArray(items) Array.prototype extensions from utils.ts used, needs more convient data binding 
- **/
-export abstract class Items extends View {
-    /** Items List
-     * e.g.
-     * list.items = ['item 1', 'item 2', 'item 3'];
-     */
-    public items: any[] = [];
-
-    /** Fires when list requires its items 
-     *  Using this excludes use of items property
-     *  e.g: 
-     *  list.onGetItems = function(addItemCallback) {
-     *     addItemCallback({text: 'value 1', value: '1'});
-     *     addItemCallback({text: 'value 1', value: '2'});
-     *  } 
-    **/
-    public onGetItems: (addItemCallback: (item) => void) => void;
-
-    /** Fires on item select */
-    public onSelectionChange: (index: number) => void;
-
-    protected _selectedIndex;
-    //protected filteredItems: any[];
-
-    public get selectedIndex() {
-        return this.getSelectedIndex();
-    }
-    public set selectedIndex(index) {
-        this.setSelectedIndex(index);
-    }
-
-
-    public getSelectedIndex() {
-        return this._selectedIndex;
-    }
-
-    public setSelectedIndex(index) {
-        index = parseInt(index);
-        if (this._selectedIndex !== index) {
-            this.updateSelectedIndex(index);
-            // invoke on selection change event
-            if (this.onSelectionChange)
-                this.onSelectionChange(index);
-            //TODO: data binding
-            // notify our targets
-            //if (this.dataSources.selectedItem)
-            //    this.dataSources.selectedItem.notifyDataLinks();
-        }
-    }
-
-    public indexOfItem(itemValue, startWith = 0) {
-        if (this.items)
-            for (let i = startWith; i < this.items.getRowCount(); i++)
-                if (this.getItemValue(this.items.getRow(i)) === itemValue)
-                    return i;
-        return -1;
-    };
-
-    public getItemValue(anItem) {
-        if (anItem === 'undefined' || typeof anItem === "string")
-            return anItem;
-        else if (typeof anItem === "object") {
-            if (anItem.value !== undefined)
-                return anItem.value;
-            if (anItem.text !== undefined)
-                return anItem.text;
-        }
-        return anItem.toString();
-    };
-
-    /** Selected option by value */
-    public get value() {
-        return this.getValue();
-    }
-
-    public set value(value) {
-        this.setValue(value);
-    }
-
-    public getValue(): any {
-        this.updateItems();
-        return this.getItemValue(this.items.getRow(this.selectedIndex));
-    }
-
-    /** Sets selected option by value */
-    public setValue(value) {
-        this.updateItems();
-        let idx = this.indexOfItem(value);
-        this.setSelectedIndex(idx);
-        return value;
-    }
-
-    /** Returns value of selected option */
-    public getSelectedItem(option?: string) {
-        this.updateItems();
-        let item = this.items.getRow(this.getSelectedIndex());
-        if (option)
-            return item[option];
-        else
-            return item;
-    }
-
-    public updateItems(forceUpdate = false) {
-        if (this.onGetItems && (forceUpdate || this.items.length === 0)) {
-            let _newItems = [];
-            //TODO: data binding
-            /*if (this.dataLinks.items)
-                _newItems = this.dataLinks.items.getValue();
-            else*/
-            if (this.onGetItems)
-                this.onGetItems(function (item) {
-                    _newItems.push(item);
-                });
-
-            //if (this.sort && _newItems.sort)
-            //    _newItems.sort(this.sort);
-
-            this.items = _newItems;
-            //this.filteredItems = [];
-            //this.setSelectedIndex(Math.min(this.items.length - 1, this.selectedIndex));
-        }
-    }
-
-    protected updateSelectedIndex(newIndex: number) {
-        // implement in descendants to update selection
-        this._selectedIndex = newIndex;
-    }
-
-    protected beforeRender() {
-        if (this.onGetItems)
-            this.items = null;
-    }
-
-}
-
-/**
  * <select> wrapper
  **/
-export class SelectViewLegacy extends Items {
+export class SelectView extends ValueView {
+    /** Source of records displayed inside the list */
+    public lookupData: LookupDataLink;
+
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.tag = 'select';
         this.renderClientArea = false;
+        this.lookupData = new LookupDataLink((eventType: EventType, data: any): void => {
+            this.updateView();
+        });
     }
-
-    public getSelectedIndex() {
-        if (this.element && this.visible)
-            return this._selectedIndex = (<any>this.element).selectedIndex;
-        else
-            return this._selectedIndex;
+    public render() {
+        return this.renderTag(this.renderItems());
     }
-
-    public render(): string {
-        return this.renderTag(this.internalRenderItems());
-    }
-
-
-    protected updateSelectedIndex(newIndex) {
-        super.updateSelectedIndex(newIndex);
-        if (this.element && this.visible)
-            (<any>this.element).selectedIndex = this._selectedIndex;
-    }
-
-    protected internalRenderItems() {
-        let html = '';
-        this.updateItems();
-        let selIdx = this.getSelectedIndex();
-
-        for (let i = 0; i < this.items.getRowCount(); i++) {
-            let comboItem: any = /*this._currentItem =*/ this.items.getRow(i);
-
-            let attr = '';
-            if (selIdx === i)
-                attr += 'selected ';
-            if (typeof comboItem === "string")
-                html += '<option ' + attr + ' >' + utils.escapeHTML(comboItem) + '</option>';
-            else {
-                for (let a in comboItem)
-                    if (comboItem.hasOwnProperty(a))
-                        if (a !== 'text' && a !== 'selected')
-                            attr += a + '="' + utils.escapeQuotes(comboItem[a]) + '" ';
-                html += '<option ' + attr + '>' + comboItem.text.escapeHTML() + '</option>';
-            }
+    protected renderItems() {
+        let html = '', rec: IRecord, val: string, displayText: string;
+        for (let i = 0; i < this.lookupData.dataSource.recordCount(); i++) {
+            rec = this.lookupData.dataSource.getRecord(i);
+            if (this.lookupData.keyField)
+                val = 'value="' + rec[this.lookupData.keyField] + '"';
+            displayText = this.lookupData.getDisplayValue(rec);
+            html += '<option ' + utils.escapeHTML(val) + '>' + utils.escapeHTML(displayText) + '</option>';
         }
         return html;
-    };
-
+    }
     protected afterUpdateView() {
         super.afterUpdateView();
         this.handleEvent('onchange', this.handleChange);
     }
-
-    protected handleChange = function () {
-        /*if (this.dataSources.selectedItem)
-            this.dataSources.selectedItem.notifyDataLinks();*/
-
-        if (this.element && this.visible)
-            this.setSelectedIndex(this.element.selectedIndex);
-    };
+    protected handleChange() {
+        // retrieve value from element
+        this.getValue();
+        // update data link
+        this.data.value = this._value;
+        // invoke event if assigned
+        if (this.onChange)
+            this.onChange(this._value);
+    }
 }
 
 /**
  * Displays list
  **/
-export class ListViewLegacy extends Items {
-    public onItemClick: (item) => void;
+export class ListView extends ValueView {
+    /** Source of records displayed inside the list */
+    public listData: LookupDataLink;
 
-    /** Fires when item's text need */
-    public onGetItemText: (item) => string;
-
-    /** Appends all items properties as element attributes */
-    public appendPropertiesToAttributes = false;
-
-    protected selectedElement: HTMLElement;
-    protected activeIndex = -1;
-    protected activeElement: HTMLElement;
-    protected renderedRowCount = 0;
-    protected filteredItems: number[] = [];
-    protected lastClickedElement: HTMLElement;
-    protected maxItemsToRender;
-    /** Is it needed to index children  */
-    protected needsItemsIndex = true;
-    /** Child element which children will be indexed, if not defined ListView itself will be used */
-    protected elementToIndex: HTMLElement;
-
-
-    public getValue(): any {
-        // public get value of selected option 
-        this.updateItems();
-        let idx = 0;
-        for (let i = 0; i < this.items.getRowCount(); i++) {
-            if (this.filteredItems.indexOf(i) >= 0)
-                continue;
-            if (idx === this.getSelectedIndex())
-                return this.getItemValue(this.items.getRow(i));
-            idx++;
-        }
+    constructor(parent: View, name?: string) {
+        super(parent, name);
+        this.listData = new LookupDataLink((eventType: EventType, data: any): void => {
+            if (eventType == EventType.CursorMoved)
+                this.updateSelectedRecord();
+            else
+                this.updateView();
+        });
     }
 
     public render() {
-        return this.renderTag(this.internalRenderItems());
+        return this.renderTag(this.renderItems());
     }
 
+    protected renderItems() {
+        let html = '', rec: IRecord;
+        for (let i = 0; i < this.listData.dataSource.recordCount(); i++) {
+            rec = this.listData.dataSource.getRecord(i);
+            html += this.getRecordHtml(rec, i, this.listData.dataSource.currentIndex == i) + '\n';
+        }
+        return html;
+    }
 
-    protected setElementSelected(element, selected, addClassName?) {
-        addClassName = addClassName || 'selected';
-        element.className = this.getSelectedCSSClass(element.className, addClassName, selected);
+    protected getRecordHtml(record: IRecord, index: number, selected: boolean) {
+        let val = '';
+        if (this.listData.keyField && record[this.listData.keyField])
+            val = ' value="' + utils.escapeHTML(record[this.listData.keyField].toString()) + '"';
+        let displayText = utils.escapeHTML(this.listData.getDisplayValue(record));
+        let attr = utils.formatStr('index="{0}"', [index]) + val;
+        if (selected)
+            attr += 'class="ctx_selected"';
+
+        return View.getTag('div', attr, displayText) + '\n';
+    }
+
+    protected updateSelectedRecord(children?: Element[] | HTMLCollection) {
+        let selectedIdx = this.listData.dataSource.currentIndex;
+        let el: Element, idx;
+        children = children || this.element.children;
+        for (let i = 0; i < children.length; i++) {
+            el = children[i];
+            idx = el.getAttribute('index');
+            if (typeof idx !== undefined && idx != selectedIdx)
+                el.removeAttribute('class');
+            else if (idx == selectedIdx)
+                el.setAttribute('class', 'ctx_selected');
+        }
     }
 
     protected afterUpdateView() {
         super.afterUpdateView();
-        if (this.element && this.visible) {
-            this.indexItems();
-            //this.handleEvent('onclick', this.handleClick);
-            this.handleEvent('onkeydown', this.handleKeyDown);
-            this.handleEvent('onmousedown', this.handleMouseDown);
-            this.handleEvent('ontouchstart', this.handleMouseDown);
-            this.handleEvent('onmouseup', this.handleMouseUp);
-            this.handleEvent('ontouchend', this.handleMouseUp);
-        }
-        //this.internalTriggerReady();
+        this.handleEvent('onmousedown', this.handleMouseDown);
+        this.handleEvent('ontouchstart', this.handleClick);
+
     }
 
-    protected indexItems() {
-        if (!this.needsItemsIndex)
-            return;
-
-        let children;
-
-        if (this.elementToIndex)
-            children = this.elementToIndex.children;
-        else
-            children = this.element.children;
-        for (let i = 0; i < children.length; i++)
-            children[i].setAttribute('index', i);
-
-        this.renderedRowCount = children.length;
-
-        if (this.renderedRowCount === 0)
-            this._selectedIndex = -1;
-        this.updateSelectedIndex(this.selectedIndex);
+    protected handleChange() {
+        // retrieve value from element
+        this.getValue();
+        // update data link
+        this.data.value = this._value;
+        // invoke event if assigned
+        if (this.onChange)
+            this.onChange(this._value);
     }
 
-    protected getActiveElement(event) {
+    protected getEventListElement(event) {
         // active element is the one being currently touched
         let listElement = event.toElement || event.target;
         if (!listElement)
@@ -316,184 +148,33 @@ export class ListViewLegacy extends Items {
         return listElement;
     }
 
-    protected handleKeyDown(event) {
-        if (event.eventPhase !== 3)
-            return;
-        let keyCode = ('which' in event) ? event.which : event.keyCode;
-        switch (parseInt(keyCode)) {
-            case 38:
-                if (this.activeIndex > 0)
-                    this.updateActiveIndex(this.activeIndex - 1);
-                break;
-            case 40:
-                if (this.activeIndex < this.renderedRowCount - 1) {
-                    if (this.activeIndex < 0)
-                        this.updateActiveIndex(0);
-                    else
-                        this.updateActiveIndex(this.activeIndex + 1);
-                }
-                break;
-        }
-    }
-
-    protected handleClick(event) {
-        let listElement = this.getActiveElement(event);
-        if (!listElement)
-            return;
-        let idx = listElement.getAttribute('index');
-
-        this.setSelectedIndex(idx);
-
-        this.setFocus();
+    protected getEventElementIndex(event) {
+        let el = this.getEventListElement(event);
+        if (!el)
+            return -1;
+        return el.getAttribute('index');
     }
 
     protected handleMouseDown(event) {
         if (event instanceof MouseEvent && event.button > 0)
             return;
-        let listElement = this.getActiveElement(event);
-        if (this.lastClickedElement)
-            this.setElementSelected(this.lastClickedElement, false, 'touched');
-        if (!listElement)
-            return;
-        this.lastClickedElement = listElement;
-        this.setElementSelected(this.lastClickedElement, true, 'touched');
         this.handleClick(event);
     }
 
-    protected handleMouseUp(event) {
-        if (event instanceof MouseEvent && event.button > 0)
+    protected handleClick(event) {
+        let idx = this.getEventElementIndex(event);
+        if (idx < 0)
             return;
-        if (this.lastClickedElement)
-            this.setElementSelected(this.lastClickedElement, false, 'touched');
-        this.lastClickedElement = null;
-        //this.handleClick(event);
-    }
-
-    protected updateActiveOrSelectedIndex(newIndex, obj: { selectedElement; selectedIndex; status }) {
-        // unselect current element
-        if (obj.selectedElement)
-            this.setElementSelected(obj.selectedElement, false, obj.status);
-        obj.selectedElement = null;
-
-        obj.selectedIndex = newIndex;
-
-        if (this.element && this.visible && obj.selectedIndex >= 0) {
-            let recurseChildren = function (el) {
-                let idx, e;
-                for (let i = 0; i < el.children.length; i++) {
-                    idx = el.children[i].getAttribute('index');
-                    //log(el.children[i].getAttribute('class') + ': ' + idx);
-                    if (idx == obj.selectedIndex)
-                        return el.children[i];
-                    else if (el.children[i].children !== 'undefined') {
-                        e = recurseChildren(el.children[i]);
-                        if (e !== null)
-                            return e;
-                    }
-                }
-                return null;
-            };
-            obj.selectedElement = recurseChildren(this.element);
-            if (obj.selectedElement)
-                this.setElementSelected(obj.selectedElement, true, obj.status);
-        }
-    }
-
-
-    protected updateSelectedIndex(newIndex) {
-        let obj = {
-            selectedElement: this.selectedElement,
-            selectedIndex: this.selectedIndex,
-            status: 'selected'
-        };
-
-        this.updateActiveOrSelectedIndex(newIndex, obj);
-        this.selectedElement = obj.selectedElement;
-        this._selectedIndex = obj.selectedIndex;
-
-        this.updateActiveIndex(this.selectedIndex);
-    }
-
-    protected updateActiveIndex(newIndex) {
-        let obj = {
-            selectedElement: this.activeElement,
-            selectedIndex: this.activeIndex,
-            status: 'active'
-        };
-
-        this.updateActiveOrSelectedIndex(newIndex, obj);
-        this.activeElement = obj.selectedElement;
-        this.activeIndex = obj.selectedIndex;
-
-        return true;
-    };
-
-    protected internalRenderItems() {
-        this.updateItems();
-        let cnt = 0;
-        let html = '';
-        let itemsToRender = this.items.getRowCount();
-        if (this.maxItemsToRender && this.maxItemsToRender < itemsToRender)
-            itemsToRender = this.maxItemsToRender;
-        for (let i = 0; i < this.items.getRowCount() && cnt < itemsToRender; i++) {
-            if (this.filteredItems.indexOf(i) >= 0)
-                continue;
-            cnt++;
-            let attr = '';
-            if (this._selectedIndex === i)
-                attr += 'class="active" ';
-
-            let item: any = /*this._currentItem =*/ this.items.getRow(i);
-            if (typeof item === "string")
-                html += this.getItemHtml(item, i, attr, item);
-            else {
-                if (this.appendPropertiesToAttributes)
-                    for (let a in item)
-                        if (item.hasOwnProperty(a))
-                            if (a !== 'text' && a !== 'selected' && typeof item[a] !== 'function' && typeof item[a] !== 'object')
-                                attr += a + '="' + item[a] + '" ';
-                let text;
-                if (typeof this.onGetItemText === 'function')
-                    text = this.onGetItemText(item);
-                //TODO: data binding
-                // else if (this.dataLinks.itemText)
-                //     text = this.L(this.dataLinks.itemText.getValue());
-                else
-                    text = item.text;
-                if (!utils.isDefined(text))
-                    text = item.value;
-                html += this.getItemHtml(item, i, attr, text);
-            }
-        }
-        return html;
-    }
-
-    protected getItemHtml(item, index, attr, text) {
-        let r = View.getTag('div', attr, text) + '\n';
-        return r;
-    };
-
-    protected getSelectedCSSClass(classNames, className, selected) {
-        let hasClassActive = false;
-        if (classNames)
-            hasClassActive = utils.indexOfWord(classNames, className) >= 0;
-
-        if (selected) {
-            if (!hasClassActive)
-                classNames = classNames + ' ' + className;
-        }
-        else if (hasClassActive)
-            classNames = classNames.replace(' ' + className, '');
-        return classNames;
+        this.listData.dataSource.currentIndex = idx;
+        this.value = this.listData.dataSource.current[this.listData.keyField];
     }
 }
-
 
 /**
  * Lookup control
  */
-export class LookupViewLegacy extends ListViewLegacy {
-    protected static listIdCounter = 1;
+export class LookupView extends ListView {
+    protected static listIdCounter = 0;
 
     /** Lookup at value beginning or anywhere, default true */
     public partialLookup = true;
@@ -504,16 +185,24 @@ export class LookupViewLegacy extends ListViewLegacy {
     /** Max items count that will be shown in the lookup list */
     public maxItemsToRender = 100;
 
+    /** filter function used to filter records when user types into input box */
+    protected _filter: IExpression = null;
+
+    protected listId;
     protected input: InputView;
     protected inputBtn: ButtonView;
     protected listVisible = false;
     protected updatingValue = false;
-    protected listId;
 
     constructor(parent: View, name?: string) {
         super(parent, name);
-        this.maxItemsToRender = 100;
-        //this.childToIndex = 1;
+
+        this.listData = new LookupDataLink((eventType: EventType, data: any): void => {
+            if (eventType == EventType.CursorMoved)
+                this.updateSelectedRecord(document.getElementById(this.listId).children);
+            else
+                this.updateView();
+        });
 
         this.input = new InputView(this, 'ctxInternalInput');
         this.input.onChange = this.onInputChange;
@@ -527,20 +216,10 @@ export class LookupViewLegacy extends ListViewLegacy {
     }
 
     public render() {
-        this.listId = 'ctxLookupView' + LookupViewLegacy.listIdCounter++;
+        this.listId = 'ctxLookupView' + LookupView.listIdCounter++;
         return this.renderTag('<div class="ctxInputBlock">' + this.input.internalRender() +
             '<div class="ctxInputBtnGroup">' + this.inputBtn.internalRender() + '</div></div>' +
-            View.getTag('div', 'class="ctxInnerList" id="' + this.listId + '"', this.internalRenderItems()));
-    }
-
-    public setSelectedIndex(index) {
-        super.setSelectedIndex(index);
-        if (this.selectedIndex < 0)
-            return;
-        this.updatingValue = true;
-        this.input.value = this.getValue();
-        this.showDropdown(false);
-        this.updatingValue = false;
+            View.getTag('div', 'class="ctxInnerList" id="' + this.listId + '"', this.renderItems()));
     }
 
     public setValue(value) {
@@ -552,78 +231,76 @@ export class LookupViewLegacy extends ListViewLegacy {
         return super.getValue() || this.input.value;
     }
 
-    protected afterUpdateView() {
-        this.elementToIndex = document.getElementById(this.listId);
-        super.afterUpdateView();
+    protected renderItems() {
+        let html = '', renderedCnt = 0;
+        for (let i = 0; i < this.listData.dataSource.recordCount(); i++) {
+            let rec = this.listData.dataSource.getRecord(i);
+            if (++renderedCnt > this.maxItemsToRender)
+                break;
+            html += this.getRecordHtml(rec, i, this.listData.dataSource.currentIndex == i) + '\n';
+        }
+        return html;
     }
 
+    protected afterUpdateView() {
+        super.afterUpdateView();
+        this.handleEvent('onkeydown', this.handleKeyDown);
+    }
 
     protected handleKeyDown(event) {
-        super.handleKeyDown(event);
-        if (event.eventPhase != 3)
-            return;
         let keyCode = ('which' in event) ? event.which : event.keyCode;
-        if (parseInt(keyCode) == 13 && this.activeIndex >= 0)
-            this.setSelectedIndex(this.activeIndex);
+        switch (parseInt(keyCode)) {
+            case 38:
+                this.listData.dataSource.prior();
+                break;
+            case 40:
+                this.listData.dataSource.next();
+                break;
+            case 13:
+                this.value = this.listData.getDisplayValue(this.listData.dataSource.current);
+                this.showDropdown(false);
+                break;
+        }
     };
 
     protected onInputChange() {
-        (<LookupViewLegacy>this.parent).doInputChange(false);
+        (<LookupView>this.parent).doInputChange(false);
     }
+
 
     protected doInputChange(forceShow: boolean) {
         if (this.updatingValue || !this.getEnabled())
             return;
-        let item, value, pos;
 
-        this.filteredItems = [];
+        this._filter = null;
 
         if (!forceShow) {
-            let inputVal = this.input.value;
-            if (!this.caseSensitive)
-                inputVal = inputVal.toLowerCase();
-
-            for (let i = 0; i < this.items.getRowCount(); i++) {
-                item = this.items.getRow(i);
-
-                if (typeof item === "string")
-                    value = item;
-                else if (utils.isDefined(item.value))
-                    value = item.value;
-                else if (utils.isDefined(item.text))
-                    value = item.text;
-                else
-                    value = '';
-                //TODO: data binding
-                // else
-                // {
-                //     if (this.dataLinks.itemText)
-                //         value = L(_this.dataLinks.itemText.getValue());
-                //     else
-                //         value = item.text;
-                // }
+            this.listData.dataSource.setFilter((rec: IRecord): boolean => {
+                let inputVal = this.input.value;
+                if (!this.caseSensitive)
+                    inputVal = inputVal.toLowerCase();
+                let value = this.listData.getDisplayValue(rec);
                 if (!this.caseSensitive)
                     value = value.toLowerCase();
-                pos = value.indexOf(inputVal);
-                if ((this.partialLookup && pos < 0) || (this.partialLookup && pos != 0))
-                    this.filteredItems.push(i);
-            }
+                let pos = value.indexOf(inputVal);
+                return ((this.partialLookup && pos >= 0) || (!this.partialLookup && pos == 0));
+            });
         }
+
         let el = document.getElementById(this.listId);
-        el.innerHTML = this.internalRenderItems();
-        this.indexItems();
+        el.innerHTML = this.renderItems();
         this.showDropdown(el.innerHTML.length > 0);
     }
 
     protected onInputBlur(event) {
-        let lookup: LookupViewLegacy = <LookupViewLegacy>this.parent;
+        let lookup: LookupView = <LookupView>this.parent;
         if (event.relatedTarget && event.relatedTarget.className.indexOf('ctxInternalInputButton') >= 0)
             return;
         lookup.showDropdown(false);
     }
 
     protected onInputKeyPress(event) {
-        let lookup: LookupViewLegacy = <LookupViewLegacy>this.parent;
+        let lookup: LookupView = <LookupView>this.parent;
         if (!lookup.getEnabled()) {
             event.preventDefault();
             return;
@@ -632,12 +309,13 @@ export class LookupViewLegacy extends ListViewLegacy {
         lookup.handleKeyDown(event);
 
         let keyCode = ('which' in event) ? event.which : event.keyCode;
-        if (parseInt(keyCode) == 38 || parseInt(keyCode) == 40)
+        if (parseInt(keyCode) == 38 || parseInt(keyCode) == 40) {
             event.preventDefault();
+        }
     }
 
     protected onInputBtnClick(event) {
-        let lookup: LookupViewLegacy = <LookupViewLegacy>this.parent;
+        let lookup: LookupView = <LookupView>this.parent;
         if (!lookup.getEnabled())
             return;
         if (!lookup.listVisible)
@@ -654,15 +332,21 @@ export class LookupViewLegacy extends ListViewLegacy {
         else
             el.style.visibility = 'hidden';
         this.listVisible = show;
-        this.updateActiveIndex(-1);
-        this.setSelectedIndex(-1);
+    }
+
+    protected handleClick(event) {
+        let idx = this.getEventElementIndex(event);
+        if (idx < 0)
+            return;
+        super.handleClick(event);
+        this.value = this.listData.getDisplayValue(this.listData.dataSource.current);
     }
 }
 
 /**
  *  Date select control
  */
-export class DatePickerLegacy extends LookupViewLegacy {
+export class DatePicker extends LookupView {
     /** First day of week, 0 - sunday, 1 - monday, default 0 */
     public firstDayOfWeek = 0;
 
@@ -685,7 +369,6 @@ export class DatePickerLegacy extends LookupViewLegacy {
     public highlightWeekends = true;
 
     protected monthToShow: Date = new Date;
-    protected selectedDate: Date;
 
     protected input: InputView;
     protected inputBtn: ButtonView;
@@ -696,7 +379,6 @@ export class DatePickerLegacy extends LookupViewLegacy {
         super(parent, name);
 
         this.showPrevNextMonthDays = true;
-        this.needsItemsIndex = false;
 
         // edit control
         this.input = new InputView(this, 'ctxInternalInput');
@@ -721,41 +403,17 @@ export class DatePickerLegacy extends LookupViewLegacy {
         this.nextMonthBtn.events.onclick = this.onNextMonthBtnClick;
     }
 
-    public getValue() {
-        return this.selectedDate;
+    public getValue(): Date {
+        return this._value;
     }
 
-    public setValue(value) {
-        this.selectedDate = value;
+    public setValue(value: Date) {
+        this._value = value;
         if (value)
-            this.input.setValue(utils.formatDate(this.selectedDate, this.dateFormat));
+            this.input.setValue(utils.formatDate(this._value, this.dateFormat));
         else
-            this.input.setValue(value);
+            this.input.setValue('');
         this.updateCalendar(false);
-    }
-
-    public setSelectedIndex(index) {
-        //super.setSelectedIndex(index);
-        index = parseInt(index);
-        if (this._selectedIndex !== index) {
-            this.updateSelectedIndex(index);
-            // invoke on selection change event
-            if (this.onSelectionChange)
-                this.onSelectionChange(index);
-            //TODO: data binding
-            // notify our targets
-            //if (this.dataSources.selectedItem)
-            //    this.dataSources.selectedItem.notifyDataLinks();
-        }
-        if (this.selectedIndex < 0)
-            return;
-        this.updatingValue = true;
-        if (this.selectedElement)
-            this.setValue(new Date(this.selectedElement.getAttribute('value')));
-        else
-            this.setValue(null);
-        this.showDropdown(false);
-        this.updatingValue = false;
     }
 
     protected onInputBlur(event) {
@@ -763,7 +421,7 @@ export class DatePickerLegacy extends LookupViewLegacy {
             || event.relatedTarget.className.indexOf('ctxPrevMonthBtn') >= 0
             || event.relatedTarget.className.indexOf('ctxNextMonthBtn') >= 0))
             return;
-        (<DatePickerLegacy>this.parent).showDropdown(false);
+        (<DatePicker>this.parent).showDropdown(false);
     }
 
     protected onInputKeyPress(event) {
@@ -774,7 +432,7 @@ export class DatePickerLegacy extends LookupViewLegacy {
     }
 
     protected onInputBtnClick(event) {
-        let picker = (<DatePickerLegacy>this.parent);
+        let picker = (<DatePicker>this.parent);
         if (!picker.listVisible)
             picker.showDropdown(true);
         else
@@ -783,13 +441,13 @@ export class DatePickerLegacy extends LookupViewLegacy {
     }
 
     protected onPrevMonthBtnClick(event) {
-        let picker = (<DatePickerLegacy>this.parent);
+        let picker = (<DatePicker>this.parent);
         picker.monthToShow.setMonth(picker.monthToShow.getMonth() - 1);
         picker.updateCalendar(true);
     }
 
     protected onNextMonthBtnClick(event) {
-        let picker = (<DatePickerLegacy>this.parent);
+        let picker = (<DatePicker>this.parent);
         picker.monthToShow.setMonth(picker.monthToShow.getMonth() + 1);
         picker.updateCalendar(true);
     }
@@ -799,7 +457,7 @@ export class DatePickerLegacy extends LookupViewLegacy {
         if (!this.listId)
             return;
         let el = document.getElementById(this.listId);
-        el.innerHTML = this.doInternalRenderItems(dontGoToSelectedDate);
+        el.innerHTML = this.doRenderItems(dontGoToSelectedDate);
         this.prevMonthBtn.updateView();
         this.nextMonthBtn.updateView();
         this.input.setFocus();
@@ -812,12 +470,11 @@ export class DatePickerLegacy extends LookupViewLegacy {
             return dayOfWeek == 5 || dayOfWeek == 6 ? ' weekend' : '';
     }
 
-    protected internalRenderItems() {
-        return this.doInternalRenderItems();
+    protected renderItems() {
+        return this.doRenderItems();
     }
 
-    protected doInternalRenderItems(dontGoToSelectedDate = false) {
-        this.updateItems();
+    protected doRenderItems(dontGoToSelectedDate = false) {
         let html = '', i, j, d;
         let monthToShow = this.monthToShow;
         if (!dontGoToSelectedDate && this.getValue())
@@ -879,5 +536,15 @@ export class DatePickerLegacy extends LookupViewLegacy {
         html += '</div></div>';
         return html;
     }
-}
 
+    protected handleClick(event: Event) {
+        let el = this.getEventListElement(event);
+        if (!el)
+            return;
+        this.updatingValue = true;
+        //this.setValue(new Date(el.getAttribute('value')));
+        this.value = new Date(el.getAttribute('value'));
+        this.showDropdown(false);
+        this.updatingValue = false;
+    }
+}

@@ -1,5 +1,5 @@
 import { utils } from './utils';
-import { Component, IFuture } from './component';
+import { IFuture } from './component';
 
 /** 
  * Enumeration of possible data types for fields 
@@ -423,6 +423,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
     protected _updateCounter = 0;
     protected _filteredRecords: number[] = [];
 
+    /** Notifies DataLinks with some event and data */
     public notifyLinks(eventType: EventType, data?: any): void {
         if (this._updateCounter == 0)
             for (let i = 0; i < this._links.length; i++) {
@@ -430,10 +431,12 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
             }
     }
 
+    /** Begins DataSource update, DataLinks notificatios are off until endUpdate() called */
     public beginUpdate(): void {
         this._updateCounter++;
     }
 
+    /** Ends DataSource update and notifies DataLinks */
     public endUpdate(): void {
         this._updateCounter--;
         if (this._updateCounter == 0)
@@ -442,11 +445,11 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
 
     public isUpdating(): boolean { return this._updateCounter != 0; }
 
+    /** Sets/gets current record by index */
     public get currentIndex(): number {
         this.checkList();
         return this._curIndex;
     }
-
     public set currentIndex(value) {
         this.checkList();
         if (value >= this._records.length)
@@ -465,6 +468,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
         }
     }
 
+    /** Returns current record */
     public get current(): IRecord {
         if (this._curIndex >= 0) {
             if (this._filteredRecords.length > 0)
@@ -476,6 +480,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
             return null;
     }
 
+    /** Sets object array as DataSource's records */
     public set records(value: IRecord[]) {
         if (value != this._records) {
             this.post();
@@ -484,17 +489,23 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
             this.notifyLinks(EventType.Refreshed);
         }
     }
+
+    /** Returns initial value of editable record */
     public get oldValue(): IRecord { return this._oldValue; }
 
+    /** Returns fields list */
     public get fields(): IField[] { return this._fields; }
 
+    /** Returns DataSource state  */
     public getState(): RecordState {
         return this._state;
     }
+
     public checkList(): void {
         if (!this._records)
             utils.RaiseError('List is not assigned');
     }
+
     public checkCurrent(): void {
         this.checkList();
         if (!this.current)
@@ -545,37 +556,52 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
 
     // ICursor methods
 
+    /** Returns is current record is last */
     public eof(): boolean {
         return this.currentIndex >= this._records.length;
     }
+
+    /** Navigates to next record */
     public next(): void {
         if (!this.eof())
             this.currentIndex++;
     }
+
+    /** Navigates to prior record */
     public prior(): void {
         if (this.currentIndex > 0)
             this.currentIndex--;
     }
+
+    /** Navigates to first record */
     public first(): void {
         this.currentIndex = 0;
     }
+
+    /** Navigates to last record */
     public last(): void {
         this.currentIndex = this.recordCount() - 1;
     }
+
+    /** Returns records count */
     public recordCount(): number {
         if (this._records && this._filteredRecords.length > 0)
             return this._filteredRecords.length;
         else
             return (this._records) ? this._records.length : 0;
     }
-    public compareRecord(obj, values) {
-        for (let id in obj) {
-            if (obj.hasOwnProperty(id) && values.hasOwnProperty(id) && values[id] != obj)
+
+    /** Compare 2 objects by their properties */
+    public compareRecord(record: IRecord, values: IRecord) {
+        for (let id in record) {
+            if (record.hasOwnProperty(id) && values.hasOwnProperty(id) && values[id] != record[id])
                 return false;
         }
         return true;
     }
-    public locate(values: any): boolean {
+
+    /** Locates record with specified values and sets it as the current */
+    public locate(values: IRecord): boolean {
         for (let i = 0; i < this.recordCount(); i++) {
             if (this.compareRecord(this._records[i], values)) {
                 this.currentIndex = i;
@@ -584,6 +610,8 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
         }
         return false;
     }
+
+    /** Returns record by index */
     public getRecord(index: number): IRecord {
         if (this._filteredRecords.length > 0)
             return this._records[this._filteredRecords[index]];

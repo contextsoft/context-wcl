@@ -1,9 +1,9 @@
 //import {utils} from './utils';
 import { resources } from './resources';
-import { utils } from './utils';
-import { View, ValueView } from "./view";
-import { ListViewLegacy } from './list.controls';
-import { ButtonType, ButtonView, ContainerView, PanelView, TextView, InputView } from './std.controls';
+import { View } from "./view";
+import { ListView } from './list.controls';
+import { ButtonType, ButtonView, ContainerView, PanelView, TextView } from './std.controls';
+import { LookupDataLink, RecordSource, RecordSetSource, EventType } from './data';
 
 resources.register('context-wcl',
     [
@@ -15,101 +15,105 @@ resources.register('context-wcl',
  * Tabs switch control
  * Additional CSS classes: flat
  */
-export class TabsView extends ListViewLegacy {
-    protected dropDownButton: ButtonView;
-    protected droppedDown = '';
+export class TabsView extends ListView {
+    protected static _listIdCounter = 0;
+    protected _listId;
+    protected _dropDownButton: ButtonView;
+    protected _droppedDown = '';
+
+    /** Sets tabs */
+    public set tabs(tabs: string[]) {
+        let tabsSource = new RecordSetSource();
+        let tabsRecs = [];
+        for (let i = 0; i < tabs.length; i++) {
+            tabsRecs.push({
+                value: i,
+                text: tabs[i]
+            });
+        }
+        tabsSource.records = tabsRecs;
+        this.listData.dataSource = tabsSource;
+
+        let valueSource = new RecordSource();
+        valueSource.current = {
+            value: ''
+        };
+        this.data.dataSource = valueSource;
+        this.data.dataField = 'value';
+        if (this.data.dataSource.current)
+            this.value = 0;
+    }
+
+    /** Set/Gets current tab index */
+    public get tabIndex(): number {
+        return this.listData.dataSource.currentIndex;
+    }
+    public set tabIndex(index: number) {
+        this.listData.dataSource.currentIndex = index;
+    }
 
     constructor(parent: View, name?: string) {
         super(parent, name);
-        var _this = this;
-        this.droppedDown = '';
-        this.dropDownButton = new ButtonView(this, 'dropDownButton');
-        this.dropDownButton.buttonType = ButtonType.toggle;
-        this.dropDownButton.events.onclick = function () {
-            _this.droppedDown = _this.droppedDown ? '' : 'droppedDown';
-            _this.updateView();
+
+        this.listData = new LookupDataLink((eventType: EventType, data: any): void => {
+            if (eventType == EventType.CursorMoved)
+                this.updateSelectedRecord(document.getElementById(this._listId).children);
+            else
+                this.updateView();
+        });
+        this.listData.displayField = 'text';
+        this.listData.keyField = 'value';
+
+        var __this = this;
+        this._droppedDown = '';
+        this._dropDownButton = new ButtonView(this, 'dropDownButton');
+        this._dropDownButton.buttonType = ButtonType.toggle;
+        this._dropDownButton.events.onclick = function () {
+            __this._droppedDown = __this._droppedDown ? '' : 'droppedDown';
+            __this.updateView();
         };
     }
 
     public render() {
-        let html = View.getTag('div', 'class="tabs ' + this.droppedDown + '"', this.internalRenderItems());
-        let selItm = this.getSelectedItem();
-        if (selItm && selItm.text)
-            html += View.getTag('div', 'class="caption" ', this.getSelectedItem().text);
-        html = this.renderTag(html + this.dropDownButton.render());
+        this._listId = 'ctxTabsView' + TabsView._listIdCounter++;
+        let html = View.getTag('div', 'class="tabs ' + this._droppedDown + '" id="' + this._listId + '"', this.renderItems());
+        let currRec = this.listData.dataSource.current;
+        if (currRec)
+            html += View.getTag('div', 'class="caption" ', this.listData.getDisplayValue(currRec));
+        html = this.renderTag(html + this._dropDownButton.render());
         return html;
-    }
-
-    protected updateSelectedIndex(newIndex) {
-        // unselect current element
-        if (this.selectedElement)
-            this.setElementSelected(this.selectedElement, false);
-        this.selectedElement = null;
-
-        this._selectedIndex = newIndex;
-
-        // select new element
-        if (this.element && this.visible && this.selectedIndex >= 0) {
-            this.selectedElement = <HTMLElement>(<HTMLElement>this.element.firstChild).children[this.selectedIndex];
-            if (this.selectedElement)
-                this.setElementSelected(this.selectedElement, true);
-            else
-                this.selectedIndex = -1;
-        }
-        return true;
-    }
-
-    protected afterUpdateView() {
-        super.afterUpdateView();
-        if (this.element && this.visible) {
-            let children = (<HTMLElement>this.element.firstChild).children;
-            this.renderedRowCount = children.length;
-            for (let i = 0; i < children.length; i++)
-                children[i].setAttribute('index', i.toString());
-            this.updateSelectedIndex(this.selectedIndex);
-            this.handleEvent('onclick', this.handleClick);
-        }
-        this.internalTriggerReady();
-    }
-
-    protected handleClick(event: Event) {
-        let listElement = this.getActiveElement(event);
-        if (!listElement)
-            return;
-
-        let idx = listElement.getAttribute('index');
-        this.setSelectedIndex(idx);
     }
 }
 
 export interface IPageViewPage {
     text: string;
-    value: View;
+    view: View;
 }
 
 /**
  * Tabs switch with pages inside
  */
 export class PageView extends View {
-    /** Pages list 
+    /** Sets pages 
      * e.g.
-     * pagesList.items = [{text: 'Page 1', value: myView1}, {text: 'Page 2', value: myView2}]
+     * pagesList.pages = [{text: 'Page 1', value: myView1}, {text: 'Page 2', value: myView2}]
     */
-    public get items(): IPageViewPage[] {
-        return this.pagesSwitcher.items;
-    }
-    public set items(items: IPageViewPage[]) {
-        this.pagesSwitcher.items = items;
-    }
+    public set pages(pages: IPageViewPage[]) {
+        let pagesSource = new RecordSetSource();
+        pagesSource.records = pages;
+        this.pagesSwitcher.listData.dataSource = pagesSource;
 
-    /** Fires when PageView requires its pages 
-     *  Using this excludes use of items property
-     *  e.g: 
-     *  pageView.onGetItems = function(addPageCallback) {
-     *     addItemCallback({text: 'Page 1', value: someView}, {text: 'Page 2', value: someView2})
-     *  } 
-    **/
-    public onGetItems: (addPageCallback: (item: IPageViewPage) => void) => void;
+        let valueSource = new RecordSource();
+        valueSource.current = {
+            value: ''
+        };
+        this.pagesSwitcher.data.dataSource = valueSource;
+        this.pagesSwitcher.data.dataField = 'value';
+        if (this.pagesSwitcher.listData.dataSource.current) {
+            let page: any = this.pagesSwitcher.listData.dataSource.current;
+            this.pagesSwitcher.value = page.view;
+        }
+    }
 
     protected pagesSwitcher: TabsView;
     protected pagesContainer: ContainerView;
@@ -120,34 +124,31 @@ export class PageView extends View {
 
         // Tabs switcher
         this.pagesSwitcher = new TabsView(this, 'pagesSwitcher');
-        this.pagesSwitcher.onGetItems = this.onGetItems;
+        this.pagesSwitcher.listData.displayField = 'text';
+        this.pagesSwitcher.listData.keyField = 'view';
+        var _this = this;
+        this.pagesSwitcher.onChange = function (page) {
+            _this.pagesContainer.showView(_this.pagesSwitcher.getValue(), ContainerView.directionForward);
+        };
 
         // Container for pages
         this.pagesContainer = new ContainerView(this, 'pagesContainer');
         this.pagesContainer.animation = null;
-
-        var _this = this;
-        this.pagesSwitcher.onSelectionChange = function (index) {
-            _this.pagesContainer.showView(_this.pagesSwitcher.getValue(), ContainerView.directionForward);
-        };
     }
 
     public setPageIndex(index) {
-        this.pagesSwitcher.setSelectedIndex(index);
-        this.pagesSwitcher.updateView();
+        this.pagesSwitcher.listData.dataSource.currentIndex = index;
     }
 
     public showPage(view) {
-        for (let i = 0; i < this.pagesSwitcher.items.length; i++)
-            if (this.pagesSwitcher.items[i].value = view) {
+        let rec: IPageViewPage;
+        for (let i = 0; i < this.pagesSwitcher.listData.dataSource.recordCount(); i++) {
+            rec = <IPageViewPage>(this.pagesSwitcher.listData.dataSource.getRecord(i));
+            if (rec.view = view) {
                 this.setPageIndex(i);
                 return;
             }
-    }
-
-    public updateItems(forceUpdate) {
-        this.pagesSwitcher.updateItems(forceUpdate);
-        this.updateView();
+        }
     }
 
     protected renderChildren(nonClientArea = false): string {

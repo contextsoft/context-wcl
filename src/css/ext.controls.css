@@ -83,7 +83,7 @@
     padding-bottom: 15px;
 }
 
-.CtxTabsView .tabs > div.selected
+.CtxTabsView .tabs > div.ctx_selected
 {
     color: #555;
     cursor: default;
@@ -119,7 +119,7 @@
     background-color: transparent;
 }
 
-.CtxTabsView.flat .tabs > div.selected
+.CtxTabsView.flat .tabs > div.ctx_selected
 {
     text-decoration: none;
     background-color: transparent;
@@ -179,8 +179,8 @@
         padding: 20px;
     }
 
-    .CtxTabsView .tabs > div.active,
-    .CtxTabsView.flat .tabs > div.active {
+    .CtxTabsView .tabs > div.ctx_selected,
+    .CtxTabsView.flat .tabs > div.ctx_selected {
         background-color: #a8a8a8;
         color: #eee;
         border-radius: 4px;
@@ -189,7 +189,7 @@
     }
 
     .CtxTabsView.flat > .tabs > div:hover,
-    .CtxTabsView.flat .tabs > div.active {
+    .CtxTabsView.flat .tabs > div.ctx_selected {
         width: 100%;
     }
 

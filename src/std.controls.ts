@@ -3,7 +3,6 @@
  **/
 import { utils } from './utils';
 import { resources } from './resources';
-import { IVoidEvent } from './component';
 import { Align, IAlign, View, ValueView } from './view';
 import { CSSTransition } from './transitions';
 //import { FieldDataLink, EventType } from './data';
@@ -211,7 +210,7 @@ export class InputView extends ValueView {
         this.data.value = this._value;
         // invoke event if assigned
         if (typeof this.onChange === 'function')
-            this.onChange();
+            this.onChange(this._value);
     }
 }
 

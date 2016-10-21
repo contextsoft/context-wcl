@@ -704,8 +704,8 @@ export abstract class View extends Component {
  * Control with a value 
  **/
 export abstract class ValueView extends View {
-    /** Fires on input's value changed */
-    public onChange: IVoidEvent;
+    /** Fires on value changed */
+    public onChange: (newValue) => void;
 
     /** FieldDataLink used as value store */
     public data = new FieldDataLink((eventType: EventType, data: any): void => {
@@ -722,6 +722,8 @@ export abstract class ValueView extends View {
         this.setValue(_value);
         // update data link
         this.data.value = this._value;
+        if (this.onChange)
+            this.onChange(_value);
     }
     public getValue() {
         if (this.element && this.getVisible())
