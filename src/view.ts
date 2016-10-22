@@ -640,7 +640,7 @@ export abstract class View extends Component {
         let a = this.additionalCSSClass;
         if (a)
             c += ' ' + a;
-        c += !this.getEnabled() ? ' disabled' : '';
+        c += !this.getEnabled() ? ' ctx_disabled' : '';
         // c += this.float? ' float-' + this.float : '';
         // c += this.position? ' position-' + this.position : '';
         // c += this.scrollbars? ' scrollbars-' + this.scrollbars : '';
@@ -667,7 +667,7 @@ export abstract class View extends Component {
         else
             delete this.attributes.style;
 
-        return 'class="' + this.getCSSClass() + '" ' + this.getTagAttr() + (this.getEnabled() ? '' : 'disabled') + ' id="' + this.id + '"' + align;
+        return 'class="' + this.getCSSClass() + '" ' + this.getTagAttr() + (this.getEnabled() ? '' : 'ctx_disabled') + ' id="' + this.id + '"' + align;
     }
 
     /** Return control element's this.attrubutes */

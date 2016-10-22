@@ -601,3 +601,42 @@ export class Splitter extends View {
 
 }
 
+/** Checkbox control */
+export class CheckBoxView extends ValueView {
+    constructor(parent: View, name?: string) {
+        super(parent, name);
+        this.renderClientArea = false;
+    }
+
+    public renderSelf() {
+        let checked = '';
+        if (this.value)
+            checked = View.getTag('span', 'class="ctx_cb_checked_icon"', '');
+        let html = View.getTag('div', 'class="ctx_cb_icon"', checked);
+        html += View.getTag('div', 'class="ctx_cb_text"', super.renderSelf());
+        return html;
+    }
+
+    protected getCSSClass(): string {
+        let cl = super.getCSSClass();
+        if (this.value)
+            cl += ' ctx_cb_checked';
+        return cl;
+    }
+
+    protected afterUpdateView() {
+        super.afterUpdateView();
+        let cb = this.element.getElementsByClassName('ctx_cb_icon');
+        if (cb.length > 0)
+            cb[0].addEventListener('click', (event) => { this.onCheckBoxClick(event); });
+    }
+
+    protected onCheckBoxClick(event: Event) {
+        if (!this.enabled)
+            return;
+        this.value = this.value ? false : true;
+        this.updateView();
+    }
+
+}
+

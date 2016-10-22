@@ -251,7 +251,7 @@ body {
     border-color: #adadad;
 }
 
-.CtxButtonView.disabled {
+.CtxButtonView.ctx_disabled {
     /* style */
     pointer-events: none;
     cursor: not-allowed;
@@ -281,7 +281,7 @@ body {
 }
 .CtxButtonView[type='primary']:hover,
 .CtxButtonView[type='primary']:active,
-.CtxButtonView[type='primary'].disabled {
+.CtxButtonView[type='primary'].ctx_disabled {
     color: #ffffff;
     background-color: #3276b1;
     border-color: #285e8e;
@@ -295,7 +295,7 @@ body {
 }
 .CtxButtonView[type='success']:hover,
 .CtxButtonView[type='success']:active,
-.CtxButtonView[type='success'].disabled {
+.CtxButtonView[type='success'].ctx_disabled {
     color: #fff;
     background-color: #47a447;
     border-color: #398439;
@@ -309,7 +309,7 @@ body {
 }
 .CtxButtonView[type='info']:hover,
 .CtxButtonView[type='info']:active,
-.CtxButtonView[type='info'].disabled {
+.CtxButtonView[type='info'].ctx_disabled {
     color: #fff;
     background-color: #39b3d7;
     border-color: #269abc;
@@ -323,7 +323,7 @@ body {
 }
 .CtxButtonView[type='warning']:hover,
 .CtxButtonView[type='warning']:active,
-.CtxButtonView[type='warning'].disabled {
+.CtxButtonView[type='warning'].ctx_disabled {
     color: #fff;
     background-color: #ed9c28;
     border-color: #d58512;
@@ -337,7 +337,7 @@ body {
 }
 .CtxButtonView[type='danger']:hover,
 .CtxButtonView[type='danger']:active,
-.CtxButtonView[type='danger'].disabled {
+.CtxButtonView[type='danger'].ctx_disabled {
     color: #fff;
     background-color: #d2322d;
     border-color: #ac2925;
@@ -381,8 +381,8 @@ body {
     Inputs 
 */
 
-.CtxInputView.disabled, .CtxSelectView.disabled, .CtxLookupView.disabled,
-.CtxLookupView.disabled *
+.CtxInputView.ctx_disabled, .CtxSelectView.ctx_disabled, .CtxLookupView.ctx_disabled,
+.CtxLookupView.ctx_disabled *
 {
     cursor: not-allowed;
     background-color: #eee;
@@ -456,6 +456,71 @@ body {
     cursor: ns-resize;
     height: 2px;
 }
+
+/* CheckBoxView */
+
+.CtxCheckBoxView {
+    margin-bottom: 10px
+}
+
+.CtxCheckBoxView .ctx_cb_icon {
+    display: inline-block;
+    box-sizing: border-box;
+    /*-webkit-transition: .24s;
+    transition: .24s;*/
+    top: 0;
+    left: 0;
+    width: 20px;
+    height: 20px;
+    border-width: 2px;
+    border-style: solid;
+    border-radius: 2px;
+    border-color: rgba(0,0,0,0.54);    
+}
+
+.CtxCheckBoxView.ctx_disabled .ctx_cb_icon {
+    border-color: rgba(0,0,0,0.38);
+}
+
+.CtxCheckBoxView.ctx_disabled.ctx_cb_checked .ctx_cb_icon{
+    background-color: rgba(0,0,0,0.38);
+}
+
+
+.CtxCheckBoxView.ctx_cb_checked .ctx_cb_icon {
+    background-color: rgba(16,108,200,0.87);
+    border-color: transparent;
+}
+
+
+.CtxCheckBoxView.ctx_cb_checked .ctx_cb_icon::after {
+    box-sizing: border-box;
+    -webkit-transform: rotate(45deg);
+    transform: rotate(45deg);
+    display: table;
+    width: 6.66667px;
+    height: 13.33333px;
+    border-width: 2px;
+    border-style: solid;
+    border-top: 0;
+    border-left: 0;
+    content: '';
+    margin-left: 5px;
+    color: #fff
+}
+
+
+.CtxCheckBoxView .ctx_cb_text {
+    display: inline-block;
+    line-height: 20px;
+    vertical-align: top;
+    margin-left: 10px
+}
+
+.CtxCheckBoxView.ctx_disabled .ctx_cb_text {
+    color: rgba(0,0,0,0.38);
+}
+
 
 
 

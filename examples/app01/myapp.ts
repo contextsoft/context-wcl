@@ -15,7 +15,8 @@ import {
     HeaderView, FooterView, GroupBoxView, ButtonView, Splitter,
     ButtonType, InputView, TextAreaView, SelectView, ListView, LookupView, DatePicker,
     TabsView, PageView, Dialog, TreeView, WorkAreaLayout, GridLayout,
-    RecordSource, RecordSetSource, EditAction, PostAction, CancelAction
+    RecordSource, RecordSetSource, EditAction, PostAction, CancelAction,
+    CheckBoxView
 }
     from 'context-wcl';
 
@@ -90,6 +91,7 @@ class MainScreen extends ScreenView {
 
         this.testEdits(stdPage);
         this.testButtons(stdPage);
+        this.testCheckBoxes(stdPage);
         this.testAligning(stdPage);
 
         this.testLists(listPage);
@@ -177,6 +179,25 @@ class MainScreen extends ScreenView {
 
     }
 
+    // CheckBoxView, RadioView
+    protected testCheckBoxes(parent: View) {
+        let grpBox = new GroupBoxView(parent);
+        grpBox.style = 'margin-bottom: 10px';
+        grpBox.caption = 'CheckBoxes';
+
+        let c1 = new CheckBoxView(grpBox);
+        c1.text = 'CheckBox 1';
+
+        let c2 = new CheckBoxView(grpBox);
+        c2.text = 'Disabled';
+        c2.enabled = false;
+
+        let c3 = new CheckBoxView(grpBox);
+        c3.text = 'Checked and Disabled';
+        c3.value = true;
+        c3.enabled = false;
+    }
+
     // View.alignChildren = true, Splitter
     protected testAligning(parent: View) {
         let grpBox = new GroupBoxView(parent);
@@ -184,7 +205,7 @@ class MainScreen extends ScreenView {
         grpBox.caption = 'Aligning and Splitter';
 
         let container = new PanelView(grpBox, 'Container');
-        container.style = 'width: 100%; height: 200px';
+        container.style = 'width: 100%; height: 100px';
         container.alignChildren = true;
 
         let leftPanel = new PanelView(container);

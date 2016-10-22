@@ -13,9 +13,8 @@
 
 .CtxLookupView {
     display: inline-block;
-    /*position: static;*/
     width: 200px;
-    margin-bottom: 9px;
+    margin-bottom: 10px;
 }
 
 .CtxLookupView .ctxInputBlock {
