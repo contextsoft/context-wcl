@@ -13,10 +13,10 @@ import { Application } from 'context-wcl';
 import {
     resources, Align, View, ScreenView, TextView, PanelView,
     HeaderView, FooterView, GroupBoxView, ButtonView, Splitter,
-    ButtonType, InputView, TextAreaView, SelectView, ListView, LookupView, DatePicker,
+    InputView, TextAreaView, SelectView, ListView, LookupView, DatePicker,
     TabsView, PageView, Dialog, TreeView, WorkAreaLayout, GridLayout,
     RecordSource, RecordSetSource, EditAction, PostAction, CancelAction,
-    CheckBoxView
+    CheckView, RadioView
 }
     from 'context-wcl';
 
@@ -124,32 +124,32 @@ class MainScreen extends ScreenView {
 
         let enableInputBtn = new ButtonView(grpBox);
         enableInputBtn.text = 'Disable';
-        enableInputBtn.buttonType = ButtonType.danger;
+        enableInputBtn.theme = ButtonView.themes.danger;
         enableInputBtn.events.onclick = (event) => {
             if (input.enabled) {
                 input.enabled = false;
                 enableInputBtn.text = 'Enable';
-                enableInputBtn.buttonType = ButtonType.primary;
+                enableInputBtn.theme = ButtonView.themes.primary;
             }
             else {
                 input.enabled = true;
                 enableInputBtn.text = 'Disable';
-                enableInputBtn.buttonType = ButtonType.danger;
+                enableInputBtn.theme = ButtonView.themes.danger;
             }
         };
 
         let readOnlyBtn = new ButtonView(grpBox);
         readOnlyBtn.text = 'Read Only';
-        readOnlyBtn.buttonType = ButtonType.warning;
+        readOnlyBtn.theme = ButtonView.themes.warning;
         readOnlyBtn.events.onclick = function (event) {
             if (input.attributes.readonly) {
                 delete input.attributes.readonly;
-                readOnlyBtn.buttonType = ButtonType.warning;
+                readOnlyBtn.theme = ButtonView.themes.warning;
                 readOnlyBtn.text = 'Read Only';
             }
             else {
                 input.attributes.readonly = true;
-                readOnlyBtn.buttonType = ButtonType.info;
+                readOnlyBtn.theme = ButtonView.themes.info;
                 readOnlyBtn.text = 'Writable';
             }
             input.updateView();
@@ -168,34 +168,64 @@ class MainScreen extends ScreenView {
         grpBox.style = 'margin-bottom: 10px';
         grpBox.caption = 'Button types';
 
-        for (let t in ButtonType) {
-            if (ButtonType.hasOwnProperty(t) && !/^\d+$/.test(t)) {
+        for (let t in ButtonView.themes) {
+            if (ButtonView.themes.hasOwnProperty(t)) {
                 let b = new ButtonView(grpBox, 'btn_' + t);
                 if (t !== 'chevronLeft' && t !== 'chevronRight')
                     b.text = t;
-                b.buttonType = <any>ButtonType[t];
+                b.theme = t;
             }
         }
 
     }
 
-    // CheckBoxView, RadioView
+    // CheckView, RadioView
     protected testCheckBoxes(parent: View) {
         let grpBox = new GroupBoxView(parent);
         grpBox.style = 'margin-bottom: 10px';
-        grpBox.caption = 'CheckBoxes';
+        grpBox.caption = 'Check boxes and radios';
 
-        let c1 = new CheckBoxView(grpBox);
+
+        let layout = new GridLayout(grpBox);
+
+        // check boxes
+
+        let leftPanel = new PanelView(layout);
+
+        let c1 = new CheckView(leftPanel);
         c1.text = 'CheckBox 1';
 
-        let c2 = new CheckBoxView(grpBox);
+        let c2 = new CheckView(leftPanel);
         c2.text = 'Disabled';
         c2.enabled = false;
 
-        let c3 = new CheckBoxView(grpBox);
+        let c3 = new CheckView(leftPanel);
         c3.text = 'Checked and Disabled';
         c3.value = true;
         c3.enabled = false;
+
+        // radios
+
+        let rightPanel = new PanelView(layout);
+
+        let r1 = new RadioView(rightPanel);
+        r1.text = 'Radio 1';
+
+        let r2 = new RadioView(rightPanel);
+        r2.text = 'Radio 2';
+
+        let r3 = new RadioView(rightPanel);
+        r3.text = 'Disabled';
+        r3.enabled = false;
+
+
+        let r4 = new RadioView(rightPanel);
+        r4.text = 'Disabled and initially checked';
+        r4.value = true;
+        r4.enabled = false;
+
+        // layout
+        layout.rows = [[leftPanel, rightPanel]];
     }
 
     // View.alignChildren = true, Splitter
@@ -335,7 +365,7 @@ class MainScreen extends ScreenView {
         grpBox.caption = 'Tabs';
 
         let tabs = new TabsView(grpBox);
-        tabs.additionalCSSClass = 'flat';
+        tabs.theme = TabsView.themes.flat;
 
         let label = new TextView(grpBox);
         label.style = 'margin-top: 10px; margin-bottom: 20px';

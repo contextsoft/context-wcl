@@ -37,27 +37,33 @@ export class TextView extends View {
 
 /**
  * <header> wrapper
- * Additional CSS classes: fixed
  */
 export class HeaderView extends View {
+    public static readonly themes = {
+        fixed: 'fixed'
+    };
+
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.renderClientArea = false;
         this.tag = 'header';
-        this.additionalCSSClass = ' fixed ';
+        this.theme = HeaderView.themes.fixed;
     }
 }
 
 /**
  * <footer> wrapper
- * Additional CSS classes: fixed
  */
 export class FooterView extends View {
+    public static readonly themes = {
+        fixed: 'fixed'
+    };
+
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.renderClientArea = false;
         this.tag = 'footer';
-        this.additionalCSSClass = ' fixed ';
+        this.theme = FooterView.themes.fixed;
     }
 }
 
@@ -67,19 +73,21 @@ export class FooterView extends View {
 export class PanelView extends View {
     constructor(parent: View, name?: string) {
         super(parent, name);
-        this.renderClientArea = true;
     }
 }
 
 /**
  * Container with header and border
- * Additional CSS classes: border
  **/
 export class GroupBoxView extends View {
+    public static readonly themes = {
+        drawBorder: 'border'
+    };
+
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.renderClientArea = true;
-        this.additionalCSSClass = ' border ';
+        this.theme = GroupBoxView.themes.drawBorder;
     }
 
     /** Sets/Gets GroupBox header */
@@ -102,25 +110,24 @@ export class GroupBoxView extends View {
     }
 }
 
-
-export enum ButtonType {
-    default,
-    primary,
-    success,
-    info,
-    warning,
-    danger,
-    //TODO: does these types needed here?
-    toggle,
-    chevronLeft,
-    chevronRight
-}
-
 /**
  * <button> wrapper
  */
 export class ButtonView extends View {
-    protected _buttonType: ButtonType;
+    public static readonly themes = {
+        default: 'default',
+        primary: 'primary',
+        success: 'success',
+        info: 'info',
+        warning: 'warning',
+        danger: 'danger',
+        //TODO: does these types needed here?
+        toggle: 'toggle',
+        chevronLeft: 'chevronLeft',
+        chevronRight: 'chevronRight'
+    };
+
+    /*protected _buttonType: ButtonType;
 
     public get buttonType(): ButtonType {
         return this._buttonType;
@@ -129,7 +136,7 @@ export class ButtonView extends View {
         this._buttonType = buttonType;
         if (this._element)
             this.updateView();
-    }
+    }*/
 
     constructor(parent: View, name?: string) {
         super(parent, name);
@@ -139,13 +146,13 @@ export class ButtonView extends View {
 
     public getTagAttr() {
         let c = super.getTagAttr();
-        if (this.buttonType)
-            c += ' type="' + ButtonType[this.buttonType] + '"';
+        if (this.theme)
+            c += ' type="' + this.theme + '"';
         return c;
     }
 
     public renderSelf() {
-        if (this.buttonType == ButtonType.toggle)
+        if (this.theme == ButtonView.themes.toggle)
             return '<span class="ctx_icon-bar"></span><span class="ctx_icon-bar"></span><span class="ctx_icon-bar"></span>';
         else
             return this.renderIcon() + this.getText();
@@ -601,8 +608,8 @@ export class Splitter extends View {
 
 }
 
-/** Checkbox control */
-export class CheckBoxView extends ValueView {
+/** Check box control */
+export class CheckView extends ValueView {
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.renderClientArea = false;
@@ -639,4 +646,32 @@ export class CheckBoxView extends ValueView {
     }
 
 }
+
+/** Radio box control */
+export class RadioView extends CheckView {
+    /** Specifies radio group index that will identify which group belongs radio inside its parent */
+    public groupId = 0;
+
+    protected onCheckBoxClick(event: Event) {
+        if (!this.enabled)
+            return;
+
+        if (!this.value) {
+            this.value = true;
+            this.updateView();
+        }
+
+        let r: RadioView;
+        for (let i = 0; i < this.parent.children.length; i++) {
+            if (this.parent.children[i] instanceof RadioView) {
+                r = <RadioView>this.parent.children[i];
+                if (r !== this && r.groupId == this.groupId) {
+                    r.value = false;
+                    r.updateView();
+                }
+            }
+        }
+    }
+}
+
 

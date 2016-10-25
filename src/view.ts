@@ -39,6 +39,11 @@ export abstract class View extends Component {
         return res;
     }
 
+    /** Available control's themes/styles  */
+    public static readonly themes = {
+        // inherit in descendants
+    };
+
     /** Global controls counter */
     protected static nextViewId = 1;
 
@@ -97,6 +102,9 @@ export abstract class View extends Component {
     /** Escape or not html tags in text value */
     public doNotEscapeHtml = false;
 
+    /** Additional control theme */
+    public theme: string = '';
+
     //protected isController = false; //TODO: used in serialization 
     protected clientAreaTag = 'div';
     protected clientAreaClass = 'ctx_view_client_area';
@@ -146,7 +154,7 @@ export abstract class View extends Component {
 
     /** Sets/Gets CSS class in addition to generated one e.g. 'TextView View additionalCSSClass'  */
     public get additionalCSSClass() {
-        return this._additionalCSSClass;
+        return this._additionalCSSClass + (this.theme ? ' ' + this.theme : '');
     }
     public set additionalCSSClass(value) {
         if (this._additionalCSSClass !== value) {

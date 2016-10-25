@@ -22,6 +22,8 @@ std.controls.ts:
     TextAreaView
     ContainerView 
     Splitter
+    CheckView
+    RadioView
 
 ext.controls.ts:
     TabsView
@@ -30,7 +32,6 @@ ext.controls.ts:
     Dialog
 
 list.controls.ts:
-    Items (abstract)
     SelectView
     ListView
     LookupView

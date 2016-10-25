@@ -490,7 +490,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
         }
     }
 
-    /** Returns initial value of editable record */
+    /** Returns initial values of editable record */
     public get oldValue(): IRecord { return this._oldValue; }
 
     /** Returns fields list */

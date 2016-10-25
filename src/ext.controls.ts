@@ -2,7 +2,7 @@
 import { resources } from './resources';
 import { View } from "./view";
 import { ListView } from './list.controls';
-import { ButtonType, ButtonView, ContainerView, PanelView, TextView } from './std.controls';
+import { ButtonView, ContainerView, PanelView, TextView } from './std.controls';
 import { LookupDataLink, RecordSource, RecordSetSource, EventType } from './data';
 
 resources.register('context-wcl',
@@ -13,9 +13,12 @@ resources.register('context-wcl',
 
 /**
  * Tabs switch control
- * Additional CSS classes: flat
  */
 export class TabsView extends ListView {
+    public static readonly themes = {
+        flat: 'flat'
+    };
+
     protected static _listIdCounter = 0;
     protected _listId;
     protected _dropDownButton: ButtonView;
@@ -67,7 +70,7 @@ export class TabsView extends ListView {
         var __this = this;
         this._droppedDown = '';
         this._dropDownButton = new ButtonView(this, 'dropDownButton');
-        this._dropDownButton.buttonType = ButtonType.toggle;
+        this._dropDownButton.theme = ButtonView.themes.toggle;
         this._dropDownButton.events.onclick = function () {
             __this._droppedDown = __this._droppedDown ? '' : 'droppedDown';
             __this.updateView();
@@ -179,7 +182,7 @@ export class ModalView extends View {
 interface IDialogButton {
     id?: string;
     text: string;
-    buttonType?: ButtonType;
+    buttonTheme?: string;
     onClick?: (dialog: Dialog) => void;
 }
 
@@ -191,7 +194,7 @@ export class Dialog extends ModalView {
         return {
             id: 'ctxOkButton',
             text: 'OK',
-            buttonType: ButtonType.primary,
+            buttonTheme: ButtonView.themes.primary,
             onClick: null
         };
     }
@@ -199,7 +202,7 @@ export class Dialog extends ModalView {
         return {
             id: 'ctxCancelButton',
             text: 'Cancel',
-            buttonType: ButtonType.default,
+            buttonTheme: ButtonView.themes.default,
             onClick: null
         };
     }
@@ -246,7 +249,7 @@ export class Dialog extends ModalView {
         for (let i = 0; i < this._buttons.length; i++) {
             let btn = new ButtonView(this.buttonsContainer, this._buttons[i].id);
             btn.text = this._buttons[i].text;
-            btn.buttonType = this._buttons[i].buttonType;
+            btn.theme = this._buttons[i].buttonTheme;
             (<any>btn).onClick = this._buttons[i].onClick;
             (<any>btn).parentDialog = this;
             btn.events.onclick = function (event) {
