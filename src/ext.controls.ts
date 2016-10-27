@@ -2,7 +2,7 @@
 import { resources } from './resources';
 import { View } from "./view";
 import { ListView } from './list.controls';
-import { ButtonView, ContainerView, PanelView, TextView } from './std.controls';
+import { ButtonView, ContainerView, PanelView, TextView, InputView } from './std.controls';
 import { LookupDataLink, RecordSource, RecordSetSource, EventType } from './data';
 
 resources.register('context-wcl',
@@ -15,7 +15,7 @@ resources.register('context-wcl',
  * Tabs switch control
  */
 export class TabsView extends ListView {
-    public static readonly themes = {
+    public static themes = {
         flat: 'flat'
     };
 
@@ -88,7 +88,9 @@ export class TabsView extends ListView {
     }
 }
 
-export interface IPageViewPage {
+// PageView
+
+interface IPageViewPage {
     text: string;
     view: View;
 }
@@ -230,6 +232,7 @@ export class Dialog extends ModalView {
         if (!buttons || buttons.length == 0)
             buttons = [Dialog.buttonOk()];
         dlg.buttons = buttons;
+        dlg.captionView.text = caption;
         dlg.show();
     }
 
@@ -273,4 +276,71 @@ export class Dialog extends ModalView {
     }
 
 }
+
+// MenuView
+
+interface IMenuItem {
+    icon?: string;
+    text: string;
+    onclick?: (item: IMenuItem) => void;
+}
+
+/** Popup Menu showed under selected target control 
+ *  e.g. popupMenu.popup(someButton) 
+ * */
+export class PopupMenu extends ListView {
+    protected target: View;
+    protected fakeEdit: View;
+
+    /** Sets menu 
+     * e.g.
+     * poupMenu.items = [{text: 'Item 1', onclick: clickHandler1}, {text: 'Item 2', onclick: clickHandler2}]
+    */
+    public set menu(items: IMenuItem[]) {
+        let menuSource = new RecordSetSource();
+        menuSource.records = items;
+        this.listData.dataSource = menuSource;
+        this.listData.displayField = 'text';
+        this.listData.keyField = 'text';
+    }
+
+    constructor(name?: string) {
+        super(null, name);
+        this.visible = false;
+        this.attributes.tabindex = 0;
+    }
+
+    public popup(target: View) {
+        this.target = target;
+        this.visible = !this.visible;
+    }
+
+    protected afterUpdateView() {
+        super.afterUpdateView();
+        if (!this.element || !this.target || !this.target.element)
+            return;
+        this.element.style.top = (this.target.element.offsetTop + this.target.element.offsetHeight) + 'px';
+        this.element.style.left = this.target.element.offsetLeft.toString() + 'px';
+        this.element.addEventListener('focusout', (event) => { this.onFocusOut(); });
+
+        this.element.focus();
+    }
+
+    protected onFocusOut() {
+        this.hide();
+    }
+
+    protected handleClick(event) {
+        let idx = this.getEventElementIndex(event);
+        if (idx < 0)
+            return;
+        let itm: any = this.listData.dataSource.getRecord(idx);
+        if (itm.onclick)
+            itm.onclick(itm);
+        this.hide();
+    }
+}
+
+
+
 

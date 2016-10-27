@@ -39,7 +39,7 @@ export class TextView extends View {
  * <header> wrapper
  */
 export class HeaderView extends View {
-    public static readonly themes = {
+    public static themes = {
         fixed: 'fixed'
     };
 
@@ -55,7 +55,7 @@ export class HeaderView extends View {
  * <footer> wrapper
  */
 export class FooterView extends View {
-    public static readonly themes = {
+    public static themes = {
         fixed: 'fixed'
     };
 
@@ -80,7 +80,7 @@ export class PanelView extends View {
  * Container with header and border
  **/
 export class GroupBoxView extends View {
-    public static readonly themes = {
+    public static themes = {
         drawBorder: 'border'
     };
 
@@ -114,7 +114,7 @@ export class GroupBoxView extends View {
  * <button> wrapper
  */
 export class ButtonView extends View {
-    public static readonly themes = {
+    public static themes = {
         default: 'default',
         primary: 'primary',
         success: 'success',
@@ -126,17 +126,6 @@ export class ButtonView extends View {
         chevronLeft: 'chevronLeft',
         chevronRight: 'chevronRight'
     };
-
-    /*protected _buttonType: ButtonType;
-
-    public get buttonType(): ButtonType {
-        return this._buttonType;
-    }
-    public set buttonType(buttonType: ButtonType) {
-        this._buttonType = buttonType;
-        if (this._element)
-            this.updateView();
-    }*/
 
     constructor(parent: View, name?: string) {
         super(parent, name);
@@ -649,7 +638,7 @@ export class CheckView extends ValueView {
 
 /** Radio box control */
 export class RadioView extends CheckView {
-    /** Specifies radio group index that will identify which group belongs radio inside its parent */
+    /** Specifies radio group that will identify which group belongs radio inside its parent */
     public groupId = 0;
 
     protected onCheckBoxClick(event: Event) {

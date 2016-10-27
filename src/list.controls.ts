@@ -29,7 +29,7 @@ export class SelectView extends ValueView {
         });
     }
     public render() {
-        return this.renderTag(this.renderItems());
+        return this.renderTag(this.renderItems() + this.renderChildren());
     }
     protected renderItems() {
         let html = '', rec: IRecord, val: string, displayText: string;
@@ -75,7 +75,7 @@ export class ListView extends ValueView {
     }
 
     public render() {
-        return this.renderTag(this.renderItems());
+        return this.renderTag(this.renderItems() + this.renderChildren());
     }
 
     protected renderItems() {
@@ -94,7 +94,9 @@ export class ListView extends ValueView {
         let displayText = utils.escapeHTML(this.listData.getDisplayValue(record));
         let attr = utils.formatStr('index="{0}"', [index]) + val;
         if (selected)
-            attr += 'class="ctx_selected"';
+            attr += 'class="ctx_list_item ctx_selected"';
+        else
+            attr += 'class="ctx_list_item"';
 
         return View.getTag('div', attr, displayText) + '\n';
     }
@@ -107,9 +109,9 @@ export class ListView extends ValueView {
             el = children[i];
             idx = el.getAttribute('index');
             if (typeof idx !== undefined && idx != selectedIdx)
-                el.removeAttribute('class');
+                el.setAttribute('class', 'ctx_list_item');
             else if (idx == selectedIdx)
-                el.setAttribute('class', 'ctx_selected');
+                el.setAttribute('class', 'ctx_list_item ctx_selected');
         }
     }
 
@@ -117,7 +119,6 @@ export class ListView extends ValueView {
         super.afterUpdateView();
         this.handleEvent('onmousedown', this.handleMouseDown);
         this.handleEvent('ontouchstart', this.handleClick);
-
     }
 
     protected handleChange() {

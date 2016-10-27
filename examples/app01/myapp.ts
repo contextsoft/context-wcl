@@ -16,7 +16,7 @@ import {
     InputView, TextAreaView, SelectView, ListView, LookupView, DatePicker,
     TabsView, PageView, Dialog, TreeView, WorkAreaLayout, GridLayout,
     RecordSource, RecordSetSource, EditAction, PostAction, CancelAction,
-    CheckView, RadioView
+    CheckView, RadioView, PopupMenu
 }
     from 'context-wcl';
 
@@ -93,8 +93,8 @@ class MainScreen extends ScreenView {
         this.testButtons(stdPage);
         this.testCheckBoxes(stdPage);
         this.testAligning(stdPage);
-
         this.testLists(listPage);
+        this.testMenus(extPage);
         this.testTabs(extPage);
         this.testDlg(extPage);
         this.testTree(treePage);
@@ -358,6 +358,35 @@ class MainScreen extends ScreenView {
         listEdit.attributes.readonly = true;
     }
 
+    // PopupMenu
+    protected testMenus(parent: View) {
+        let grpBox = new GroupBoxView(parent);
+        grpBox.style = 'margin-bottom: 10px';
+        grpBox.caption = 'Menu';
+
+        // menu
+        let onItemClick = function (item) {
+            Dialog.showDialog(item.text);
+        };
+
+        let menu = new PopupMenu();
+        menu.menu = [
+            { text: 'item 1', onclick: onItemClick },
+            { text: 'item 2', onclick: onItemClick },
+            { text: 'item 3', onclick: onItemClick },
+            { text: 'item 4', onclick: onItemClick },
+            { text: 'item 5', onclick: onItemClick }
+        ];
+
+        // target control
+        let popupBtn = new ButtonView(grpBox);
+        popupBtn.theme = ButtonView.themes.toggle;
+        popupBtn.events.onclick = function () {
+            menu.popup(popupBtn);
+        };
+
+    }
+
     // TabsView, PageView
     protected testTabs(parent: View) {
         let grpBox = new GroupBoxView(parent);
@@ -365,7 +394,7 @@ class MainScreen extends ScreenView {
         grpBox.caption = 'Tabs';
 
         let tabs = new TabsView(grpBox);
-        tabs.theme = TabsView.themes.flat;
+        //tabs.theme = TabsView.themes.flat;
 
         let label = new TextView(grpBox);
         label.style = 'margin-top: 10px; margin-bottom: 20px';
@@ -451,6 +480,7 @@ class MainScreen extends ScreenView {
         ];
     }
 
+    // Data-binding
     protected testDataSource(parent: View) {
         let ds = new RecordSource();
         let dataObj = new MyDataClass('john', 'smith');

@@ -40,7 +40,7 @@ export abstract class View extends Component {
     }
 
     /** Available control's themes/styles  */
-    public static readonly themes = {
+    public static themes = {
         // inherit in descendants
     };
 
@@ -102,7 +102,7 @@ export abstract class View extends Component {
     /** Escape or not html tags in text value */
     public doNotEscapeHtml = false;
 
-    /** Additional control theme */
+    /** Control style/theme. Use ControlType.themes to assign */
     public theme: string = '';
 
     //protected isController = false; //TODO: used in serialization 
@@ -154,7 +154,12 @@ export abstract class View extends Component {
 
     /** Sets/Gets CSS class in addition to generated one e.g. 'TextView View additionalCSSClass'  */
     public get additionalCSSClass() {
-        return this._additionalCSSClass + (this.theme ? ' ' + this.theme : '');
+        let cl = '';
+        if (this.theme)
+            cl = this.theme;
+        if (this._additionalCSSClass)
+            cl += (cl ? ' ' : '') + this._additionalCSSClass;
+        return cl;
     }
     public set additionalCSSClass(value) {
         if (this._additionalCSSClass !== value) {

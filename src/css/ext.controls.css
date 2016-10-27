@@ -266,3 +266,28 @@
 .CtxDialog .cxtModalContainer .ctxButtonsContainer {
     text-align: right;
 }
+
+/* PopupMenu */
+
+.CtxPopupMenu, .CtxPopupMenu:focus {
+    position: absolute;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    box-shadow: 0 2px 4px -1px rgba(0,0,0,.2),0 4px 5px 0 rgba(0,0,0,.14),0 1px 10px 0 rgba(0,0,0,.12);
+    background-color: rgba(255, 255, 255, 100);
+}
+
+.CtxPopupMenu .ctx_list_item {
+    padding: 10px 20px 10px 20px;
+    cursor: pointer;
+}
+
+.CtxPopupMenu .ctx_list_item:hover,
+.CtxPopupMenu .ctx_list_item.ctx_selected:hover {
+    color: #262626;
+    background-color: #e4e4e4;
+}
+
+.CtxPopupMenu .ctx_list_item.ctx_selected {
+    background-color: inherit;
+}
