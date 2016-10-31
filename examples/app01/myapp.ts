@@ -372,10 +372,12 @@ class MainScreen extends ScreenView {
         let menu = new PopupMenu();
         menu.menu = [
             { text: 'item 1', onclick: onItemClick },
-            { text: 'item 2', onclick: onItemClick },
+            { text: '-' },
+            { text: 'item 2', disabled: false, onclick: onItemClick },
             { text: 'item 3', onclick: onItemClick },
+            { text: '-' },
             { text: 'item 4', onclick: onItemClick },
-            { text: 'item 5', onclick: onItemClick }
+            { text: 'item 5', disabled: true, onclick: onItemClick }
         ];
 
         // target control
@@ -413,8 +415,6 @@ class MainScreen extends ScreenView {
 
         let page2 = new PanelView(pages);
         page2.text = 'This is Page 2';
-
-        page1.style = page2.style = "padding: 10px";
 
         pages.pages = [
             { text: 'Page 1', view: page1 },

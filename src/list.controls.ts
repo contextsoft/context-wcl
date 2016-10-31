@@ -91,14 +91,23 @@ export class ListView extends ValueView {
         let val = '';
         if (this.listData.keyField && record[this.listData.keyField])
             val = ' value="' + utils.escapeHTML(record[this.listData.keyField].toString()) + '"';
-        let displayText = utils.escapeHTML(this.listData.getDisplayValue(record));
-        let attr = utils.formatStr('index="{0}"', [index]) + val;
+        let displayText = utils.escapeHTML(this.getRecordDisplayText(record));
+        let attr = utils.formatStr('index="{0}" class="ctx_list_item', [index]);
         if (selected)
-            attr += 'class="ctx_list_item ctx_selected"';
-        else
-            attr += 'class="ctx_list_item"';
+            attr += ' ctx_selected';
+        attr += ' ' + this.getRecordCSSClass(record) + '"' + val;
 
         return View.getTag('div', attr, displayText) + '\n';
+    }
+
+    /** Returns additional CSS class for record */
+    protected getRecordCSSClass(record) {
+        return '';
+    }
+
+    /** Returns record's display text */
+    protected getRecordDisplayText(record) {
+        return this.listData.getDisplayValue(record);
     }
 
     protected updateSelectedRecord(children?: Element[] | HTMLCollection) {
@@ -258,7 +267,7 @@ export class LookupView extends ListView {
                 this.listData.dataSource.next();
                 break;
             case 13:
-                this.value = this.listData.getDisplayValue(this.listData.dataSource.current);
+                this.value = this.getRecordDisplayText(this.listData.dataSource.current);
                 this.showDropdown(false);
                 break;
         }
@@ -280,7 +289,7 @@ export class LookupView extends ListView {
                 let inputVal = this.input.value;
                 if (!this.caseSensitive)
                     inputVal = inputVal.toLowerCase();
-                let value = this.listData.getDisplayValue(rec);
+                let value = this.getRecordDisplayText(rec);
                 if (!this.caseSensitive)
                     value = value.toLowerCase();
                 let pos = value.indexOf(inputVal);
@@ -340,7 +349,7 @@ export class LookupView extends ListView {
         if (idx < 0)
             return;
         super.handleClick(event);
-        this.value = this.listData.getDisplayValue(this.listData.dataSource.current);
+        this.value = this.getRecordDisplayText(this.listData.dataSource.current);
     }
 }
 

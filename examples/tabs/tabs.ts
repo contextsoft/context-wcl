@@ -35,25 +35,24 @@ class MainScreen extends ScreenView {
             'tab 3'
         ];
 
-
-        // paged
+        // pages
 
         let pages = new PageView(this);
         pages.style = 'margin-top: 20px';
 
         let page1 = new PanelView(pages);
-        page1.text = 'Page 1';
+        page1.text = 'This is Page 1';
 
         let page2 = new PanelView(pages);
-        page2.text = 'Page 2';
+        page2.text = 'This is Page 2';
 
         let page3 = new PanelView(pages);
-        page3.text = 'Page 3';
+        page3.text = 'This is Page 3';
 
         pages.pages = [
             { text: 'page 1', view: page1 },
-            { text: 'page 1', view: page2 },
-            { text: 'page 1', view: page3 }
+            { text: 'page 2', view: page2 },
+            { text: 'page 3', view: page3 }
         ];
 
     }

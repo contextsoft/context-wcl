@@ -8,6 +8,7 @@
     -ms-user-select: none;
     -o-user-select: none;
     user-select: none;
+    margin-bottom: 10px;
 }
 
 .CtxTabsView .caption {
@@ -80,7 +81,7 @@
 .CtxTabsView .tabs > div:hover {
     color: #365fbc;
     background-color: #ededed;
-    padding-bottom: 15px;
+    padding-bottom: 16px;
 }
 
 .CtxTabsView .tabs > div.ctx_selected
@@ -90,7 +91,7 @@
     background-color: #fff;
     border: 1px solid #ddd;
     border-bottom-width: 0;
-    padding-bottom: 15px;
+    padding-bottom: 16px;
 }
 
 /* Flat Style */
@@ -135,10 +136,13 @@
     .CtxTabsView {
         float: left;
         border-radius: 4px;
+        margin-bottom: 0;
     }
 
     .CtxTabsView .caption {
         display: inline-block;
+        padding-left: 0;
+        padding-right: 0;
     }
 
     .CtxTabsView .dropDownButton {
@@ -198,8 +202,11 @@
 
 /* PageView */
 
-.CtxPageView .pagesContainer {
-    padding-top: 8px;
+@media (max-width: 767px)
+{
+    .CtxPageView .pagesContainer {
+        padding-top: 50px
+    }
 }
 
 /* ModalView */
@@ -290,4 +297,19 @@
 
 .CtxPopupMenu .ctx_list_item.ctx_selected {
     background-color: inherit;
+}
+
+.CtxPopupMenu .ctx_list_item.ctx_separator {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    height: 1px;
+    min-height: 1px;
+    max-height: 1px;
+    width: 100%;
+    background-color: rgba(0,0,0,0.11);
+    padding: 0;     
+}
+
+.CtxPopupMenu .ctx_list_item.ctx_disabled {
+    color: rgba(0,0,0,0.38);    
 }

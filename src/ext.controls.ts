@@ -1,9 +1,10 @@
 //import {utils} from './utils';
 import { resources } from './resources';
+import { utils } from './utils';
 import { View } from "./view";
 import { ListView } from './list.controls';
-import { ButtonView, ContainerView, PanelView, TextView, InputView } from './std.controls';
-import { LookupDataLink, RecordSource, RecordSetSource, EventType } from './data';
+import { ButtonView, ContainerView, PanelView, TextView } from './std.controls';
+import { LookupDataLink, RecordSource, RecordSetSource, EventType, IRecord } from './data';
 
 resources.register('context-wcl',
     [
@@ -20,9 +21,9 @@ export class TabsView extends ListView {
     };
 
     protected static _listIdCounter = 0;
-    protected _listId;
-    protected _dropDownButton: ButtonView;
-    protected _droppedDown = '';
+    protected listId;
+    protected dropDownButton: ButtonView;
+    protected droppedDown = false;
 
     /** Sets tabs */
     public set tabs(tabs: string[]) {
@@ -60,30 +61,46 @@ export class TabsView extends ListView {
 
         this.listData = new LookupDataLink((eventType: EventType, data: any): void => {
             if (eventType == EventType.CursorMoved)
-                this.updateSelectedRecord(document.getElementById(this._listId).children);
+                this.updateSelectedRecord(document.getElementById(this.listId).children);
             else
                 this.updateView();
         });
         this.listData.displayField = 'text';
         this.listData.keyField = 'value';
 
-        var __this = this;
-        this._droppedDown = '';
-        this._dropDownButton = new ButtonView(this, 'dropDownButton');
-        this._dropDownButton.theme = ButtonView.themes.toggle;
-        this._dropDownButton.events.onclick = function () {
-            __this._droppedDown = __this._droppedDown ? '' : 'droppedDown';
-            __this.updateView();
+        this.dropDownButton = new ButtonView(this, 'dropDownButton');
+        this.dropDownButton.theme = ButtonView.themes.toggle;
+        this.dropDownButton.events.onclick = function () {
+            <TabsView>(this.parent).dropDownButtonClick();
         };
     }
 
+    protected dropDownButtonClick() {
+        this.showDropDown(!this.droppedDown);
+    }
+
+    protected showDropDown(show) {
+        if (show != this.droppedDown) {
+            this.droppedDown = show;
+            this.updateView();
+        }
+        
+    }
+
+    protected handleClick(event) {
+        super.handleClick(event);
+        if (this.droppedDown)
+            this.showDropDown(false);    
+    }
+    
+
     public render() {
-        this._listId = 'ctxTabsView' + TabsView._listIdCounter++;
-        let html = View.getTag('div', 'class="tabs ' + this._droppedDown + '" id="' + this._listId + '"', this.renderItems());
+        this.listId = 'ctxTabsView' + TabsView._listIdCounter++;
+        let html = View.getTag('div', 'class="tabs ' + (this.droppedDown ? 'droppedDown' : '') + '" id="' + this.listId + '"', this.renderItems());
         let currRec = this.listData.dataSource.current;
         if (currRec)
             html += View.getTag('div', 'class="caption" ', this.listData.getDisplayValue(currRec));
-        html = this.renderTag(html + this._dropDownButton.render());
+        html = this.renderTag(html + this.dropDownButton.render());
         return html;
     }
 }
@@ -282,6 +299,7 @@ export class Dialog extends ModalView {
 interface IMenuItem {
     icon?: string;
     text: string;
+    disabled?: boolean;
     onclick?: (item: IMenuItem) => void;
 }
 
@@ -289,6 +307,7 @@ interface IMenuItem {
  *  e.g. popupMenu.popup(someButton) 
  * */
 export class PopupMenu extends ListView {
+    public static separator = '-';
     protected target: View;
     protected fakeEdit: View;
 
@@ -335,10 +354,32 @@ export class PopupMenu extends ListView {
         if (idx < 0)
             return;
         let itm: any = this.listData.dataSource.getRecord(idx);
-        if (itm.onclick)
+        if (!itm.disabled && itm.onclick)
             itm.onclick(itm);
         this.hide();
     }
+
+    protected getRecordCSSClass(record) {
+        let val = '';
+        if (this.listData.keyField && record[this.listData.keyField])
+            val = record[this.listData.keyField].toString();
+        if (val == PopupMenu.separator)
+            return 'ctx_separator';
+        else if (<IMenuItem>record.disabled)
+            return 'ctx_disabled';
+        else 
+            return '';
+        
+    }
+
+    protected getRecordDisplayText(record) {
+        let t = this.listData.getDisplayValue(record);
+        if (t == PopupMenu.separator)
+            t = '';
+        return t;
+    }
+
+    
 }
 
 

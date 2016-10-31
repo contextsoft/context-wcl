@@ -1,5 +1,3 @@
-import { Component } from './component';
-
 /** Action handling component */
 
 /** TODO:
