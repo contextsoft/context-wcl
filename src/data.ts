@@ -170,14 +170,12 @@ export interface IDataSource {
  * Provides access to a single record of data
  */
 export interface IRecordSource extends IDataSource, IReference, IEditableRecord {
-
 }
 
 /**
  * Provides access to a record set 
  */
 export interface IRecordSetSource extends IRecordSource, ICursor, IEditableList {
-
 }
 
 /**
@@ -396,16 +394,19 @@ export class RecordSource extends BaseSource implements IRecordSource {
         utils.assign(this.current, this._oldValue);
         this.setState(RecordState.Edit);
     }
+
     public post(): void {
         this.checkCurrent();
         this.setState(RecordState.Browse);
     }
+
     public cancel(): void {
         this.checkCurrent();
         utils.assign(this._oldValue, this.current);
         this._oldValue = {};
         this.setState(RecordState.Browse);
     }
+
     public getState(): RecordState {
         return this._state;
     }

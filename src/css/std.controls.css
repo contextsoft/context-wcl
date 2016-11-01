@@ -531,8 +531,8 @@ body {
 }
 
 .CtxRadioView.ctx_cb_checked .ctx_cb_icon::after {
-    width: 17px;
-    height: 17px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
     margin: 0;
     border-width: 3px;

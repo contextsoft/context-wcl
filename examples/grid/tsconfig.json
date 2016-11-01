@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "amd",
+        "preserveConstEnums": true,
+        "outFile": "grid.js",
+        // "outDir": "./dist",        
+        "moduleResolution": "node",
+        "inlineSourceMap": true,
+        //"sourceMap": true,
+        "baseUrl": "./../../../../node_modules",
+        "paths": {
+            "jquery": [
+                "jquery/dist/jquery"
+            ],
+            "context-wcl": [
+                "context-wcl/src/index"
+            ]
+        }
+    },
+    "include": [
+        "../../src/*",
+        "./*"
+    ]
+}

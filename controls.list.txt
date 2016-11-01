@@ -30,6 +30,7 @@ ext.controls.ts:
     PageView
     ModalView    
     Dialog
+    PopupMenu
 
 list.controls.ts:
     SelectView
@@ -42,6 +43,7 @@ tree.controls.ts:
     TreeView    
 
 grid.controls.ts:
+    GridView
 
 
 

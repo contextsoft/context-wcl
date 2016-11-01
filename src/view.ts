@@ -605,11 +605,15 @@ export abstract class View extends Component {
         // assign self to DOM element
         (<any>this.element).view = this;
 
+        //  TODO: check this
         // assign style if it's an object
-        if (typeof this.style === "object")
+        if (typeof this.style === "object") {
             for (let s in this.style)
                 if (this.style.hasOwnProperty(s))
                     this.element.style[s] = this.style[s];
+        }
+        else if (this.style)
+            this.element.style.cssText = this.style;
 
         // update all children
         for (let i = 0; i < this.children.length; i++)

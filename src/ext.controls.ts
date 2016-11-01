@@ -1,10 +1,9 @@
-//import {utils} from './utils';
 import { resources } from './resources';
-import { utils } from './utils';
+//import { utils } from './utils';
 import { View } from "./view";
 import { ListView } from './list.controls';
 import { ButtonView, ContainerView, PanelView, TextView } from './std.controls';
-import { LookupDataLink, RecordSource, RecordSetSource, EventType, IRecord } from './data';
+import { LookupDataLink, RecordSource, RecordSetSource, EventType } from './data';
 
 resources.register('context-wcl',
     [
@@ -84,15 +83,15 @@ export class TabsView extends ListView {
             this.droppedDown = show;
             this.updateView();
         }
-        
+
     }
 
     protected handleClick(event) {
         super.handleClick(event);
         if (this.droppedDown)
-            this.showDropDown(false);    
+            this.showDropDown(false);
     }
-    
+
 
     public render() {
         this.listId = 'ctxTabsView' + TabsView._listIdCounter++;
@@ -367,9 +366,9 @@ export class PopupMenu extends ListView {
             return 'ctx_separator';
         else if (<IMenuItem>record.disabled)
             return 'ctx_disabled';
-        else 
+        else
             return '';
-        
+
     }
 
     protected getRecordDisplayText(record) {
@@ -378,8 +377,6 @@ export class PopupMenu extends ListView {
             t = '';
         return t;
     }
-
-    
 }
 
 

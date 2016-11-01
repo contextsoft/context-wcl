@@ -19,7 +19,6 @@ class MyApp extends Application {
 class MainScreen extends ScreenView {
     protected initComponents() {
         this.createHeaderFooter();
-        this.style = 'margin-top: 40px; margin-bottom: 40px;';
 
         // tabs
 
@@ -63,6 +62,7 @@ class MainScreen extends ScreenView {
         let footer = new FooterView(this, 'footer');
         footer.text = '(c) 2016 Context Software LLC.';
         header.style = footer.style = 'min-height: 30px; padding-top: 6px;';
+        this.style = 'margin-top: 40px; margin-bottom: 40px;';
     }
 
 }
