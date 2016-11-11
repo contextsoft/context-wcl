@@ -4,6 +4,7 @@
 import { utils } from './utils';
 import { resources } from './resources';
 import { IVoidEvent, IDOMEvent } from './component';
+import { IService } from './service';
 
 export interface IAppConfig {
     appUrl: string;
@@ -53,6 +54,9 @@ export class Application {
 
     /** Used as temporary application-wide storage */
     public sessionInfo: any;
+
+    /** Reference to the main application service - optional */
+    public mainService: IService = null;
 
     /** Fires on after application after loaded and inited */
     public onReady: IVoidEvent;
