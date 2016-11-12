@@ -3,6 +3,11 @@
         "module": "amd",
         "outDir": "../dist",
         "target": "es5",
+        "lib": [
+            "dom",
+            "es2015.promise",
+            "es5"
+        ],
         //"sourceMap": true
         "inlineSourceMap": true
     }

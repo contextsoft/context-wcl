@@ -1,0 +1,33 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "amd",
+        "lib": [
+            "dom",
+            "es2015.promise",
+            "es5"
+        ],
+        "preserveConstEnums": true,
+        "outFile": "mysql.js",
+        // "outDir": "./dist",        
+        "moduleResolution": "node",
+        "inlineSourceMap": true,
+        //"sourceMap": true,
+        "baseUrl": "./../../../../node_modules",
+        "paths": {
+            "jquery": [
+                "jquery/dist/jquery"
+            ],
+            "context-wcl": [
+                "context-wcl/src/index"
+            ],
+            "application": [
+                "context-wcl/src/application"
+            ]
+        }
+    },
+    "include": [
+        "../../src/*",
+        "./*"
+    ]
+}

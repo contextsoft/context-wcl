@@ -7,7 +7,11 @@ import { IVoidEvent, IDOMEvent } from './component';
 import { IService } from './service';
 
 export interface IAppConfig {
-    appUrl: string;
+    /** Application root URL */
+    appUrl?: string;
+    /** Service URL e.g. PHP handler */
+    serviceUrl?: string;
+    debug?: boolean;
     libraries?: any;
 }
 
@@ -41,11 +45,9 @@ export class Application {
 
     /** General app-wide configuration params */
     public config: IAppConfig = {
-        /** Path to application */
-        appUrl: '',
+        debug: false
         // servletExtension: '',
         // baseUrl: '',
-        // servlet: '',
         // rootPost: true,
         // requestCancelTime: 10000, // 10 sec
         // keepAliveInterval: 60000,
@@ -196,5 +198,5 @@ export class Application {
 }
 
 /** Global Application instance */
-export var application: Application = null;
+export let application: Application = null;
 
