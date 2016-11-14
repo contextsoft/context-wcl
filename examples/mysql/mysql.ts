@@ -25,15 +25,13 @@ class MainScreen extends ScreenView {
         // Simple request
         let label1 = new TextView(this);
         label1.text = 'Here should be server respond';
+        label1.doNotEscapeHtml = true;
         Ajax.post(
             application.config.serviceUrl,
-            { class: 'SomeClass', method: 'someMethid' },
+            { adapter: 'UserSession', method: 'getSessionInfo' },
             (data) => {
                 label1.text = data;
             });
-
-        //let ds = new DataSet();
-        //ds.fill();
     }
 
     protected createHeaderFooter() {
