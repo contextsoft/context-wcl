@@ -1,89 +1,95 @@
 <?php
 
-error_log("service.php loaded and executed", 0);
-$app = new Application();
-global $app;
-$app->handleRequest();
+$application = new Application();
+global $application;
+$application->handleRequest();
 
-class Application {
-    protected $_connection;
-    protected $_session;
+class Application 
+{
+    protected $connection;
+    protected $session;
     
     public function getConnection() {
-        return $this->_connection;
+        if (!isset($this->connection))
+            $this->connectToDb();
+        if (!isset($this->connection))
+            return mysqli_connect_error();
+        return $this->connection;
     }
     
     public function getSession() {
-        if (!$this->_session)
-            $this->_session = new UserSession();
-        return $this->_session;
+        if (!$this->session)
+            $this->session = new UserSession();
+        return $this->session;
     }
     
     public function handleRequest() {
-        error_log("handleRequest called", 0);
         $adapter = null;
         $method = null;
         $params = null;
-        $res = '';
-        if(isset($_POST['adapter'])) {
+        $res = null;
+        if(isset($_POST['adapter'])) 
             $adapter = $_POST['adapter'];
-            error_log("handleRequest adapter: ".$adapter, 0);
-        }
-        if(isset($_POST['method'])) {
+        if(isset($_POST['method'])) 
             $method = $_POST['method'];
-            error_log("handleRequest method: ".$method, 0);
-        }
-        if(isset($_POST['params'])) {
+        if(isset($_POST['params'])) 
             $params = $_POST['params'];
-            error_log("handleRequest params: ".$params, 0);
-        }
         if(isset($adapter) && isset($method)) {
-            $obj = new $adapter();
+            $this->getSession();
+            if (strcasecmp($adapter, 'Application') == 0)
+                $obj = $this;
+            else if (strcasecmp($adapter, 'UserSession') == 0)
+                $obj = $this->getSession();
+            else
+                $obj = new $adapter();
             $res = $obj->$method($params);
         }
         echo json_encode($res);
     }
+
+    protected function connectToDb() {
+        $config = parse_ini_file('../config.ini'); 
+        $this->$connection = mysqli_connect($config['host'], $config['username'], $config['password'], $config['dbname']);
+        if($this->connection === false) {
+            $this->connection = null;  
+        }        
+    }
 }
 
-class UserSession {
-    public function __construct()  {
-        //$this->session_start();
-        if (!isset($_SESSION['CREATED']))
-        {
-            // invalidate old session data and ID
-            //$this->session_regenerate_id(true);
-            $_SESSION['CREATED'] = time();
+class UserSession 
+{
+    public function __construct() {
+        session_start();
+        if (!isset($_SESSION['created'])) {
+            session_regenerate_id(true);
+            $_SESSION['sessionId'] = session_id();
+            $_SESSION['created'] = time();
         }
     }
-    
-    function getSessionInfo() {
+
+    public function getSessionInfo() {
         return $_SESSION;
     }
     
-    function setValue($name, $value) {
+    public function setValue($name, $value) {
         $_SESSION[$name] = $value;
     }
     
-    function getValue($name) {
+    public function getValue($name) {
         return $_SESSION[$name];
     }
 }
 
-
-class DbObject {
-    public static function tableName() {
-        return '';
-    }
+class DbObject 
+{
+    public $tableName;
+    public $idField = 'id';
     
-    public static function idField() {
-        return 'id';
-    }
-    
-    public static function fields() {
+    public function fields() {
         return ['id' => 'string'];
     }
     
-    public static function getConnection() {
+    public function getConnection() {
         return $app->getConnection();
     }
     
@@ -100,10 +106,8 @@ class DbObject {
     }
     
     public function delete($params) {
-        //$this->getConnection()->query('delete from '.$this->tableName().' where '.$this->idField().' = '.$params[$this->idField()]]);
+        $this->getConnection()->query('delete from '.$this->tableName().' where '.$this->idField().' = '.$params[$this->idField()]);
     }
-    
 }
-
 
 ?>

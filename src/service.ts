@@ -34,7 +34,7 @@ export interface IService {
 
 export class Ajax {
     public static send(url: string, callback: IOnData, method: string, data?, async = true) {
-        let x = new XMLHttpRequest();
+        let x = Ajax.getXHR();
         x.open(method, url, async);
         x.onreadystatechange = function () {
             if (x.readyState == 4) {
@@ -63,12 +63,11 @@ export class Ajax {
         Ajax.send(url, callback, 'POST', query.join('&'), async);
     }
 
-
     protected static getXHR() {
         if (typeof XMLHttpRequest !== 'undefined') {
             return new XMLHttpRequest();
         }
-        // old IE compatibility
+        // IE compatibility
         /*
         let versions = [
             "MSXML2.XmlHttp.6.0",
@@ -89,7 +88,6 @@ export class Ajax {
         return xhr;
         */
     }
-
 }
 
 export class Service implements IService {
@@ -104,30 +102,33 @@ export class Service implements IService {
     public login(username?: string, password?: string): Promise<any> {
         if (username)
             this.username = username;
-        return this.execute('application', 'login', { username: this.username, password: password });
+        return this.execute('Application', 'login', { username: this.username, password: password });
     };
 
     public logout(): Promise<any> {
         this._authenticated = false;
-        return this.execute('application', 'logout');
+        return this.execute('Application', 'logout');
     };
 
-    public execute(className: string, methodName: string, params?: any): Promise<any> {
+    public execute(adapter: string, method: string, params?: any): Promise<any> {
+        let data = {
+            adapter: adapter,
+            method: method,
+            params: params || null
+        };
         let promise = new Promise((resolve, reject) => {
-            Ajax.post(this.url, params, (data) => {
-                resolve(data);
+            Ajax.post(this.url, data, (result) => {
+                let r = JSON.parse(result);
+                resolve(r);
             });
         });
         return promise;
     };
 
     public getSessionInfo() {
-        return this.execute('application', 'getSessionInfo')
-            .then((data) => { this.login(); });
+        return this.execute('UserSession', 'getSessionInfo')
+            .then((data) => {
+                //this.login(); 
+            });
     }
-
-    public test() {
-        this.getSessionInfo().then(() => { alert('applicationCache.showMainForm()'); });
-    }
-
 }

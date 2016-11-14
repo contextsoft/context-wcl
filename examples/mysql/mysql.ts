@@ -1,5 +1,5 @@
 import {
-    utils, Application, ScreenView, HeaderView, FooterView, TextView, Ajax, DataSet
+    Application, ScreenView, HeaderView, FooterView, TextView, Ajax, Service
 } from 'context-wcl';
 
 import { config } from './config';
@@ -22,8 +22,8 @@ class MainScreen extends ScreenView {
     protected initComponents() {
         this.createHeaderFooter();
 
-        // Simple request
-        let label1 = new TextView(this);
+        // xhr post
+        /*let label1 = new TextView(this);
         label1.text = 'Here should be server respond';
         label1.doNotEscapeHtml = true;
         Ajax.post(
@@ -31,6 +31,16 @@ class MainScreen extends ScreenView {
             { adapter: 'UserSession', method: 'getSessionInfo' },
             (data) => {
                 label1.text = data;
+            });*/
+
+        // service
+        let label2 = new TextView(this);
+        label2.text = 'Here should be server respond';
+        label2.doNotEscapeHtml = true;
+        let svc = <Service>application.service;
+        svc.execute('UserSession', 'getSessionInfo').then(
+            (data) => {
+                label2.text = JSON.stringify(data);
             });
     }
 

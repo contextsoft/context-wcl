@@ -4,7 +4,10 @@
 import { utils } from './utils';
 import { resources } from './resources';
 import { IVoidEvent, IDOMEvent } from './component';
-import { IService } from './service';
+import { IService, Service } from './service';
+
+/** Global Application instance */
+export let application: Application = null;
 
 export interface IAppConfig {
     /** Application root URL */
@@ -66,12 +69,28 @@ export class Application {
     /** Fires on window resize */
     public onWindowResize: IDOMEvent[] = [];
 
+    /** Remote service */
+    public get service(): IService {
+        return this._service;
+    }
+
+    /** Sets default remote service */
+    protected createService() {
+        this._service = new Service();
+    }
+
+    /** Inits remote service */
+    protected initService() {
+        this.service.url = this.config.serviceUrl;
+    }
+
     /** Default settings */
     protected defaultSettings = {
         locale: 'en'
     };
 
     protected _agentInfo;
+    protected _service: IService;
 
     constructor(config?: IAppConfig, onReady?: IVoidEvent) {
         if (config)
@@ -94,9 +113,12 @@ export class Application {
             }
         });
 
-        this.initLibraries();
         this.sessionInfo = {};
+        this.initLibraries();
         this.loadSettings();
+        this.createService();
+        this.initService();
+
         application = this;
         this.init();
     }
@@ -197,6 +219,4 @@ export class Application {
 
 }
 
-/** Global Application instance */
-export let application: Application = null;
 
