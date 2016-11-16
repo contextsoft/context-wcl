@@ -287,6 +287,7 @@ export class Dialog extends ModalView {
     constructor(name?: string) {
         super(null, name);
         this.captionView = new TextView(this.modalContainer, 'ctxCaption');
+        this.captionView.doNotEscapeHtml = true;
         this.buttonsContainer = new PanelView(this.modalContainer, 'ctxButtonsContainer');
         this.buttons = [Dialog.buttonOk()];
     }

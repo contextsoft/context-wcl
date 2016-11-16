@@ -266,12 +266,17 @@
 .CtxDialog .cxtModalContainer .ctxCaption {
     font-size: 18px;
     font-weight: bolder;
-    margin-bottom: 20px;
+    margin-bottom: 40px;
     text-align: left;
 }
 
 .CtxDialog .cxtModalContainer .ctxButtonsContainer {
+    position: absolute;
     text-align: right;
+    bottom: 0;
+    padding-right: 30px;
+    margin-bottom: 10px;
+    width: 100%;        
 }
 
 /* PopupMenu */

@@ -5,6 +5,7 @@ import { utils } from './utils';
 import { resources } from './resources';
 import { IVoidEvent, IDOMEvent } from './component';
 import { IService, Service } from './service';
+import { Dialog } from './ext.controls';
 
 /** Global Application instance */
 export let application: Application = null;
@@ -154,7 +155,8 @@ export class Application {
     /** Shows localized alert */
     public showMessage(msg: string) {
         if (msg && msg !== '')
-            alert(this.L(msg));
+           //alert(this.L(msg));
+           Dialog.showDialog(msg);
     }
 
     /** Throws localized exception */

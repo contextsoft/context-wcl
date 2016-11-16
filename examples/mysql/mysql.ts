@@ -1,5 +1,5 @@
 import {
-    Application, ScreenView, HeaderView, FooterView, TextView, Ajax, Service
+    Application, ScreenView, HeaderView, FooterView, Dialog, TextView, Ajax, Service
 } from 'context-wcl';
 
 import { config } from './config';
@@ -34,14 +34,29 @@ class MainScreen extends ScreenView {
             });*/
 
         // service
-        let label2 = new TextView(this);
+        let svc = <Service>application.service;
+
+        // session info
+        /*let label2 = new TextView(this);
         label2.text = 'Here should be server respond';
         label2.doNotEscapeHtml = true;
-        let svc = <Service>application.service;
         svc.execute('UserSession', 'getSessionInfo').then(
             (data) => {
                 label2.text = JSON.stringify(data);
-            });
+            });*/
+
+        // mysql
+        let label3 = new TextView(this);
+        label3.text = 'Here should be server respond';
+        label3.doNotEscapeHtml = true;
+        svc.execute('World', 'select').then(
+            (data) => {
+                label3.text = JSON.stringify(data);
+            },
+            (error) => {
+                label3.text = error;
+            }
+        );
     }
 
     protected createHeaderFooter() {

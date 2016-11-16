@@ -1,5 +1,14 @@
 /** Server communication protocols and routines */
 
+import { utils } from './Utils';
+import { application } from './Application';
+
+interface IData {
+    data: any;
+    error?: string;
+    xdebug?: string;
+}
+
 interface IOnData {
     (data: any): any;
 }
@@ -33,12 +42,23 @@ export interface IService {
 }*/
 
 export class Ajax {
+    public static parseJSON(data: string) {
+        let r;
+        try {
+            r = JSON.parse(data);
+        }
+        catch (e) {
+            r = data;
+        }
+        return r;
+    }
+
     public static send(url: string, callback: IOnData, method: string, data?, async = true) {
         let x = Ajax.getXHR();
         x.open(method, url, async);
         x.onreadystatechange = function () {
             if (x.readyState == 4) {
-                callback(x.responseText);
+                callback(Ajax.parseJSON(x.responseText));
             }
         };
         if (method == 'POST') {
@@ -110,7 +130,7 @@ export class Service implements IService {
         return this.execute('Application', 'logout');
     };
 
-    public execute(adapter: string, method: string, params?: any): Promise<any> {
+    public execute(adapter: string, method: string, params?: any): Promise<IData> {
         let data = {
             adapter: adapter,
             method: method,
@@ -118,8 +138,29 @@ export class Service implements IService {
         };
         let promise = new Promise((resolve, reject) => {
             Ajax.post(this.url, data, (result) => {
-                let r = JSON.parse(result);
-                resolve(r);
+                // cutting php debug info
+                if (typeof result === 'string' && result.indexOf('xdebug-error') >= 0)
+                {
+                    let xdebug = result.substr(0, result.indexOf('</table></font>'));
+                    let s = result.substr(result.indexOf('</table></font>') + 16); 
+                    let res = Ajax.parseJSON(s);
+                    result = {
+                        data: res.data ? res.data : res,
+                        error: res.error ? res.error : xdebug,
+                        xdebug: xdebug
+                    };   
+                }
+                // handling response
+                if (result && result.error) {
+                    let msg = result.error;
+                    if (result.xdebug) {
+                        msg += '<br>' + result.xdebug;
+                    }
+                    application.showMessage(msg);
+                    reject(result);
+                }
+                else
+                    resolve(result);    
             });
         });
         return promise;

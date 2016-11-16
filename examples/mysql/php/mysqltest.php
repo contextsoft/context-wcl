@@ -1,9 +1,10 @@
 <?php
 require('./../../../src/php/service.php');
 
-class Employee extends DbObject {
-    public $tableName = 'employee';
+class World extends DbObject {
+    public $tableName = 'country';
 } 
 
+Application::$instance->handleRequest();
 
 ?>

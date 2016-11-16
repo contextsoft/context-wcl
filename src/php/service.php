@@ -1,61 +1,87 @@
 <?php
 
-$application = new Application();
-global $application;
-$application->handleRequest();
+/** Global Application instance */
+Application::$instance = new Application();
 
+class Response {
+    public $error;
+    public $data;
+}
+
+/** Basic interface that handled requests, stores session info and database connection **/
 class Application 
 {
+    public static $instance;
+    public $configFilePath = 'config.ini';
+
     protected $connection;
     protected $session;
+    protected $response;
+
+    public function __construct() {
+    }
+
+    /** Appends error to the response */
+    public function error($error) {
+        $this->response->error = isset($this->response->error)? $this->response->error. "<br>" . $error : $error;    
+    }    
     
+    /** Returns MySQLi object connected to a database described at the Application::$configFilePath */
     public function getConnection() {
-        if (!isset($this->connection))
+        if (!isset($this->connection) || $this->connection)
             $this->connectToDb();
-        if (!isset($this->connection))
-            return mysqli_connect_error();
         return $this->connection;
     }
     
+    /** Returns Session object */
     public function getSession() {
         if (!$this->session)
             $this->session = new UserSession();
         return $this->session;
     }
     
+    /** Handles POST request
+     *  Creates instance of a class and calls its method if request is: {adapter: "className", method: "classMethod", params: ""}
+    */
     public function handleRequest() {
         $adapter = null;
         $method = null;
         $params = null;
-        $res = null;
-        if(isset($_POST['adapter'])) 
-            $adapter = $_POST['adapter'];
-        if(isset($_POST['method'])) 
-            $method = $_POST['method'];
-        if(isset($_POST['params'])) 
-            $params = $_POST['params'];
-        if(isset($adapter) && isset($method)) {
-            $this->getSession();
-            if (strcasecmp($adapter, 'Application') == 0)
-                $obj = $this;
-            else if (strcasecmp($adapter, 'UserSession') == 0)
-                $obj = $this->getSession();
-            else
-                $obj = new $adapter();
-            $res = $obj->$method($params);
+        $this->response = new Response();
+
+        try {
+            if(isset($_POST['adapter'])) 
+                $adapter = $_POST['adapter'];
+            if(isset($_POST['method'])) 
+                $method = $_POST['method'];
+            if(isset($_POST['params'])) 
+                $params = $_POST['params'];
+            if(isset($adapter) && isset($method)) {
+                $this->getSession();
+                if (strcasecmp($adapter, 'Application') == 0)
+                    $obj = $this;
+                else if (strcasecmp($adapter, 'UserSession') == 0)
+                    $obj = $this->getSession();
+                else
+                    $obj = new $adapter();
+                $this->response->data = $obj->$method($params);
+            }
         }
-        echo json_encode($res);
+        catch (Exception $e) {
+            $this->error($e->getMessage());       
+        }
+        echo json_encode($this->response);
     }
 
     protected function connectToDb() {
-        $config = parse_ini_file('../config.ini'); 
-        $this->$connection = mysqli_connect($config['host'], $config['username'], $config['password'], $config['dbname']);
-        if($this->connection === false) {
-            $this->connection = null;  
-        }        
+        $config = parse_ini_file(Application::$instance->configFilePath); 
+        $this->connection = mysqli_connect($config['host'], $config['username'], $config['password'], $config['dbname']);
+        if (!$this->connection)
+            throw new Exception(mysqli_connect_error()); 
     }
 }
 
+/** Stores session info */
 class UserSession 
 {
     public function __construct() {
@@ -80,6 +106,7 @@ class UserSession
     }
 }
 
+/** Basic interface to access database **/
 class DbObject 
 {
     public $tableName;
@@ -90,11 +117,15 @@ class DbObject
     }
     
     public function getConnection() {
-        return $app->getConnection();
+        return Application::$instance->getConnection();
     }
     
     public function select($params) {
-        return $this->getConnection()->query('select * from '.$this->tableName());
+        $con = $this->getConnection();
+        $data = $con->query('select * from '.$this->tableName);
+        if ($con->error)
+            return $con->error;
+        return $data; 
     }
     
     public function insert($params) {
@@ -106,7 +137,7 @@ class DbObject
     }
     
     public function delete($params) {
-        $this->getConnection()->query('delete from '.$this->tableName().' where '.$this->idField().' = '.$params[$this->idField()]);
+        $this->getConnection()->query('delete from '.$this->tableName.' where '.$this->idField.' = '.$params[$this->idField]);
     }
 }
 
