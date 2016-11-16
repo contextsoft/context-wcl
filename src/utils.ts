@@ -346,7 +346,7 @@ export namespace utils {
         let res = '';
         for (let i in style)
             res += i + ' = ' + style[i] + '\n';
-        return res;        
+        return res;
     }
 
     /** Convert any value to string if necessary */
@@ -498,6 +498,7 @@ export namespace utils {
 
 // Object extensions, polyfill
 
+/*
 declare global {
     interface Array<T> {
         indexOfObject(field, value): number;
@@ -545,6 +546,7 @@ Array.prototype.move = function (old_index, new_index) {
     this.splice(new_index, 0, this.splice(old_index, 1)[0]);
     return this;
 };
+*/
 
 /*
 declare global {

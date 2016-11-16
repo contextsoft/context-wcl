@@ -1,5 +1,6 @@
 import {
-    Application, ScreenView, HeaderView, FooterView, Dialog, TextView, Ajax, Service
+    Application, ScreenView, HeaderView, FooterView, TextView, Ajax, Service, DataSet,
+    RecordSetSource, GridView
 } from 'context-wcl';
 
 import { config } from './config';
@@ -22,8 +23,19 @@ class MainScreen extends ScreenView {
     protected initComponents() {
         this.createHeaderFooter();
 
+        // mysql
+        let dataSet = new DataSet('World');
+        let recSource = new RecordSetSource();
+        let grid = new GridView(this);
+        grid.data.dataSource = recSource;
+
+        dataSet.fill().then((records) => {
+            recSource.records = records;
+        });
+
+        /*
         // xhr post
-        /*let label1 = new TextView(this);
+        let label1 = new TextView(this);
         label1.text = 'Here should be server respond';
         label1.doNotEscapeHtml = true;
         Ajax.post(
@@ -31,21 +43,19 @@ class MainScreen extends ScreenView {
             { adapter: 'UserSession', method: 'getSessionInfo' },
             (data) => {
                 label1.text = data;
-            });*/
-
-        // service
-        let svc = <Service>application.service;
+            });
 
         // session info
-        /*let label2 = new TextView(this);
+        let label2 = new TextView(this);
         label2.text = 'Here should be server respond';
         label2.doNotEscapeHtml = true;
         svc.execute('UserSession', 'getSessionInfo').then(
             (data) => {
                 label2.text = JSON.stringify(data);
-            });*/
-
-        // mysql
+            }); 
+        
+        // service
+        let svc = <Service>application.service;
         let label3 = new TextView(this);
         label3.text = 'Here should be server respond';
         label3.doNotEscapeHtml = true;
@@ -54,6 +64,7 @@ class MainScreen extends ScreenView {
                 label3.text = JSON.stringify(response.data);
             }
         );
+        */
     }
 
     protected createHeaderFooter() {

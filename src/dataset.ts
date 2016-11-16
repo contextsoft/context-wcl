@@ -1,22 +1,30 @@
 import { utils } from './utils';
 import { IRecord } from './data';
 import { application } from './application';
-import { IService } from './service';
+import { IService, IResponse } from './service';
 
 export class DataSet {
+    public adapter: string;
+    public service: IService;
+    //public tables: DataTable[];
 
-    adapter: string;
-    service: IService;
-    tables: DataTable[];
+    public records: IRecord[];
+    public fields: any[];
 
-    getService(): IService {
-        return this.service || application.mainService;
+    constructor(adapter?: string) {
+        this.adapter = adapter;
     }
 
-    fill(): Promise<any> {
-        return this.getService().execute(this.adapter, 'select').then((data) => {
-            // fill tables with data
+    public fill(): Promise<IRecord[]> {
+        return this.getService().execute(this.adapter, 'select').then((response: IResponse) => {
+            this.records = response.data.rows;
+            this.fields = response.data.fields;
+            return this.records;
         });
+    }
+
+    protected getService(): IService {
+        return this.service || application.service;
     }
 }
 

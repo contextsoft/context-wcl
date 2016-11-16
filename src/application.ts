@@ -17,7 +17,7 @@ export interface IAppConfig {
     serviceUrl?: string;
     /** Debug mode e.g. will display service callstack on errors */
     debug?: boolean;
-    /** If debug=true && showServiceRawOutput=true will display service raw output instead of service returned callstack on errors, e.g. handy when xdebug or similar installed */  
+    /** If debug=true && showServiceRawOutput=true will display service raw output instead of service returned callstack on errors, e.g. handy when xdebug or similar installed */
     showServiceRawOutput?: boolean;
     libraries?: any;
 }
@@ -63,9 +63,6 @@ export class Application {
 
     /** Used as temporary application-wide storage */
     public sessionInfo: any;
-
-    /** Reference to the main application service - optional */
-    public mainService: IService = null;
 
     /** Fires on after application after loaded and inited */
     public onReady: IVoidEvent;
@@ -158,8 +155,8 @@ export class Application {
     /** Shows localized alert */
     public showMessage(msg: string) {
         if (msg && msg !== '')
-           //alert(this.L(msg));
-           Dialog.showDialog(msg);
+            //alert(this.L(msg));
+            Dialog.showDialog(msg);
     }
 
     /** Throws localized exception */

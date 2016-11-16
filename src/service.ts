@@ -3,7 +3,7 @@
 import { utils } from './Utils';
 import { application } from './Application';
 
-interface IData {
+export interface IResponse {
     data: any;
     error?: string;
     errorCallstack?: string;
@@ -19,27 +19,8 @@ export interface IService {
     username: string;
     login(username?: string, password?: string): Promise<any>;
     logout();
-    execute(className: string, methodName: string, params?: any): Promise<string>;
+    execute(className: string, methodName: string, params?: any): Promise<IResponse>;
 }
-
-/*export class Promise {
-    protected onData: IOnData;
-    protected next: Promise;
-
-    public then(onData: IOnData): Promise {
-        this.onData = onData;
-        this.next = new Promise();
-        return this.next;
-    };
-
-    public invoke(data: any) {
-        let nextData = {};
-        if (this.onData)
-            nextData = this.onData(data) || data;
-        if (this.next)
-            this.next.invoke(nextData);
-    }
-}*/
 
 export class Ajax {
     public static parseJSON(data: string) {
@@ -130,7 +111,7 @@ export class Service implements IService {
         return this.execute('Application', 'logout');
     };
 
-    public execute(adapter: string, method: string, params?: any): Promise<IData> {
+    public execute(adapter: string, method: string, params?: any): Promise<IResponse> {
         let data = {
             adapter: adapter,
             method: method,
@@ -138,31 +119,43 @@ export class Service implements IService {
         };
         let promise = new Promise((resolve, reject) => {
             Ajax.post(this.url, data, (result) => {
-                // cutting php debug info
-                if (typeof result === 'string' && result.indexOf('{"data":') >= 0)
-                {
-                    let raw = result.substr(0, result.indexOf('{"data":'));
-                    let s = result.substr(result.indexOf('{"data":')); 
-                    let res = Ajax.parseJSON(s);
-                    result = {
-                        data: res.data ? res.data : res,
-                        error: res.error ? res.error : raw,
-                        errorCallstack: res.errorCallstack ? res.errorCallstack : ''
-                    };  
+
+                // cutting php raw output
+                if (typeof result === 'string') {
+                    let raw;
+                    if (result.indexOf('{"data":') >= 0) {
+                        raw = result.substr(0, result.indexOf('{"data":'));
+                        let s = result.substr(result.indexOf('{"data":'));
+                        let res = Ajax.parseJSON(s);
+                        result = {
+                            data: res.data ? res.data : res,
+                            error: res.error ? res.error : raw,
+                            errorCallstack: res.errorCallstack ? res.errorCallstack : ''
+                        };
+                    }
+                    else {
+                        raw = result;
+                        result = {
+                            data: '',
+                            error: 'Parse error',
+                            errorCallstack: raw
+                        };
+                    }
                     if (application.config.showServiceRawOutput)
-                        result.errorCallstack = raw; 
+                        result.errorCallstack = raw;
                 }
+
                 // handling response
                 if (result && result.error) {
                     let msg = result.error;
                     if (application.config.debug && result.errorCallstack) {
-                        msg += '<br><font size="1">' + result.errorCallstack + '</font>';
+                        msg += '<div style="font-weight: normal; font-size: small; color: rgba(0,0,0,0.8);">' + result.errorCallstack + '</div>';
                     }
                     application.showMessage(msg);
                     reject(result);
                 }
                 else
-                    resolve(result);    
+                    resolve(result);
             });
         });
         return promise;
