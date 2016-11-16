@@ -50,11 +50,8 @@ class MainScreen extends ScreenView {
         label3.text = 'Here should be server respond';
         label3.doNotEscapeHtml = true;
         svc.execute('World', 'select').then(
-            (data) => {
-                label3.text = JSON.stringify(data);
-            },
-            (error) => {
-                label3.text = error;
+            (response) => {
+                label3.text = JSON.stringify(response.data);
             }
         );
     }

@@ -15,7 +15,10 @@ export interface IAppConfig {
     appUrl?: string;
     /** Service URL e.g. PHP handler */
     serviceUrl?: string;
+    /** Debug mode e.g. will display service callstack on errors */
     debug?: boolean;
+    /** If debug=true && showServiceRawOutput=true will display service raw output instead of service returned callstack on errors, e.g. handy when xdebug or similar installed */  
+    showServiceRawOutput?: boolean;
     libraries?: any;
 }
 

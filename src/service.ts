@@ -6,7 +6,7 @@ import { application } from './Application';
 interface IData {
     data: any;
     error?: string;
-    xdebug?: string;
+    errorCallstack?: string;
 }
 
 interface IOnData {
@@ -139,22 +139,24 @@ export class Service implements IService {
         let promise = new Promise((resolve, reject) => {
             Ajax.post(this.url, data, (result) => {
                 // cutting php debug info
-                if (typeof result === 'string' && result.indexOf('xdebug-error') >= 0)
+                if (typeof result === 'string' && result.indexOf('{"data":') >= 0)
                 {
-                    let xdebug = result.substr(0, result.indexOf('</table></font>'));
-                    let s = result.substr(result.indexOf('</table></font>') + 16); 
+                    let raw = result.substr(0, result.indexOf('{"data":'));
+                    let s = result.substr(result.indexOf('{"data":')); 
                     let res = Ajax.parseJSON(s);
                     result = {
                         data: res.data ? res.data : res,
-                        error: res.error ? res.error : xdebug,
-                        xdebug: xdebug
-                    };   
+                        error: res.error ? res.error : raw,
+                        errorCallstack: res.errorCallstack ? res.errorCallstack : ''
+                    };  
+                    if (application.config.showServiceRawOutput)
+                        result.errorCallstack = raw; 
                 }
                 // handling response
                 if (result && result.error) {
                     let msg = result.error;
-                    if (result.xdebug) {
-                        msg += '<br>' + result.xdebug;
+                    if (application.config.debug && result.errorCallstack) {
+                        msg += '<br><font size="1">' + result.errorCallstack + '</font>';
                     }
                     application.showMessage(msg);
                     reject(result);

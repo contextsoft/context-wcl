@@ -4,8 +4,9 @@
 Application::$instance = new Application();
 
 class Response {
-    public $error;
     public $data;
+    public $error;
+    public $errorCallstack;
 }
 
 /** Basic interface that handled requests, stores session info and database connection **/
@@ -22,9 +23,10 @@ class Application
     }
 
     /** Appends error to the response */
-    public function error($error) {
-        $this->response->error = isset($this->response->error)? $this->response->error. "<br>" . $error : $error;    
-    }    
+    public function handleException($e) {
+        $this->response->error = $e->getMessage();
+        $this->response->errorCallstack = nl2br('Exception at:<br>'.$e->getTraceAsString());
+   }    
     
     /** Returns MySQLi object connected to a database described at the Application::$configFilePath */
     public function getConnection() {
@@ -68,7 +70,12 @@ class Application
             }
         }
         catch (Exception $e) {
-            $this->error($e->getMessage());       
+            $this->handleException($e);
+            /*if (function_exists('xdebug_print_function_stack')) {
+                xdebug_print_function_stack($e->getMessage());        
+                echo json_encode($this->response);
+                return;
+            }*/
         }
         echo json_encode($this->response);
     }
@@ -124,7 +131,7 @@ class DbObject
         $con = $this->getConnection();
         $data = $con->query('select * from '.$this->tableName);
         if ($con->error)
-            return $con->error;
+            throw new Exception($con->error);
         return $data; 
     }
     
