@@ -3,6 +3,7 @@
 .CtxGridView {
     overflow: hidden;
     min-height: 100px;
+    height: inherit;
 }
 
 .CtxGridView .ctx_view_client_area {

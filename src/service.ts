@@ -119,10 +119,9 @@ export class Service implements IService {
         };
         let promise = new Promise((resolve, reject) => {
             Ajax.post(this.url, data, (result) => {
-
                 // cutting php raw output
+                let raw = '';
                 if (typeof result === 'string') {
-                    let raw;
                     if (result.indexOf('{"data":') >= 0) {
                         raw = result.substr(0, result.indexOf('{"data":'));
                         let s = result.substr(result.indexOf('{"data":'));
@@ -141,8 +140,8 @@ export class Service implements IService {
                             errorCallstack: raw
                         };
                     }
-                    if (application.config.showServiceRawOutput)
-                        result.errorCallstack = raw;
+                    //if (application.config.showServiceRawOutput)
+                    //    result.errorCallstack = raw;
                 }
 
                 // handling response
@@ -150,6 +149,7 @@ export class Service implements IService {
                     let msg = result.error;
                     if (application.config.debug && result.errorCallstack) {
                         msg += '<div style="font-weight: normal; font-size: 12px; color: rgba(0,0,0,0.8);">' + result.errorCallstack + '</div>';
+                        msg += raw;
                     }
                     application.showMessage(msg);
                     reject(result);

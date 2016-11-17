@@ -1,5 +1,6 @@
 import { utils } from './utils';
 import { IFuture } from './component';
+import { TableDataSet } from './dataset';
 
 /** 
  * Enumeration of possible data types for fields 
@@ -629,5 +630,22 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
             if (filter(this.getRecord(i)))
                 newFilteredRecs.push(i);
         this._filteredRecords = newFilteredRecs;
+    }
+}
+
+export class TableDataSource extends RecordSetSource {
+    public dataSet: TableDataSet;
+
+    constructor(dataSet?: TableDataSet) {
+        super();
+        this.dataSet = dataSet;
+    }
+
+    public fill(): Promise<IRecord[]> {
+        return this.dataSet.fill().then((records: IRecord[]) => {
+            this.records = records;
+            this.notifyLinks(EventType.Refreshed);
+            return records;
+        });
     }
 }

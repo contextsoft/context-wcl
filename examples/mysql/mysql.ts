@@ -1,6 +1,6 @@
 import {
-    Application, ScreenView, HeaderView, FooterView, TextView, Ajax, Service, DataSet,
-    RecordSetSource, GridView
+    Application, ScreenView, HeaderView, FooterView, TextView, Ajax, Service, TableDataSource, TableDataSet,
+    GridView, PanelView, Align
 } from 'context-wcl';
 
 import { config } from './config';
@@ -23,17 +23,41 @@ class MainScreen extends ScreenView {
     protected initComponents() {
         this.createHeaderFooter();
 
-        // mysql
-        let dataSet = new DataSet('World');
-        let recSource = new RecordSetSource();
-        let grid = new GridView(this);
-        grid.data.dataSource = recSource;
+        // controls 
 
-        dataSet.fill().then((records) => {
-            recSource.records = records;
-        });
+        let clientPanel = new PanelView(this);
+        clientPanel.style = 'position: absolute; width: 100%; top: 30px; bottom: 30px;';
+        clientPanel.alignChildren = true;
 
-        /*
+        let topPanel = new PanelView(clientPanel);
+        topPanel.style = 'height: 200px; border-bottom: 1px solid #c1c1c1;';
+        topPanel.align = Align.top;
+
+        let bottomPanel = new PanelView(clientPanel);
+        bottomPanel.align = Align.client;
+
+        let grid = new GridView(bottomPanel);
+        grid.fixedHeader = true;
+
+        // binding data
+
+        let dataSet = new TableDataSet('World');
+        let dataSource = new TableDataSource(dataSet);
+
+        grid.data.dataSource = dataSource;
+        dataSource.fill();
+    }
+
+    protected createHeaderFooter() {
+        let header = new HeaderView(this, 'header');
+        header.text = 'Context Web Components Library - Test Project';
+        let footer = new FooterView(this, 'footer');
+        footer.text = '(c) 2016 Context Software LLC.';
+        header.style = footer.style = 'min-height: 30px; padding-top: 6px;';
+        this.style = 'margin-top: 40px; margin-bottom: 40px;';
+    }
+
+    /*protected otherTests() {
         // xhr post
         let label1 = new TextView(this);
         label1.text = 'Here should be server respond';
@@ -49,11 +73,11 @@ class MainScreen extends ScreenView {
         let label2 = new TextView(this);
         label2.text = 'Here should be server respond';
         label2.doNotEscapeHtml = true;
-        svc.execute('UserSession', 'getSessionInfo').then(
+        application.service.execute('UserSession', 'getSessionInfo').then(
             (data) => {
                 label2.text = JSON.stringify(data);
-            }); 
-        
+            });
+
         // service
         let svc = <Service>application.service;
         let label3 = new TextView(this);
@@ -64,16 +88,5 @@ class MainScreen extends ScreenView {
                 label3.text = JSON.stringify(response.data);
             }
         );
-        */
-    }
-
-    protected createHeaderFooter() {
-        let header = new HeaderView(this, 'header');
-        header.text = 'Context Web Components Library - Test Project';
-        let footer = new FooterView(this, 'footer');
-        footer.text = '(c) 2016 Context Software LLC.';
-        header.style = footer.style = 'min-height: 30px; padding-top: 6px;';
-        this.style = 'margin-top: 40px; margin-bottom: 40px;';
-    }
-
+    }*/
 }

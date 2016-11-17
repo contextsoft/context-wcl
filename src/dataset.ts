@@ -3,13 +3,10 @@ import { IRecord } from './data';
 import { application } from './application';
 import { IService, IResponse } from './service';
 
-export class DataSet {
+export class TableDataSet {
     public adapter: string;
     public service: IService;
-    //public tables: DataTable[];
-
     public records: IRecord[];
-    public fields: any[];
 
     constructor(adapter?: string) {
         this.adapter = adapter;
@@ -17,8 +14,7 @@ export class DataSet {
 
     public fill(): Promise<IRecord[]> {
         return this.getService().execute(this.adapter, 'select').then((response: IResponse) => {
-            this.records = response.data.rows;
-            this.fields = response.data.fields;
+            this.records = response.data.records;
             return this.records;
         });
     }

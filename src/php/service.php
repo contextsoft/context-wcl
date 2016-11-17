@@ -36,10 +36,8 @@ class Application
             if(isset($adapter) && isset($method)) {
                 // starting session
                 Application::getSession();
-                if (strcasecmp($adapter, 'Application') == 0)
-                    $obj = $this;
-                else if (strcasecmp($adapter, 'UserSession') == 0)
-                    $obj = $this->getSession();
+                if (strcasecmp($adapter, 'UserSession') == 0)
+                    $obj = Application::getSession();
                 else
                     $obj = new $adapter();
                 if (isset($obj))
@@ -125,7 +123,7 @@ class DbObject
         $con = $this->getConnection();
         $query = $con->query('select * from '.$this->tableName);
         $data = array();
-        $data['rows'] = $query->fetchAll(PDO::FETCH_ASSOC);
+        $data['records'] = $query->fetchAll(PDO::FETCH_ASSOC);
         return $data; 
     }
     
