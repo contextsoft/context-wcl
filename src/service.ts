@@ -149,7 +149,7 @@ export class Service implements IService {
                 if (result && result.error) {
                     let msg = result.error;
                     if (application.config.debug && result.errorCallstack) {
-                        msg += '<div style="font-weight: normal; font-size: small; color: rgba(0,0,0,0.8);">' + result.errorCallstack + '</div>';
+                        msg += '<div style="font-weight: normal; font-size: 12px; color: rgba(0,0,0,0.8);">' + result.errorCallstack + '</div>';
                     }
                     application.showMessage(msg);
                     reject(result);

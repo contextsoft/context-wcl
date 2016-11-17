@@ -1,4 +1,5 @@
 <?php
+include('config.php');
 require('./../../../src/php/service.php');
 
 class World extends DbObject {

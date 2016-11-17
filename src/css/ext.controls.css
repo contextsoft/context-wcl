@@ -247,8 +247,7 @@
 
 @media (max-width: 767px) {
     .CtxModalView .cxtModalContainer {
-        min-width: 150px;
-        max-width: 300px;
+        min-width: 200px;
     }
 }
 

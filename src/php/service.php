@@ -12,29 +12,19 @@ class Response {
 /** Basic interface that handled requests, stores session info and database connection */
 class Application 
 {
-    public $configFilePath = 'config.ini';
-
-    protected static $instance;
-    protected $connection;
-    protected $session;
-    protected $response;
-    
-    public function __construct() {
-        Application::$instance = $this;
-    } 
+    protected static $connection;
+    protected static $session;
+    protected static $response;
     
     /** Handles POST request
      *  Creates instance of a class and calls its method if request is: {adapter: "className", method: "classMethod", params: ""}
     */
     public static function handleRequest() {
-        Application::$instance->doHandleRequest();        
-    }
-    protected function doHandleRequest() {
         $obj = null;
         $adapter = null;
         $method = null;
         $params = null;
-        $this->response = new Response();
+        $response = new Response();
 
         try {
             if(isset($_POST['adapter'])) 
@@ -44,7 +34,8 @@ class Application
             if(isset($_POST['params'])) 
                 $params = $_POST['params'];
             if(isset($adapter) && isset($method)) {
-                $this->getSession();
+                // starting session
+                Application::getSession();
                 if (strcasecmp($adapter, 'Application') == 0)
                     $obj = $this;
                 else if (strcasecmp($adapter, 'UserSession') == 0)
@@ -52,46 +43,40 @@ class Application
                 else
                     $obj = new $adapter();
                 if (isset($obj))
-                    $this->response->data = $obj->$method($params);
+                    $response->data = $obj->$method($params);
             }
         }
         catch (Exception $e) {
-            $this->handleException($e);
+            Application::handleException($e, $response);
         }
-        echo json_encode($this->response);
+        echo json_encode($response);
     }
 
-    /** Returns MySQLi object connected to a database described at the Application::$configFilePath */
+    /** Returns PDO object connected to a database, see config.php for configuration */
     public static function getConnection() {
-        return Application::$instance->doGetConnection(); 
+        if (!isset(Application::$connection) || !Application::$connection)
+            Application::connectToDb();
+        return Application::$connection;
     }
-    protected function doGetConnection() {
-        if (!isset($this->connection) || $this->connection)
-            $this->connectToDb();
-        return $this->connection;
+
+    /** Connects to DB */
+    protected static function connectToDb() {
+        if(!class_exists('DatabaseConfig'))
+            throw new Exception('Database not configured.'); 
+        Application::$connection = new PDO(DatabaseConfig::$dsn, DatabaseConfig::$username, DatabaseConfig::$password);
     }
-    
+
     /** Returns Session object */
     public static function getSession() {
-         return Application::$instance->doGetSession();    
-    }
-    protected function doGetSession() {
-        if (!$this->session)
-            $this->session = new UserSession();
-        return $this->session;
-    }
-
-    protected function connectToDb() {
-        $config = parse_ini_file(Application::$instance->configFilePath); 
-        $this->connection = mysqli_connect($config['host'], $config['username'], $config['password'], $config['dbname']);
-        if (!$this->connection)
-            throw new Exception(mysqli_connect_error()); 
+        if (!Application::$session)
+            Application::$session = new UserSession();
+        return Application::$session;
     }
 
     /** Appends error to the response */
-    protected function handleException($e) {
-        $this->response->error = $e->getMessage();
-        $this->response->errorCallstack = nl2br('<br>Exception at:<br>'.$e->getTraceAsString());
+    protected static function handleException($e, $response) {
+        $response->error = $e->getMessage();
+        $response->errorCallstack = nl2br('<br>Exception at:<br>'.$e->getTraceAsString());
     }    
     
 }
@@ -139,28 +124,9 @@ class DbObject
     public function select($params) {
         $con = $this->getConnection();
         $query = $con->query('select * from '.$this->tableName);
-        if ($con->error)
-            throw new Exception($con->error);
-        if (!$query)
-            return;
-        try {
-            $data = array();
-
-            $finfo = $query->fetch_fields();
-
-            // fields
-            foreach ($finfo as $val) 
-                $data['fields'][] = $val;
-
-            // rows
-            while ($row = $query->fetch_assoc()) 
-                $data['rows'][] = $row;
-            
-            return $data; 
-        }
-        finally {
-            $query->free();
-        }
+        $data = array();
+        $data['rows'] = $query->fetchAll(PDO::FETCH_ASSOC);
+        return $data; 
     }
     
     public function insert($params) {
