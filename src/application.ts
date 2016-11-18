@@ -17,7 +17,7 @@ export interface IAppConfig {
     serviceUrl?: string;
     /** Debug mode e.g. will display service callstack on errors */
     debug?: boolean;
-    /** If debug=true && showServiceRawOutput=true error dialog will show service raw output e.g. warnings, errors etc. */
+    /** Show or not service raw output on error dialog e.g. for PHP its an errors, warnings etc. */
     showServiceRawOutput?: boolean;
     libraries?: any;
 }

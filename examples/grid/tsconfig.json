@@ -2,6 +2,11 @@
     "compilerOptions": {
         "target": "es5",
         "module": "amd",
+        "lib": [
+            "dom",
+            "es2015.promise",
+            "es5"
+        ],
         "preserveConstEnums": true,
         "outFile": "grid.js",
         // "outDir": "./dist",        

@@ -136,12 +136,10 @@ export class Service implements IService {
                         raw = result;
                         result = {
                             data: '',
-                            error: 'Parse error',
-                            errorCallstack: raw
+                            error: 'Service error',
+                            errorCallstack: ''
                         };
                     }
-                    //if (application.config.showServiceRawOutput)
-                    //    result.errorCallstack = raw;
                 }
 
                 // handling response
@@ -149,8 +147,9 @@ export class Service implements IService {
                     let msg = result.error;
                     if (application.config.debug && result.errorCallstack) {
                         msg += '<div style="font-weight: normal; font-size: 12px; color: rgba(0,0,0,0.8);">' + result.errorCallstack + '</div>';
-                        msg += raw;
                     }
+                    if (application.config.showServiceRawOutput && raw)
+                        msg += '<div style="margin-top: 10px"' + raw + '</div>';
                     application.showMessage(msg);
                     reject(result);
                 }

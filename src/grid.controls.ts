@@ -83,6 +83,8 @@ export class GridView extends View {
     /** Creates grid columns from data.dataSource */
     public createDefaultColumns() {
         let ds = this.data.dataSource;
+        if (!ds)
+            return;
         if (this.columns.length > 0)
             return;
         if (ds.fields.length > 0)
@@ -168,6 +170,9 @@ export class GridView extends View {
         this.innerListId = 'ctx_grid_body_' + (++GridView.innerGridCounter).toString();
         let ds = <IRecordSetSource>this.data.dataSource;
         let rec: IRecord;
+
+        if (!ds)
+            return;
 
         //let rows = utils.formatStr('<div class="ctx_grid_body_outer">\n<div class="ctx_grid_body_scroller">\n<div class="ctx_grid_body" id="{0}">\n',
         //     [this.innerListId.toString()]);

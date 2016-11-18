@@ -42,7 +42,7 @@ export class RecordSetSourceAction extends BaseAction {
         this.setDefaults();
         this.updateAction();
         if (this.timeToUpdateTargets())
-            this.notifyTargets()
+            this.notifyTargets();
     };
     get dataSource(): IRecordSetSource { return this.link.dataSource; }
     set dataSource(value: IRecordSetSource) { this.link.dataSource = value; }

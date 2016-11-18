@@ -62,6 +62,7 @@ class Application
         if(!class_exists('DatabaseConfig'))
             throw new Exception('Database not configured.'); 
         Application::$connection = new PDO(DatabaseConfig::$dsn, DatabaseConfig::$username, DatabaseConfig::$password);
+        Application::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
     /** Returns Session object */
@@ -136,7 +137,7 @@ class DbObject
     }
     
     public function delete($params) {
-        $this->getConnection()->query('delete from '.$this->tableName.' where '.$this->idField.' = '.$params[$this->idField]);
+        $this->getConnection()->exec('delete from '.$this->tableName.' where '.$this->idField.' = '.$params[$this->idField]);
     }
 }
 

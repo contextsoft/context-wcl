@@ -645,6 +645,7 @@ export class TableDataSource extends RecordSetSource {
         return this.dataSet.fill().then((records: IRecord[]) => {
             this.records = records;
             this.notifyLinks(EventType.Refreshed);
+            this.setState(RecordState.Browse);
             return records;
         });
     }
