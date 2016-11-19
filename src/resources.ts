@@ -110,6 +110,7 @@ export class ResourseLoader {
     }
 
     protected baseUri(baseUri: string, uri: string) {
+        uri = uri || ''; // make sure to avoid null here
         if (uri == '')
             return uri;
         if (baseUri && baseUri.length > 0 && uri.indexOf(baseUri) === 0)

@@ -1,7 +1,7 @@
 <?php
 
 /** Initialazing global Application instance */
-new Application();
+new Application(); // MB++ question: why instantiate it, you're using only static method?
 
 class Response {
     public $data;
@@ -32,14 +32,22 @@ class Application
             if(isset($_POST['method'])) 
                 $method = $_POST['method'];
             if(isset($_POST['params'])) 
-                $params = $_POST['params'];
+                $params = $_POST['params']; // I think you need to use json_decode on params
             if(isset($adapter) && isset($method)) {
                 // starting session
-                Application::getSession();
-                if (strcasecmp($adapter, 'UserSession') == 0)
-                    $obj = Application::getSession();
+                Application::getSession(); // if we need it - we should start it anyway
+
+                /*
+                  WARNING! Security problem. We are allowing to effectively invoke any class on server using its name.
+                  We should somehow control that by testing that class's property and only 
+                  allow to call "controller" classes.
+                */
+
+                if (strcasecmp($adapter, 'UserSession') == 0) // MB++: not sure if we should allow calling this thing like that, I would rather created a separate controller for it
+                    $obj = Application::getSession(); // MB++: no need to call it again if you called it above. Also, the method should take $params parameter
                 else
                     $obj = new $adapter();
+
                 if (isset($obj))
                     $response->data = $obj->$method($params);
             }
