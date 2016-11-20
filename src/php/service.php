@@ -1,8 +1,5 @@
 <?php
 
-/** Initialazing global Application instance */
-new Application();
-
 class Response
 {
     public $data;
@@ -46,7 +43,12 @@ class Application
             }
             if (isset($adapter) && isset($method)) {
                 // starting session
-                Application::getSession();
+                Application::getSession(); // if we need it - we should start it anyway
+                /*
+                   WARNING! Security problem. We are allowing to effectively invoke any class on server using its name.
+                   We should somehow control that by testing that class's property and only 
+                   allow to call "controller" classes.
+                 */
                 if (strcasecmp($adapter, 'UserSession') == 0) {
                     $obj = Application::getSession();
                 } else {
