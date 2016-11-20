@@ -413,10 +413,21 @@ export class RecordSource extends BaseSource implements IRecordSource {
     }
 }
 
+
 /**
  * Implementation of record set source for an array of objects 
  */
 export class RecordSetSource extends BaseSource implements IRecordSetSource, IUpdatable {
+    public static changeActions() {
+        return {
+            post: 'post',
+            cancel: 'cancel'
+        };
+    }
+
+    /** Action perfomed on dataSet scroll, refresh etc. See RecordSetSource.changeActions()  */
+    public changeAction = RecordSetSource.changeActions().cancel;
+
     protected _records: IRecord[] = [];
     protected _curIndex = -1;
     protected _state: RecordState;
@@ -424,6 +435,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
     protected _fields: IField[] = [];
     protected _updateCounter = 0;
     protected _filteredRecords: number[] = [];
+
 
     /** Notifies DataLinks with some event and data */
     public notifyLinks(eventType: EventType, data?: any): void {
@@ -457,7 +469,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
         if (value >= this._records.length)
             value = this._records.length - 1;
         if (value != this._curIndex) {
-            this.post();
+            this.doChangeAction();
             this._curIndex = value;
             this.notifyLinks(EventType.CursorMoved);
         }
@@ -468,6 +480,13 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
             this._state = value;
             this.notifyLinks(EventType.StateChanged, value);
         }
+    }
+
+    protected doChangeAction() {
+        if (this.changeAction == RecordSetSource.changeActions().post)
+            this.post();
+        else
+            this.cancel();
     }
 
     /** Returns current record */
@@ -485,7 +504,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
     /** Sets object array as DataSource's records */
     public set records(value: IRecord[]) {
         if (value != this._records) {
-            this.post();
+            this.doChangeAction();
             this._records = value;
             this._curIndex = (value && value.length > 0) ? 0 : -1;
             this.notifyLinks(EventType.Refreshed);
@@ -524,6 +543,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
             this.setState(RecordState.Edit);
         }
     }
+
     public post(): void {
         if (this._state && this._state != RecordState.Browse) {
             this.checkCurrent();
@@ -531,29 +551,36 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
             this.setState(RecordState.Browse);
         }
     }
+
     public cancel(): void {
         if (this._state && this._state != RecordState.Browse) {
             this.checkCurrent();
-            utils.assign(this._oldValue, this.current);
-            this._oldValue = {};
-            this.setState(RecordState.Browse);
+            if (this._state == RecordState.Insert)
+                this.delete();
+            else {
+                utils.assign(this._oldValue, this.current);
+                this._oldValue = {};
+                this.setState(RecordState.Browse);
+            }
         }
     }
+
     public insert(): void {
         this.checkList();
-        this.post();
+        this.doChangeAction();
         this._records.push({});
         this._curIndex = this._records.length - 1;
         this._oldValue = {};
         this.setState(RecordState.Insert);
     }
+
     public delete(): void {
         this.checkCurrent();
-        this.cancel();
         this._records.splice(this._curIndex);
         if (this._curIndex >= this._records.length)
             this._curIndex = this._records.length - 1;
-        this.notifyLinks(EventType.CursorMoved);
+        this.setState(RecordState.Browse);
+        this.notifyLinks(EventType.Refreshed);
     }
 
     // ICursor methods
@@ -649,4 +676,26 @@ export class TableDataSource extends RecordSetSource {
             return records;
         });
     }
+
+    public post(): Promise<void> {
+        if (this._state == RecordState.Insert)
+            return this.dataSet.insertRecord(this._curIndex, ).then(() => {
+                super.post();
+            });
+        else
+            return this.dataSet.updateRecord(this._curIndex, ).then(() => {
+                super.post();
+            });
+    }
+
+    public delete(): Promise<void> {
+        if (this._state == RecordState.Insert)
+            super.delete();
+        else
+            return this.dataSet.deleteRecord(this._curIndex).then(() => {
+                super.delete();
+            });
+    }
+
+
 }

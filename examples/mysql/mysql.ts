@@ -1,11 +1,11 @@
 import {
-    Application, ScreenView, HeaderView, FooterView, TextView, Ajax, Service, TableDataSource, TableDataSet,
+    Application, ScreenView, HeaderView, FooterView, TextView, /*Ajax, Service,*/ TableDataSource, TableDataSet,
     GridView, PanelView, Align, InputView, GridLayout, Splitter, ButtonView, PostAction, EditAction, CancelAction,
     DeleteAction, InsertAction
 } from 'context-wcl';
 
 import { config } from './config';
-import { application } from 'application';
+//import { application } from 'application';
 
 export function main() {
     new MyApp(config);
@@ -38,7 +38,7 @@ class MainScreen extends ScreenView {
         topPanel.style = 'height: 220px; padding: 10px';
         topPanel.align = Align.top;
 
-        let leftLayout = new GridLayout(topPanel); 
+        let leftLayout = new GridLayout(topPanel);
 
         let idCap = new TextView(leftLayout);
         idCap.text = 'Id: ';
@@ -47,11 +47,11 @@ class MainScreen extends ScreenView {
 
         let col1Cap = new TextView(leftLayout);
         col1Cap.text = 'Col1: ';
-        let col1Edit = new InputView(leftLayout);  
+        let col1Edit = new InputView(leftLayout);
 
         let col2Cap = new TextView(leftLayout);
         col2Cap.text = 'Col2: ';
-        let col2Edit = new InputView(leftLayout);  
+        let col2Edit = new InputView(leftLayout);
 
         let col3Cap = new TextView(leftLayout);
         col3Cap.text = 'Col3: ';
@@ -62,7 +62,7 @@ class MainScreen extends ScreenView {
             [col1Cap, col1Edit],
             [col2Cap, col2Edit],
             [col3Cap, col3Edit]
-        ];  
+        ];
 
         // buttons
         let btnPanel = new PanelView(topPanel);
@@ -70,21 +70,21 @@ class MainScreen extends ScreenView {
 
         let editBtn = new ButtonView(btnPanel);
         editBtn.theme = ButtonView.themes.primary;
-        
+
         let postBtn = new ButtonView(btnPanel);
         postBtn.theme = ButtonView.themes.success;
-        
+
         let cancelBtn = new ButtonView(btnPanel);
         cancelBtn.theme = ButtonView.themes.danger;
 
         let newBtn = new ButtonView(btnPanel);
         newBtn.style = 'margin-left: 20px';
-        
+
         let delBtn = new ButtonView(btnPanel);
 
         // grid
         let splitter = new Splitter(clientPanel);
-        splitter.align = Align.top; 
+        splitter.align = Align.top;
 
         let bottomPanel = new PanelView(clientPanel, 'BottomPanel');
         bottomPanel.style = 'padding: 10px';

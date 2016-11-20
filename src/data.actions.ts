@@ -79,7 +79,7 @@ export class PostAction extends RecordSourceAction {
         this._caption = 'Post';
     }
     public updateAction() {
-        this.enabled = this.link.dataSource && (this.link.dataSource.getState() == RecordState.Edit);
+        this.enabled = this.link.dataSource && (this.link.dataSource.getState() == RecordState.Edit || this.link.dataSource.getState() == RecordState.Insert);
     }
     public execute(sender: any) {
         if (this.enabled && this.link.dataSource)
@@ -92,7 +92,7 @@ export class CancelAction extends RecordSourceAction {
         this._caption = 'Cancel';
     }
     public updateAction() {
-        this.enabled = this.link.dataSource && (this.link.dataSource.getState() == RecordState.Edit);
+        this.enabled = this.link.dataSource && (this.link.dataSource.getState() == RecordState.Edit || this.link.dataSource.getState() == RecordState.Insert);
     }
     public execute(sender: any) {
         if (this.enabled && this.link.dataSource)

@@ -1,6 +1,6 @@
 /** Server communication protocols and routines */
 
-import { utils } from './Utils';
+//import { utils } from './Utils';
 import { application } from './Application';
 
 export interface IResponse {
@@ -112,6 +112,8 @@ export class Service implements IService {
     };
 
     public execute(adapter: string, method: string, params?: any): Promise<IResponse> {
+        if (typeof params === 'object')
+            params = JSON.stringify(params);
         let data = {
             adapter: adapter,
             method: method,

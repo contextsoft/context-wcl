@@ -1,4 +1,4 @@
-import { utils } from './utils';
+//import { utils } from './utils';
 import { IRecord } from './data';
 import { application } from './application';
 import { IService, IResponse } from './service';
@@ -19,11 +19,24 @@ export class TableDataSet {
         });
     }
 
+    public updateRecord(index: number): Promise<void> {
+        return this.getService().execute(this.adapter, 'update', this.records[index]);
+    }
+
+    public insertRecord(index: number): Promise<string> {
+        return this.getService().execute(this.adapter, 'insert', this.records[index]).then((response: IResponse) => {
+            let keyField = Object.keys(response.data)[0];
+            this.records[index][keyField] = response.data[keyField];
+            return this.records[index][keyField];
+        });
+    }
+
+    public deleteRecord(index: number): Promise<void> {
+        return this.getService().execute(this.adapter, 'delete', this.records[index]);
+    }
+
     protected getService(): IService {
         return this.service || application.service;
     }
 }
 
-export class DataTable {
-    records: IRecord[];
-}
