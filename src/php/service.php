@@ -12,7 +12,6 @@ class Application
 {
     protected static $connection;
     protected static $session;
-    protected static $response;
     
     /** Handles POST request
      *  Creates instance of a class and calls its method if request is: {adapter: "className", method: "classMethod", params: ""}
