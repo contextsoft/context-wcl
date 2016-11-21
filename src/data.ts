@@ -1,6 +1,5 @@
 import { utils } from './utils';
-import { IFuture } from './component';
-import { TableDataSet } from './dataset';
+import { IFuture, InstanceFactory } from './component';
 
 /** 
  * Enumeration of possible data types for fields 
@@ -660,42 +659,139 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
     }
 }
 
-export class TableDataSource extends RecordSetSource {
-    public dataSet: TableDataSet;
+export interface IDataTable {
+    tableName: string;
+    fields: IField[];
+    records: IRecord[];
+    // adapter: TableAdapter;
+    createRecord(): IRecord;
+    internalRead(obj: any): void;
+    fill(): Promise<any>;
+    update(): Promise<any>;        
+}
 
-    constructor(dataSet?: TableDataSet) {
-        super();
-        this.dataSet = dataSet;
-    }
+export interface IDataSet {
+    tables: IDataTable[];
+    adapter: IDataSetAdapter;
+    fill(): Promise<any>;
+    update(): Promise<any>;    
+}
 
-    public fill(): Promise<IRecord[]> {
-        return this.dataSet.fill().then((records: IRecord[]) => {
-            this.records = records;
-            this.notifyLinks(EventType.Refreshed);
-            this.setState(RecordState.Browse);
-            return records;
-        });
-    }
+export class Record implements IRecord {
+}
 
-    public post(): Promise<void> {
-        if (this._state == RecordState.Insert)
-            return this.dataSet.insertRecord(this._curIndex, ).then(() => {
-                super.post();
-            });
+export class DataSet implements IDataSet {
+    tables: IDataTable[];
+    adapter: IDataSetAdapter;
+    fill(): Promise<any> {
+        return this.adapter.fill(this);
+    };
+    update(): Promise<any> {
+        return this.adapter.update(this);        
+    };        
+}
+
+export class DataTable<R extends IRecord> implements IDataTable {
+    tableName: string;
+    fields: IField[] = [];
+    records: R[] = [];
+    rowFactory: InstanceFactory<R>;
+    adapter: IDataTableAdapter;
+
+    fill(): Promise<any> {
+        return this.adapter.fill(this);
+    };
+    update(): Promise<any> {
+        return this.adapter.update(this);        
+    };        
+
+    getMetaInfo(): any {
+        if ((<any>this.rowFactory).metaInfo)
+            return (<any>this.rowFactory).metaInfo;
         else
-            return this.dataSet.updateRecord(this._curIndex, ).then(() => {
-                super.post();
-            });
+            return this.fields;
     }
 
-    public delete(): Promise<void> {
-        if (this._state == RecordState.Insert)
-            super.delete();
-        else
-            return this.dataSet.deleteRecord(this._curIndex).then(() => {
-                super.delete();
-            });
+    internalRead(obj: any): void {
+        // read from object obj		
+    };
+
+    constructor(c?: { new (): R }, owner?: DataSet, tableName?: string) {
+        this.rowFactory = c;
+        // (<any>this.rowFactory).__table = this;
+        this.tableName = tableName;
+        if (owner)
+            owner.tables.push(this);
     }
 
+    createRecord(): R {
+        let newRec;
+        if (this.rowFactory) newRec = new this.rowFactory();
+        else newRec = new Record();
+        newRec.table = this;
+        return newRec;
+    };
+
+    add(record?: R): R {
+        if (!record)
+            record = this.createRecord();
+        this.records.push(record);
+        return record;
+    }
+}
+
+export interface IDataAdapter {
+    execute(command: string, params: any): Promise<any>;
+}
+
+export interface IDataTableAdapter extends IDataAdapter {
+
+    fill(dataTable: IDataTable): Promise<any>;
+    update(dataTable: IDataTable): Promise<any>;
+    refresh(dataTable: IDataTable): Promise<any>;
 
 }
+
+export interface IDataSetAdapter extends IDataAdapter {
+
+    fill(dataSet: IDataSet): Promise<any>;
+    update(dataSet: IDataSet): Promise<any>;
+    refresh(dataSet: IDataSet): Promise<any>;
+
+}
+
+
+/** example code */
+
+/*
+
+class Customer extends Record {
+    name: string;
+    phone: string;
+    static metaInfo =
+    {
+        name: {
+            dataType: 'string',
+            dataSize: 20,
+            required: false
+        }
+    }
+}
+
+class Order extends Record {
+}
+
+class OrderDataSet extends DataSet {
+    order = new DataTable(Order, this, 'order');
+    customer = new DataTable(Customer, this, 'customer');
+}
+
+let order = new OrderDataSet();
+order.customer.edit();
+order.customer.name = 'Smith';
+order.customer.post();
+order.update();
+
+let customerTable = new DataTable(Customer);
+
+*/

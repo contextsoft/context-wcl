@@ -1,5 +1,5 @@
 //import { utils } from './utils';
-import { IRecord } from './data';
+import { IRecord, RecordSetSource, RecordState, EventType } from './data';
 import { application } from './application';
 import { IService, IResponse } from './service';
 
@@ -38,5 +38,45 @@ export class TableDataSet {
     protected getService(): IService {
         return this.service || application.service;
     }
+}
+
+export class TableDataSource extends RecordSetSource {
+    public dataSet: TableDataSet;
+
+    constructor(dataSet?: TableDataSet) {
+        super();
+        this.dataSet = dataSet;
+    }
+
+    public fill(): Promise<IRecord[]> {
+        return this.dataSet.fill().then((records: IRecord[]) => {
+            this.records = records;
+            this.notifyLinks(EventType.Refreshed);
+            this.setState(RecordState.Browse);
+            return records;
+        });
+    }
+
+    public post(): Promise<void> {
+        if (this._state == RecordState.Insert)
+            return this.dataSet.insertRecord(this._curIndex, ).then(() => {
+                super.post();
+            });
+        else
+            return this.dataSet.updateRecord(this._curIndex, ).then(() => {
+                super.post();
+            });
+    }
+
+    public delete(): Promise<void> {
+        if (this._state == RecordState.Insert)
+            super.delete();
+        else
+            return this.dataSet.deleteRecord(this._curIndex).then(() => {
+                super.delete();
+            });
+    }
+
+
 }
 
