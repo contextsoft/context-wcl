@@ -168,9 +168,22 @@ export class DataTable<R extends IRecord> implements IDataTable {
     // }
 
     public fill(): Promise<R[]> {
-        return this.adapter.fill(this).then((records: R[]) => {
+        return this.adapter.fill(this).then((records: IRecord[]) => {
             // TODO: object instancing
-            this.records = records;
+            this.records = [];
+            if (this.recordFactory) {
+                let rec: R;
+                for (let i = 0; i < records.length; i++) {
+                    rec = new this.recordFactory();
+                    for (let field in rec) {
+                        if (rec.hasOwnProperty(field) && records[i].hasOwnProperty(field))
+                            rec[field] = records[i][field];
+                    }
+                    this.records.push(rec);
+                }
+            }
+            else
+                this.records = <R[]>records;
             this.notifyLinks(DataSetEventType.Refreshed);
             return records;
         });
