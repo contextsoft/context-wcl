@@ -5,7 +5,7 @@ import { utils } from './utils';
 import { resources } from './resources';
 import { View, ValueView } from './view';
 import { InputView, ButtonView } from './std.controls';
-import { IRecord, IExpression, LookupDataLink, EventType } from './data';
+import { IRecord, IExpression, LookupDataLink, DataEventType } from './data';
 
 resources.register('context-wcl',
     [
@@ -24,7 +24,7 @@ export class SelectView extends ValueView {
         super(parent, name);
         this.tag = 'select';
         this.renderClientArea = false;
-        this.lookupData = new LookupDataLink((eventType: EventType, data: any): void => {
+        this.lookupData = new LookupDataLink((eventType: DataEventType, data: any): void => {
             this.updateView();
         });
     }
@@ -66,8 +66,8 @@ export class ListView extends ValueView {
 
     constructor(parent: View, name?: string) {
         super(parent, name);
-        this.listData = new LookupDataLink((eventType: EventType, data: any): void => {
-            if (eventType == EventType.CursorMoved)
+        this.listData = new LookupDataLink((eventType: DataEventType, data: any): void => {
+            if (eventType == DataEventType.CursorMoved)
                 this.updateSelectedRecord();
             else
                 this.updateView();
@@ -207,8 +207,8 @@ export class LookupView extends ListView {
     constructor(parent: View, name?: string) {
         super(parent, name);
 
-        this.listData = new LookupDataLink((eventType: EventType, data: any): void => {
-            if (eventType == EventType.CursorMoved)
+        this.listData = new LookupDataLink((eventType: DataEventType, data: any): void => {
+            if (eventType == DataEventType.CursorMoved)
                 this.updateSelectedRecord(document.getElementById(this.listId).children);
             else
                 this.updateView();

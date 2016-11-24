@@ -145,7 +145,7 @@ class DbObject
         return Application::getConnection();
     }
     
-    public function select($params)
+    public function fill($params)
     {
         $data = array();
         $data['records'] = $this->fetchSQL("select * from $this->tableName");

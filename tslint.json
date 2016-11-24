@@ -9,20 +9,13 @@
         "no-duplicate-variable": true,
         "no-eval": true,
         "no-var-keyword": false,
-        "no-unused-variable": [
-            true
-        ],
         "semicolon": [
             true
         ],
         "no-conditional-assignment": false,
         "no-invalid-this": true,
-        "no-unreachable": true,
         "no-unused-expression": true,
         "no-use-before-declare": true,
-        "use-strict": [
-            true
-        ],
         "member-ordering": [
             false,
             {

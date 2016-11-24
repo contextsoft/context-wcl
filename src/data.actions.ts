@@ -1,4 +1,4 @@
-import { BaseDataLink, IRecordSource, IRecordSetSource, EventType, RecordState } from './data';
+import { BaseDataLink, IRecordSource, IRecordSetSource, DataEventType, RecordState } from './data';
 import { BaseAction } from './actions';
 
 export class RecordSourceAction extends BaseAction {
@@ -6,7 +6,7 @@ export class RecordSourceAction extends BaseAction {
 
     constructor(dataSource?: IRecordSource) {
         super();
-        this.link = new BaseDataLink<IRecordSource>((eventType: EventType, data?: any): void => {
+        this.link = new BaseDataLink<IRecordSource>((eventType: DataEventType, data?: any): void => {
             this.updateAction();
         });
         this.link.dataSource = dataSource;
@@ -35,7 +35,7 @@ export class RecordSetSourceAction extends BaseAction {
 
     constructor(dataSource?: IRecordSetSource) {
         super();
-        this.link = new BaseDataLink<IRecordSetSource>((eventType: EventType, data?: any): void => {
+        this.link = new BaseDataLink<IRecordSetSource>((eventType: DataEventType, data?: any): void => {
             this.updateAction();
         });
         this.link.dataSource = dataSource;

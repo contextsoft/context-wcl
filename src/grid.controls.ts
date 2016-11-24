@@ -5,7 +5,7 @@
 import { utils } from './utils';
 import { resources } from './resources';
 import { View } from './view';
-import { EventType, IRecord, RecordSetDataLink, IRecordSetSource } from './data';
+import { DataEventType, IRecord, RecordSetDataLink, IRecordSetSource } from './data';
 
 resources.register('context-wcl',
     [
@@ -71,8 +71,8 @@ export class GridView extends View {
 
     constructor(parent: View, name?: string) {
         super(parent, name);
-        this.data = new RecordSetDataLink((eventType: EventType, data: any): void => {
-            if (eventType == EventType.CursorMoved)
+        this.data = new RecordSetDataLink((eventType: DataEventType, data: any): void => {
+            if (eventType == DataEventType.CursorMoved)
                 this.updateSelectedRow();
             else
                 this.updateView();

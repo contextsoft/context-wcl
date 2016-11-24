@@ -1,6 +1,6 @@
 import { utils } from './utils';
 import { IVoidEvent, Component } from './component';
-import { FieldDataLink, EventType } from './data';
+import { FieldDataLink, DataEventType } from './data';
 import { IAction } from './actions';
 
 /** Views's Align */
@@ -725,7 +725,7 @@ export abstract class ValueView extends View {
     public onChange: (newValue) => void;
 
     /** FieldDataLink used as value store */
-    public data = new FieldDataLink((eventType: EventType, data: any): void => {
+    public data = new FieldDataLink((eventType: DataEventType, data: any): void => {
         this.setValue((this.data).value || '');
     });
 

@@ -3,7 +3,7 @@ import { resources } from './resources';
 import { View } from "./view";
 import { ListView } from './list.controls';
 import { ButtonView, ContainerView, PanelView, TextView } from './std.controls';
-import { LookupDataLink, RecordSource, RecordSetSource, EventType } from './data';
+import { LookupDataLink, RecordSource, RecordSetSource, DataEventType } from './data';
 
 resources.register('context-wcl',
     [
@@ -58,8 +58,8 @@ export class TabsView extends ListView {
     constructor(parent: View, name?: string) {
         super(parent, name);
 
-        this.listData = new LookupDataLink((eventType: EventType, data: any): void => {
-            if (eventType == EventType.CursorMoved)
+        this.listData = new LookupDataLink((eventType: DataEventType, data: any): void => {
+            if (eventType == DataEventType.CursorMoved)
                 this.updateSelectedRecord(document.getElementById(this.listId).children);
             else
                 this.updateView();

@@ -1,7 +1,7 @@
 import {
-    Application, ScreenView, HeaderView, FooterView, TextView, /*Ajax, Service,*/ TableDataSource, TableDataSet,
+    Application, ScreenView, HeaderView, FooterView, TextView, /*Ajax, Service,*/ TableDataSource, DataTable,
     GridView, PanelView, Align, InputView, GridLayout, Splitter, ButtonView, PostAction, EditAction, CancelAction,
-    DeleteAction, InsertAction
+    DeleteAction, InsertAction, Record
 } from 'context-wcl';
 
 import { config } from './config';
@@ -19,14 +19,21 @@ class MyApp extends Application {
     }
 }
 
+class TestRecord extends Record {
+    id: number;
+    col1: string;
+    col2: string;
+    col3: string;
+}
+
 class MainScreen extends ScreenView {
 
     protected initComponents() {
         this.createHeaderFooter();
 
         // data
-        let dataSet = new TableDataSet('Test');
-        let dataSource = new TableDataSource(dataSet);
+        let testTable = new DataTable(TestRecord, null, 'test');
+        let testTableSource = new TableDataSource(testTable);
 
         // controls 
 
@@ -95,25 +102,25 @@ class MainScreen extends ScreenView {
 
         // binding data
 
-        idEdit.data.dataSource = dataSource;
+        idEdit.data.dataSource = testTableSource;
         idEdit.data.dataField = 'id';
-        col1Edit.data.dataSource = dataSource;
+        col1Edit.data.dataSource = testTableSource;
         col1Edit.data.dataField = 'col1';
-        col2Edit.data.dataSource = dataSource;
+        col2Edit.data.dataSource = testTableSource;
         col2Edit.data.dataField = 'col2';
-        col3Edit.data.dataSource = dataSource;
+        col3Edit.data.dataSource = testTableSource;
         col3Edit.data.dataField = 'col3';
 
-        editBtn.action = new EditAction(dataSource);
-        postBtn.action = new PostAction(dataSource);
-        cancelBtn.action = new CancelAction(dataSource);
-        newBtn.action = new InsertAction(dataSource);
-        delBtn.action = new DeleteAction(dataSource);
+        editBtn.action = new EditAction(testTableSource);
+        postBtn.action = new PostAction(testTableSource);
+        cancelBtn.action = new CancelAction(testTableSource);
+        newBtn.action = new InsertAction(testTableSource);
+        delBtn.action = new DeleteAction(testTableSource);
 
-        grid.data.dataSource = dataSource;
+        grid.data.dataSource = testTableSource;
 
         // filling data
-        dataSource.fill();
+        testTable.fill();
     }
 
     protected createHeaderFooter() {

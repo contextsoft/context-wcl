@@ -5,7 +5,7 @@
 export var config =
     {
         appUrl: '',
-        serviceUrl: 'http://localhost/context-wcl/node_modules/context-wcl/examples/mysql/php/mysqltest.php',
+        serviceUrl: 'http://localhost/context-wcl/node_modules/context-wcl/examples/data/php/data.php',
         debug: true,
         showServiceRawOutput: true,
         libraries: {

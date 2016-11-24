@@ -68,26 +68,6 @@ export class Ajax {
         if (typeof XMLHttpRequest !== 'undefined') {
             return new XMLHttpRequest();
         }
-        // IE compatibility
-        /*
-        let versions = [
-            "MSXML2.XmlHttp.6.0",
-            "MSXML2.XmlHttp.5.0",
-            "MSXML2.XmlHttp.4.0",
-            "MSXML2.XmlHttp.3.0",
-            "MSXML2.XmlHttp.2.0",
-            "Microsoft.XmlHttp"
-        ];
-        let xhr;
-        for (let i = 0; i < versions.length; i++) {
-            try {
-                xhr = new ActiveXObject(versions[i]);
-                break;
-            } catch (e) {
-            }
-        }
-        return xhr;
-        */
     }
 }
 

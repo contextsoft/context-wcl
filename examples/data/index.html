@@ -8,7 +8,7 @@
     <script>
         var require = {
             baseUrl: "../../",
-            deps: ['examples/mysql/mysql'],
+            deps: ['examples/data/data.example'],
             paths: {
                 //"jquery": '../jquery/dist',
                 //"breeze-client": '../breeze-client'
@@ -19,7 +19,7 @@
             ],
             callback: function() 
             {
-                require(['examples/mysql/mysql'], function(app) 
+                require(['examples/data/data.example'], function(app) 
                 {
                     app.main();
                 });
