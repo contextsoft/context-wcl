@@ -20,10 +20,10 @@ class MyApp extends Application {
 }
 
 class TestRecord extends Record {
-    id: number = 0;
+    /*id: number = 0;
     col1: string = '';
     col2: string = '';
-    col3: string = '';
+    col3: string = '';*/
 }
 
 class MainScreen extends ScreenView {

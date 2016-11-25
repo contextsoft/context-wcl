@@ -74,7 +74,7 @@ export class GridView extends View {
         this.data = new RecordSetDataLink((eventType: DataEventType, data: any): void => {
             if (eventType == DataEventType.CursorMoved)
                 this.updateSelectedRow();
-            else
+            else if (eventType == DataEventType.Refreshed)
                 this.updateView();
         });
         this.renderClientArea = true;

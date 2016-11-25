@@ -470,7 +470,7 @@ export namespace utils {
         return result;
     }
 
-    /** Assign @src to @dest */
+    /** Assigns src to dest */
     export function assign<T, U>(src: T, dest: U): void {
         for (let id in src) {
             if (src.hasOwnProperty(id)) {
@@ -478,6 +478,17 @@ export namespace utils {
             }
         }
     }
+
+    /** Checks is object empty */
+    export function isEmptyObject(obj) {
+        for (var prop in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     export function RaiseError(msg: string): void {
         throw new Error(msg);
