@@ -164,7 +164,7 @@ class DbObject
         $this->getConnection()->exec($sql);
     }
     
-    public function insert($params)
+    public function insertRecord($params)
     {
         $fields = '';
         $values = '';
@@ -188,7 +188,7 @@ class DbObject
         return $result;
     }
     
-    public function update($params)
+    public function updateRecord($params)
     {
         $sql = '';
         foreach ($params as $field => $value) {
@@ -206,9 +206,24 @@ class DbObject
         $this->execSQL($sql);
     }
     
-    public function delete($params)
+    public function deleteRecord($params)
     {
         $this->execSQL('delete from '.$this->tableName.' where '.$this->idField.' = '.$params[$this->idField]);
+    }
+
+    public function applyUpdates($params)
+    {
+        foreach ($params as $update) {
+            $updateType = $update['_updateType_'];
+            unset($update['_updateType_']);
+            if (strcasecmp($updateType, 'update') == 0) {
+                $this->updateRecord($update);
+            } elseif (strcasecmp($updateType, 'delete') == 0) {
+                $this->deleteRecord($update);
+            } elseif (strcasecmp($updateType, 'insert') == 0) {
+                $this->insertRecord($update);
+            }
+        }
     }
 
     protected function generateId()

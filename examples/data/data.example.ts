@@ -89,6 +89,15 @@ class MainScreen extends ScreenView {
 
         let delBtn = new ButtonView(btnPanel);
 
+        let applyBtn = new ButtonView(btnPanel);
+        applyBtn.text = 'Save to database';
+        applyBtn.theme = ButtonView.themes.warning;
+        applyBtn.events.onclick = function () {
+            testTable.applyUpdates().then(() => {
+                testTable.fill();
+            });
+        };
+
         // grid
         let splitter = new Splitter(clientPanel);
         splitter.align = Align.top;

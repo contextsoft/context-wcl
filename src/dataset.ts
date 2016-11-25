@@ -11,7 +11,7 @@ import { utils } from './utils';
 export enum DataSetEventType { Refreshed, Updated };
 
 /** Record state for cached updates */
-export enum RecordUpdateType { Deleted = 1, Modified = 2, Inserted = 3 };
+export enum RecordUpdateType { Delete = 1, Update = 2, Insert = 3 };
 
 /** Event type that raised when something changes in the data set */
 export interface IOnDataSetChangeEvent {
@@ -35,6 +35,7 @@ export interface IDataTable extends IDataSet {
     tableName: string;
     fields: IField[];
     records: IRecord[];
+    recordsUpdates: RecordsUpdates;
     createRecord(): IRecord;
     //internalRead(obj: any): void;
     fill(): Promise<any>;
@@ -81,11 +82,12 @@ export class Record implements IRecord {
             }
         */
     };
+    public table: DataTable<Record>;
 }
 
 /** Record link used in cached updates */
 class RecordUpdate {
-    constructor(public record: IRecord, public updateType?: RecordUpdateType) {
+    constructor(public record: Record, public updateType?: RecordUpdateType) {
     }
 }
 
@@ -100,28 +102,46 @@ class RecordsUpdates {
         this._updates = [];
     }
 
-    public addUpdate(rec: IRecord, updateType: RecordUpdateType): RecordUpdate {
+    public addUpdate(rec: Record, updateType: RecordUpdateType): RecordUpdate {
         let idx = this.getUpdateIndex(rec);
         if (idx === undefined)
             idx = this._updates.push(new RecordUpdate(rec)) - 1;
         let update = this.updates[idx];
 
         // inserted and then deleted records just removing from updates
-        if (updateType == RecordUpdateType.Deleted && (update.updateType !== undefined && update.updateType == RecordUpdateType.Inserted)) {
+        if (updateType == RecordUpdateType.Delete && (update.updateType !== undefined && update.updateType == RecordUpdateType.Insert)) {
             this.updates.splice(idx);
             return;
         }
 
         // updates other than Modified have higher priority
-        if (!update.updateType || (update.updateType && update.updateType == RecordUpdateType.Modified))
+        if (!update.updateType || (update.updateType && update.updateType == RecordUpdateType.Update))
             update.updateType = updateType;
 
         return update;
     }
 
-    protected getUpdateIndex(rec: IRecord): number {
+    // Returns updates as service params
+    public getUpdateParams() {
+        let upd: RecordUpdate, rec: Record, fields: IField[], param, result = [];
+        for (let i = 0; i < this._updates.length; i++) {
+            upd = this._updates[i];
+            rec = upd.record;
+            fields = rec.table.getMetaInfo();
+            param = {};
+            for (let j = 0; j < fields.length; j++) {
+                if (rec.hasOwnProperty(fields[j].fieldName))
+                    param[fields[j].fieldName] = rec[fields[j].fieldName];
+            }
+            param._updateType_ = RecordUpdateType[upd.updateType];
+            result.push(param);
+        }
+        return result;
+    }
+
+    protected getUpdateIndex(rec: Record): number {
         for (let i = 0; i < this.updates.length; i++)
-            if (this.updates[i].record = rec)
+            if (this.updates[i].record === rec)
                 return i;
     }
 }
@@ -173,7 +193,10 @@ export class DataTable<R extends Record> implements IDataTable {
     public recordFactory: InstanceFactory<R>;
 
     /** Modified records */
-    protected recordsUpdates = new RecordsUpdates();
+    protected _recordsUpdates = new RecordsUpdates();
+    public get recordsUpdates(): RecordsUpdates {
+        return this._recordsUpdates;
+    }
 
     /** Links to maintained DataSources */
     protected links: IDataSetLink[] = [];
@@ -191,7 +214,7 @@ export class DataTable<R extends Record> implements IDataTable {
     public add(record?: R): R {
         if (!record)
             record = this.createRecord();
-        this.recordsUpdates.addUpdate(record, RecordUpdateType.Inserted);
+        this.recordsUpdates.addUpdate(record, RecordUpdateType.Insert);
         this.records.push(record);
         this.notifyLinks(DataSetEventType.Refreshed);
         return record;
@@ -199,13 +222,13 @@ export class DataTable<R extends Record> implements IDataTable {
 
     public delete(index: number) {
         let rec = this.records[index];
-        this.recordsUpdates.addUpdate(rec, RecordUpdateType.Deleted);
+        this.recordsUpdates.addUpdate(rec, RecordUpdateType.Delete);
         this.records.splice(index);
         this.notifyLinks(DataSetEventType.Refreshed);
     }
 
     public update(record: R) {
-        this.recordsUpdates.addUpdate(record, RecordUpdateType.Modified);
+        this.recordsUpdates.addUpdate(record, RecordUpdateType.Update);
         this.notifyLinks(DataSetEventType.Refreshed);
     }
 
@@ -235,13 +258,13 @@ export class DataTable<R extends Record> implements IDataTable {
     }
 
     public createRecord(): R {
-        let newRec;
+        let newRec: Record;
         if (this.recordFactory)
             newRec = new this.recordFactory();
         else
             newRec = new Record();
         newRec.table = this;
-        return newRec;
+        return <R>newRec;
     }
 
     public fill(): Promise<R[]> {
@@ -267,7 +290,9 @@ export class DataTable<R extends Record> implements IDataTable {
         });
     }
 
-    public applyUpdates(): Promise<any> {
+    public applyUpdates(): Promise<R[]> {
+        if (this.recordsUpdates.updates.length === 0)
+            return;
         return this.adapter.update(this);
     }
 }
@@ -315,7 +340,6 @@ export class TableDataSource<R extends Record> extends RecordSetSource {
     }
 
     public post() {
-        super.post();
         if (this._state && this._state != RecordState.Browse) {
             this.dataTable.update(<R>this.current);
             super.post();
@@ -324,13 +348,12 @@ export class TableDataSource<R extends Record> extends RecordSetSource {
 
     public delete(): void {
         this.checkCurrent();
-        let index = this._curIndex;
         this.dataTable.delete(this._curIndex);
-        if (index >= this._records.length)
-            this.currentIndex = this._records.length - 1;
-        else
-            this.currentIndex = index;
-        this.notifyLinks(DataEventType.CursorMoved);
+        this.setState(RecordState.Browse);
+        if (this._curIndex >= this._records.length) {
+            this._curIndex = this._records.length - 1;
+            this.notifyLinks(DataEventType.CursorMoved);
+        }
     }
 
     public insert(): void {
@@ -368,7 +391,10 @@ export class DataTableAdapter implements IDataTableAdapter {
     }
 
     public update(dataTable: IDataTable): Promise<any> {
-        return this.execute('update').then((data) => {
+        let params = dataTable.recordsUpdates.getUpdateParams();
+        if (!params)
+            return;
+        return this.execute('applyUpdates', dataTable.recordsUpdates.getUpdateParams()).then((data) => {
             dataTable.records = data.records;
             return dataTable.records;
         });
@@ -389,19 +415,27 @@ class Customer extends Record {
     name: string;
     phone: string;
     static metaInfo =
-    {
-        name: {
+    [
+        {
+            fieldName: 'name',
+            dataType: 'string',
+            dataSize: 20,
+            required: true
+        },
+        {
+            fieldName: 'phone',
             dataType: 'string',
             dataSize: 20,
             required: false
-        }
-    }
+        },
+    ]
 }
 
 class Order extends Record {
+    ...
 }
 
-class OrderDataSet extends DataSet {
+class OrderDataSet extends DataTableSet {
     order = new DataTable(Order, this, 'order');
     customer = new DataTable(Customer, this, 'customer');
 }
@@ -410,88 +444,9 @@ let order = new OrderDataSet();
 order.customer.edit();
 order.customer.name = 'Smith';
 order.customer.post();
-order.update();
+order.applyUpdates();
 
 let customerTable = new DataTable(Customer);
 
-*/
-
-/*
-export class TableDataSet {
-    public adapter: string;
-    public service: IService;
-    public records: IRecord[];
-
-    constructor(adapter?: string) {
-        this.adapter = adapter;
-    }
-
-    public fill(): Promise<IRecord[]> {
-        return this.getService().execute(this.adapter, 'select').then((response: IResponse) => {
-            this.records = response.data.records;
-            return this.records;
-        });
-    }
-
-    public updateRecord(index: number): Promise<void> {
-        return this.getService().execute(this.adapter, 'update', this.records[index]);
-    }
-
-    public insertRecord(index: number): Promise<string> {
-        return this.getService().execute(this.adapter, 'insert', this.records[index]).then((response: IResponse) => {
-            let keyField = Object.keys(response.data)[0];
-            this.records[index][keyField] = response.data[keyField];
-            return this.records[index][keyField];
-        });
-    }
-
-    public deleteRecord(index: number): Promise<void> {
-        return this.getService().execute(this.adapter, 'delete', this.records[index]);
-    }
-
-    protected getService(): IService {
-        return this.service || application.service;
-    }
-}
-
-export class TableDataSource extends RecordSetSource {
-    public dataSet: TableDataSet;
-
-    constructor(dataSet?: TableDataSet) {
-        super();
-        this.dataSet = dataSet;
-    }
-
-    public fill(): Promise<IRecord[]> {
-        return this.dataSet.fill().then((records: IRecord[]) => {
-            this.records = records;
-            this.notifyLinks(EventType.Refreshed);
-            this.setState(RecordState.Browse);
-            return records;
-        });
-    }
-
-    public post(): Promise<void> {
-        if (this._state == RecordState.Insert)
-            return this.dataSet.insertRecord(this._curIndex, ).then(() => {
-                super.post();
-            });
-        else
-            return this.dataSet.updateRecord(this._curIndex, ).then(() => {
-                super.post();
-            });
-    }
-
-    public delete(): Promise<void> {
-        if (this._state == RecordState.Insert)
-            super.delete();
-        else
-            return this.dataSet.deleteRecord(this._curIndex).then(() => {
-                super.delete();
-            });
-    }
-
-
-}
 */
 

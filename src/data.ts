@@ -514,10 +514,12 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
     public delete(): void {
         this.checkCurrent();
         this._records.splice(this._curIndex);
-        if (this._curIndex >= this._records.length)
-            this._curIndex = this._records.length - 1;
         this.setState(RecordState.Browse);
         this.notifyLinks(DataEventType.Refreshed);
+        if (this._curIndex >= this._records.length) {
+            this._curIndex = this._records.length - 1;
+            this.notifyLinks(DataEventType.CursorMoved);
+        }
     }
 
     // ICursor methods
