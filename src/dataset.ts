@@ -293,8 +293,11 @@ export class TableDataSource<R extends Record> extends RecordSetSource {
     constructor(dataTable?: DataTable<R>) {
         super();
         this._data = new DataSetLink<DataTable<R>>((eventType: DataSetEventType, data: any) => {
-            if (eventType == DataSetEventType.Refreshed)
+            if (eventType == DataSetEventType.Refreshed) {
                 this.records = this.dataTable.records;
+                if (!this._state)
+                    this.setState(RecordState.Browse);
+            }
             this.notifyLinks(DataEventType.Refreshed);
         });
         this._data.dataSet = dataTable;
