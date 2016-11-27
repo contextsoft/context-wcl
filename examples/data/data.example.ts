@@ -1,7 +1,7 @@
 import {
     Application, ScreenView, HeaderView, FooterView, TextView, /*Ajax, Service,*/ TableDataSource, DataTable,
     GridView, PanelView, Align, InputView, GridLayout, Splitter, ButtonView, PostAction, EditAction, CancelAction,
-    DeleteAction, InsertAction, Record
+    DeleteAction, InsertAction, Record, DataTableSet
 } from 'context-wcl';
 
 import { config } from './config';
@@ -19,20 +19,15 @@ class MyApp extends Application {
     }
 }
 
-class TestRecord extends Record {
-    /*id: number = 0;
-    col1: string = '';
-    col2: string = '';
-    col3: string = '';*/
-}
-
 class MainScreen extends ScreenView {
 
     protected initComponents() {
         this.createHeaderFooter();
 
         // data
-        let testTable = new DataTable(TestRecord, null, 'test');
+        let testDataSet = new DataTableSet('TestTableSet');
+        let testTable = new DataTable(null, testDataSet, 'test');
+        let test2Table = new DataTable(null, testDataSet, 'test1');
         let testTableSource = new TableDataSource(testTable);
 
         // controls 
@@ -93,8 +88,8 @@ class MainScreen extends ScreenView {
         applyBtn.text = 'Save to database';
         applyBtn.theme = ButtonView.themes.warning;
         applyBtn.events.onclick = function () {
-            testTable.applyUpdates().then(() => {
-                testTable.fill();
+            testDataSet.applyUpdates().then(() => {
+                testDataSet.fill();
             });
         };
 
@@ -129,7 +124,7 @@ class MainScreen extends ScreenView {
         grid.data.dataSource = testTableSource;
 
         // filling data
-        testTable.fill();
+        testDataSet.fill();
     }
 
     protected createHeaderFooter() {

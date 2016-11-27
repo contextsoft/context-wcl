@@ -1,5 +1,5 @@
 //import { utils } from './utils';
-import { InstanceFactory } from './component';
+import { Component, InstanceFactory } from './component';
 import { IRecord, IField, IDataSource, RecordState, DataEventType, RecordSetSource } from './data';
 import { application } from './application';
 import { IService, IResponse } from './service';
@@ -37,17 +37,18 @@ export interface IDataTable extends IDataSet {
     records: IRecord[];
     recordsUpdates: RecordsUpdates;
     createRecord(): IRecord;
-    //internalRead(obj: any): void;
-    fill(): Promise<any>;
-    applyUpdates(): Promise<any>;
+    fillRecords(records: IRecord[]): void;
+    fill(): Promise<void>;
+    applyUpdates(): Promise<void>;
 }
 
 /** Describes an object containing several data tables */
 export interface IDataTableSet {
     tables: IDataTable[];
     adapter: IDataTableSetAdapter;
-    fill(): Promise<any>;
-    update(): Promise<any>;
+    tableByName(tableName: string): IDataTable;
+    fill(): Promise<void>;
+    applyUpdates(): Promise<void>;
 }
 
 /** Describes an object for remote data manipulation */
@@ -57,22 +58,22 @@ export interface IDataAdapter {
 
 /** Describes an object for table remote data manipulation */
 export interface IDataTableAdapter extends IDataAdapter {
-    fill(dataTable: IDataTable): Promise<any>;
-    update(dataTable: IDataTable): Promise<any>;
+    fill(table: IDataTable): Promise<void>;
+    applyUpdates(table: IDataTable): Promise<void>;
 }
 
 /** Describes an object document remote data manipulation */
 export interface IDataTableSetAdapter extends IDataAdapter {
-    fill(dataSet: IDataTableSet): Promise<any>;
-    update(dataSet: IDataTableSet): Promise<any>;
+    fill(tableSet: IDataTableSet): Promise<void>;
+    applyUpdates(tableSet: IDataTableSet): Promise<void>;
 }
 
 
 // Implementation
 
-/** Object contaning its metainfo */
+/** Object contaning its metainfo and table */
 export class Record implements IRecord {
-    /** Fields information */
+    /** Fields information, in general not needed because DataTable contains its own */
     public static metaInfo = {
         /* implement in descendats, e:g:
             name: {
@@ -128,12 +129,14 @@ class RecordsUpdates {
             upd = this._updates[i];
             rec = upd.record;
             fields = rec.table.getMetaInfo();
-            param = {};
+            param = {
+                data: {},
+                updateType: RecordUpdateType[upd.updateType]
+            };
             for (let j = 0; j < fields.length; j++) {
                 if (rec.hasOwnProperty(fields[j].fieldName))
-                    param[fields[j].fieldName] = rec[fields[j].fieldName];
+                    param.data[fields[j].fieldName] = rec[fields[j].fieldName];
             }
-            param._updateType_ = RecordUpdateType[upd.updateType];
             result.push(param);
         }
         return result;
@@ -187,7 +190,7 @@ export class DataTable<R extends Record> implements IDataTable {
     public fields: IField[] = [];
     /** Records returned by service */
     public records: R[] = [];
-    /** Remote data manipulation adapter */
+    /** Remote crud adapter */
     public adapter: IDataTableAdapter;
     /** Records constructor */
     public recordFactory: InstanceFactory<R>;
@@ -233,7 +236,7 @@ export class DataTable<R extends Record> implements IDataTable {
     }
 
     public getMetaInfo(): any {
-        if ((<any>this.recordFactory).metaInfo && !utils.isEmptyObject((<any>this.recordFactory).metaInfo))
+        if (this.recordFactory && (<any>this.recordFactory).metaInfo && !utils.isEmptyObject((<any>this.recordFactory).metaInfo))
             return (<any>this.recordFactory).metaInfo;
         else
             return this.fields;
@@ -267,51 +270,83 @@ export class DataTable<R extends Record> implements IDataTable {
         return <R>newRec;
     }
 
-    public fill(): Promise<R[]> {
-        return this.adapter.fill(this).then((records: IRecord[]) => {
-            this.records = [];
-            this.fields = [];
-            this.recordsUpdates.clear();
-            if (Array.isArray(records) && records.length > 0) {
-                this.fields = RecordSetSource.getObjectFields(records[0]);
-                // Records instancing
-                let rec: R;
-                for (let i = 0; i < records.length; i++) {
-                    rec = this.createRecord();
-                    for (let field in records[i]) {
-                        if (records[i].hasOwnProperty(field) /*&& rec.hasOwnProperty(field)*/)
-                            rec[field] = records[i][field];
-                    }
-                    this.records.push(rec);
-                }
-            }
+    public fill(): Promise<void> {
+        return this.adapter.fill(this).then(() => {
             this.notifyLinks(DataSetEventType.Refreshed);
-            return records;
         });
     }
 
-    public applyUpdates(): Promise<R[]> {
+    public fillRecords(data): void {
+        this.records = [];
+        this.fields = [];
+        this.recordsUpdates.clear();
+        if (Array.isArray(data.records) && data.records.length > 0) {
+            // metainfo
+            this.fields = RecordSetSource.getObjectFields(data.records[0]);
+            // Records instancing
+            let rec: R;
+            for (let i = 0; i < data.records.length; i++) {
+                rec = this.createRecord();
+                for (let field in data.records[i]) {
+                    if (data.records[i].hasOwnProperty(field) /*&& rec.hasOwnProperty(field)*/)
+                        rec[field] = data.records[i][field];
+                }
+                this.records.push(rec);
+            }
+        }
+    }
+
+    public applyUpdates(): Promise<void> {
         if (this.recordsUpdates.updates.length === 0)
             return;
-        return this.adapter.update(this);
+        return this.adapter.applyUpdates(this).then(() => {
+            this.notifyLinks(DataSetEventType.Updated);
+        });
     }
 }
 
-/** DataSet containing several tables */
-export class DataTableSet implements IDataTableSet {
-    public tables: IDataTable[];
-    public adapter: IDataTableSetAdapter;
+/** 
+ * Data table crud adapter  
+ **/
+export class DataTableAdapter implements IDataTableAdapter {
+    public adapter: string;
+    public service: IService;
 
-    public fill(): Promise<any> {
-        return this.adapter.fill(this);
+    constructor(adapter: string) {
+        this.adapter = adapter;
     }
 
-    public update(): Promise<any> {
-        return this.adapter.update(this);
+    public execute(command: string, params?: any): Promise<any> {
+        return this.getService().execute(this.adapter, command, params).then((response: IResponse) => {
+            return response.data;
+        });
+    }
+
+    public fill(table: IDataTable): Promise<void> {
+        return this.execute('fill').then((data) => {
+            if (!data || !data.records)
+                throw 'Service did not returned any data';
+            table.fillRecords(data);
+        });
+    }
+
+    public applyUpdates(table: IDataTable): Promise<void> {
+        let params = table.recordsUpdates.getUpdateParams();
+        if (!params)
+            return;
+        return this.execute('applyUpdates', params).then(() => {
+            table.recordsUpdates.clear();
+        });
+    }
+
+    protected getService(): IService {
+        return this.service || application.service;
     }
 }
 
-/** DataSource containing one table */
+/** 
+ * DataSource containing one table 
+ **/
 export class TableDataSource<R extends Record> extends RecordSetSource {
     protected _data: DataSetLink<DataTable<R>>;
 
@@ -322,8 +357,8 @@ export class TableDataSource<R extends Record> extends RecordSetSource {
                 this.records = this.dataTable.records;
                 if (!this._state)
                     this.setState(RecordState.Browse);
+                this.notifyLinks(DataEventType.Refreshed);
             }
-            this.notifyLinks(DataEventType.Refreshed);
         });
         this._data.dataSet = dataTable;
     }
@@ -368,8 +403,57 @@ export class TableDataSource<R extends Record> extends RecordSetSource {
     }
 }
 
-/** Perfoms remote data manipulations */
-export class DataTableAdapter implements IDataTableAdapter {
+
+/** 
+ * DataSet containing several tables 
+ **/
+export class DataTableSet implements IDataTableSet {
+    /** Maintained tables */
+    public tables: IDataTable[] = [];
+    /** Remote crud adapter */
+    public adapter: IDataTableSetAdapter;
+
+    constructor(adapter: IDataTableSetAdapter | string) {
+        if (typeof adapter === 'object')
+            this.adapter = adapter;
+        else {
+            //let p = Object.getPrototypeOf(this);
+            //let c = Component.getFunctionName(p.constructor);
+            this.adapter = new DataTableSetAdapter(adapter);
+        }
+    }
+
+    // IDataTableSet implementation
+
+    /** Returns table by its name */
+    public tableByName(tableName: string): IDataTable {
+        for (let i = 0; i < this.tables.length; i++)
+            if (this.tables[i].tableName === tableName)
+                return this.tables[i];
+    }
+
+    /** Fills tables using application service */
+    public fill(): Promise<void> {
+        return this.adapter.fill(this).then(() => {
+            for (let i = 0; i < this.tables.length; i++)
+                this.tables[i].notifyLinks(DataSetEventType.Refreshed);
+        });
+    }
+
+    /** Updates tables using application service */
+    public applyUpdates(): Promise<void> {
+        return this.adapter.applyUpdates(this).then(() => {
+            for (let i = 0; i < this.tables.length; i++)
+                this.tables[i].notifyLinks(DataSetEventType.Updated);
+        });
+    }
+
+}
+
+/** 
+ * Table set crud adapter  
+ **/
+export class DataTableSetAdapter implements IDataTableSetAdapter {
     public adapter: string;
     public service: IService;
 
@@ -383,28 +467,36 @@ export class DataTableAdapter implements IDataTableAdapter {
         });
     }
 
-    public fill(dataTable: IDataTable): Promise<any> {
+    public fill(tableSet: IDataTableSet): Promise<void> {
         return this.execute('fill').then((data) => {
-            dataTable.records = data.records;
-            return dataTable.records;
+            let dataTable;
+            for (let table in data) {
+                if (data.hasOwnProperty(table) && data[table].hasOwnProperty('records') && (dataTable = tableSet.tableByName(table))) {
+                    dataTable.fillRecords(data[table]);
+                }
+            }
+            return;
         });
     }
 
-    public update(dataTable: IDataTable): Promise<any> {
-        let params = dataTable.recordsUpdates.getUpdateParams();
-        if (!params)
-            return;
-        return this.execute('applyUpdates', dataTable.recordsUpdates.getUpdateParams()).then((data) => {
-            dataTable.records = data.records;
-            return dataTable.records;
+    public applyUpdates(tableSet: IDataTableSet): Promise<void> {
+        let params = {};
+        for (let i = 0; i < tableSet.tables.length; i++) {
+            if (tableSet.tables[i].recordsUpdates.updates.length > 0)
+                params[tableSet.tables[i].tableName] = tableSet.tables[i].recordsUpdates.getUpdateParams();
+        }
+        return this.execute('applyUpdates', params).then(() => {
+            for (let i = 0; i < tableSet.tables.length; i++) {
+                tableSet.tables[i].recordsUpdates.clear();
+            }
         });
     }
 
     protected getService(): IService {
         return this.service || application.service;
     }
-
 }
+
 
 
 // example code 

@@ -7,7 +7,9 @@ class Response
     public $errorCallstack;
 }
 
-/** Basic interface that handled requests, stores session info and database connection */
+/**
+* Basic interface that handled requests, stores session info and database connection
+*/
 class Application
 {
     protected static $connection;
@@ -99,7 +101,9 @@ class Application
     }
 }
 
-/** Stores session info */
+/**
+* Stores session info
+*/
 class UserSession
 {
     public function __construct()
@@ -128,22 +132,37 @@ class UserSession
     }
 }
 
-/** Basic interface to access database **/
-class DbObject
+/**
+* Basic database object
+*/
+class DBObject
+{
+    protected function getConnection()
+    {
+        return Application::getConnection();
+    }
+
+    protected function fetchSQL($sql)
+    {
+        $con = $this->getConnection();
+        $query = $con->query($sql);
+        return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    protected function execSQL($sql)
+    {
+        $this->getConnection()->exec($sql);
+    }
+}
+
+/**
+* Database table crud interface
+*/
+class DataTable extends DBObject
 {
     public $tableName;
     public $idField = 'id';
     public $sql;
-    
-    public function fields()
-    {
-        return ['id' => 'string'];
-    }
-    
-    public function getConnection()
-    {
-        return Application::getConnection();
-    }
     
     public function fill($params)
     {
@@ -152,19 +171,21 @@ class DbObject
         return $data;
     }
 
-    public function fetchSQL($sql)
+    public function applyUpdates($params)
     {
-        $con = $this->getConnection();
-        $query = $con->query($sql);
-        return $query->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function execSQL($sql)
-    {
-        $this->getConnection()->exec($sql);
+        foreach ($params as $update) {
+            $updateType = $update['updateType'];
+            if (strcasecmp($updateType, 'update') == 0) {
+                $this->updateRecord($update['data']);
+            } elseif (strcasecmp($updateType, 'delete') == 0) {
+                $this->deleteRecord($update['data']);
+            } elseif (strcasecmp($updateType, 'insert') == 0) {
+                $this->insertRecord($update['data']);
+            }
+        }
     }
     
-    public function insertRecord($params)
+    protected function insertRecord($params)
     {
         $fields = '';
         $values = '';
@@ -188,7 +209,7 @@ class DbObject
         return $result;
     }
     
-    public function updateRecord($params)
+    protected function updateRecord($params)
     {
         $sql = '';
         foreach ($params as $field => $value) {
@@ -206,29 +227,48 @@ class DbObject
         $this->execSQL($sql);
     }
     
-    public function deleteRecord($params)
+    protected function deleteRecord($params)
     {
         $this->execSQL('delete from '.$this->tableName.' where '.$this->idField.' = '.$params[$this->idField]);
     }
 
-    public function applyUpdates($params)
-    {
-        foreach ($params as $update) {
-            $updateType = $update['_updateType_'];
-            unset($update['_updateType_']);
-            if (strcasecmp($updateType, 'update') == 0) {
-                $this->updateRecord($update);
-            } elseif (strcasecmp($updateType, 'delete') == 0) {
-                $this->deleteRecord($update);
-            } elseif (strcasecmp($updateType, 'insert') == 0) {
-                $this->insertRecord($update);
-            }
-        }
-    }
 
     protected function generateId()
     {
         $cnt = $this->fetchSQL("select max(id) + 1 as newId from $this->tableName");
         return $cnt[0]['newId'];
+    }
+}
+
+/**
+* Database table set crud interface
+*/
+class DataTableSet
+{
+    public $tables = [];
+    
+    public function fill($params)
+    {
+        foreach ($this->tables as $table) {
+            $data[$table->tableName] = $table->fill($params);
+        }
+        return $data;
+    }
+
+    public function applyUpdates($params)
+    {
+        foreach ($params as $tableName => $tableParams) {
+            $table = $this->getTableByName($tableName);
+            $table->applyUpdates($tableParams);
+        }
+    }
+
+    protected function getTableByName($name)
+    {
+        foreach ($this->tables as $table) {
+            if ($table->tableName === $name) {
+                return $table;
+            }
+        }
     }
 }

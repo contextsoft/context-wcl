@@ -2,12 +2,6 @@
 include('config.php');
 require('./../../../src/php/service.php');
 
-class World extends DbObject
-{
-    public $tableName = 'country';
-    public $id = 'code';
-}
-
 /*
 Test table:
 CREATE TABLE `test` (
@@ -18,10 +12,35 @@ CREATE TABLE `test` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 */
-class Test extends DbObject
+class TestTable extends DataTable
 {
     public $tableName = 'test';
     public $id = 'id';
+}
+
+/*
+Test table:
+CREATE TABLE `test2` (
+  `id` int(11) NOT NULL,
+  `col4` varchar(45) DEFAULT NULL,
+  `col5` varchar(45) DEFAULT NULL,
+  `col6` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+*/
+class Test2Table extends DataTable
+{
+    public $tableName = 'test2';
+    public $id = 'id';
+}
+
+class TestTableSet extends DataTableSet
+{
+    function __construct()
+    {
+        $this->tables[] = new TestTable();
+        $this->tables[] = new Test2Table();
+    }
 }
  
 
