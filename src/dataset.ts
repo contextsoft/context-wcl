@@ -345,7 +345,7 @@ export class DataTableAdapter implements IDataTableAdapter {
 }
 
 /** 
- * DataSource containing one table 
+ * DataTable's DataSource  
  **/
 export class TableDataSource<R extends Record> extends RecordSetSource {
     protected _data: DataSetLink<DataTable<R>>;
