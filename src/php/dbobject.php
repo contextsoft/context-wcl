@@ -3,23 +3,32 @@
 /**
 * Basic database object
 */
-class DBObject
+class DBObject extends Adapter
 {
+    public static $allowedExternalCalls = [];
+
     protected function getConnection()
     {
         return Application::getConnection();
     }
 
-    protected function fetchSQL($sql)
+    protected function internalExecSQL($sql, $params)
     {
         $con = $this->getConnection();
-        $query = $con->query($sql);
-        return $query->fetchAll(PDO::FETCH_ASSOC);
+        $query = $con->prepare($sql);
+        $query->execute($params);
+        return $query;
     }
 
-    protected function execSQL($sql)
+    protected function execSQL($sql, $params)
     {
-        $this->getConnection()->exec($sql);
+        $this->internalExecSQL($sql, $params);
+    }
+
+    protected function fetchSQL($sql, $params)
+    {
+        $query = $this->internalExecSQL($sql, $params);
+        return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 
@@ -28,14 +37,27 @@ class DBObject
 */
 class DataTable extends DBObject
 {
+    public static $allowedMethods = ['fill', 'applyUpdates'];
+    
     public $tableName;
     public $idField = 'id';
     public $sql;
+
+    public function __construct($tableName = '', $idField = '')
+    {
+        if ($tableName != '') {
+            $this->$tableName = $tableName;
+        }
+        if ($idField != '') {
+            $this->$idField = $idField;
+        }
+    }
     
     public function fill($params)
     {
-        $data = array();
-        $data['records'] = $this->fetchSQL("select * from $this->tableName");
+        $data = [];
+        $sql = "select * from $this->tableName";
+        $data['records'] = $this->fetchSQL($sql, $params);
         return $data;
     }
 
@@ -53,7 +75,7 @@ class DataTable extends DBObject
         }
     }
     
-    protected function insertRecord($params)
+    public function insertRecord($params)
     {
         $fields = '';
         $values = '';
@@ -72,12 +94,12 @@ class DataTable extends DBObject
         }
         $sql = "insert into $this->tableName ($fields) values ($values)";
         $this->execSQL($sql);
-        $result = array();
+        $result = [];
         $result[$this->idField] = $params[$this->idField];
         return $result;
     }
     
-    protected function updateRecord($params)
+    public function updateRecord($params)
     {
         $sql = '';
         foreach ($params as $field => $value) {
@@ -95,13 +117,13 @@ class DataTable extends DBObject
         $this->execSQL($sql);
     }
     
-    protected function deleteRecord($params)
+    public function deleteRecord($params)
     {
         $this->execSQL('delete from '.$this->tableName.' where '.$this->idField.' = '.$params[$this->idField]);
     }
 
 
-    protected function generateId()
+    public function generateId()
     {
         $cnt = $this->fetchSQL("select max(id) + 1 as newId from $this->tableName");
         return $cnt[0]['newId'];
@@ -111,8 +133,10 @@ class DataTable extends DBObject
 /**
 * Database table set crud interface
 */
-class DataTableSet
+class DataTableSet extends Adapter
 {
+    public static $allowedMethods = ['fill', 'applyUpdates'];
+
     public $tables = [];
     
     public function fill($params)
@@ -131,7 +155,7 @@ class DataTableSet
         }
     }
 
-    protected function getTableByName($name)
+    public function getTableByName($name)
     {
         foreach ($this->tables as $table) {
             if ($table->tableName === $name) {

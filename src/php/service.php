@@ -1,8 +1,18 @@
 <?php
 
 require_once('dbobject.php');
-require_once('hybridauth.php');
+require_once('auth.php');
 
+
+
+/** Basic adapter type (object directly called by client) */
+class Adapter
+{
+    /** List of methods that can be called */
+    public static $allowedMethods = [];
+}
+
+/** Response sent by service */
 class Response
 {
     public $data;
@@ -16,7 +26,6 @@ class Response
 class Application
 {
     protected static $connection;
-    protected static $session;
     
     /** Handles POST request
      *  Creates instance of a class and calls its method if request is: {adapter: "className", method: "classMethod", params: ""}
@@ -36,7 +45,7 @@ class Application
             if (isset($_POST['method'])) {
                 $method = $_POST['method'];
             }
-            if (isset($_POST['params'])) {
+            if (isset($_POST['params']) && $_POST['params'] != 'null') {
                 $params = $_POST['params'];
                 if (!empty($params)) {
                     $decoded = json_decode($params, true);
@@ -46,21 +55,25 @@ class Application
                 }
             }
             if (isset($adapter) && isset($method)) {
-                // starting session
-                Application::getSession(); // if we need it - we should start it anyway
-                /*
-                   WARNING! Security problem. We are allowing to effectively invoke any class on server using its name.
-                   We should somehow control that by testing that class's property and only 
-                   allow to call "controller" classes.
-                 */
-                if (strcasecmp($adapter, 'UserSession') == 0) {
-                    $obj = Application::getSession();
-                } else {
+                // checking is class exists
+                if (class_exists($adapter)) {
                     $obj = new $adapter();
-                }
-                if (isset($obj)) {
+                    // checking is it an Adapter
+                    if (!is_subclass_of($obj, 'Adapter')) {
+                        throw new Exception("'$adapter' is not an adapter.");
+                    }
+                    // checking if method is allowed
+                    if (array_search($method, $adapter::$allowedMethods) === false) {
+                        throw new Exception("'$method' is not allowed method for '$adapter'.");
+                    }
+                    // starting session
+                    UserSession::startSession();
                     $response->data = $obj->$method($params);
+                } else {
+                    throw new Exception("Adapter '$adapter' does not exists.");
                 }
+            } else {
+                throw new Exception("Adapter or method not provided.");
             }
         } catch (Exception $e) {
             Application::handleException($e, $response);
@@ -109,7 +122,7 @@ class Application
 */
 class UserSession
 {
-    public function __construct()
+    public static function startSession()
     {
         session_start();
         if (!isset($_SESSION['time'])) {
@@ -118,19 +131,14 @@ class UserSession
             $_SESSION['time'] = time();
         }
     }
-
-    public function getSessionInfo()
-    {
-        return $_SESSION;
-    }
     
-    public function setValue($name, $value)
+    public static function setValue($name, $value)
     {
         $_SESSION[$name] = $value;
     }
     
-    public function getValue($name)
+    public static function getValue($name)
     {
-        return $_SESSION[$name];
+        return $_SESSION[$name] || null;
     }
 }

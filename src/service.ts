@@ -110,7 +110,7 @@ export class Service implements IService {
                         let res = Ajax.parseJSON(s);
                         result = {
                             data: res.data ? res.data : res,
-                            error: res.error ? res.error : raw,
+                            error: res.error ? res.error : '' /*raw*/,
                             errorCallstack: res.errorCallstack ? res.errorCallstack : ''
                         };
                     }
@@ -125,15 +125,18 @@ export class Service implements IService {
                 }
 
                 // handling response
-                if (result && result.error) {
+                if ((result && result.error) || raw) {
                     let msg = result.error;
                     if (application.config.debug && result.errorCallstack) {
                         msg += '<div style="font-weight: normal; font-size: 12px; color: rgba(0,0,0,0.8);">' + result.errorCallstack + '</div>';
                     }
                     if (application.config.showServiceRawOutput && raw)
-                        msg += '<div style="margin-top: 10px"' + raw + '</div>';
+                        msg += '<div style="margin-top: 10px"><div style="margin-bottom: -10px; font-size: 14px">PHP:</div>' + raw + '</div>';
                     application.showMessage(msg);
-                    reject(result);
+                    if (result && !result.error)
+                        resolve(result);
+                    else
+                        reject(result);
                 }
                 else
                     resolve(result);

@@ -241,8 +241,10 @@
     min-width: 300px;
     max-width: 70%;
     height: auto;
+    max-height: 90%;
     margin: 30px auto;
     padding: 15px;
+    overflow: auto;
 }
 
 @media (max-width: 767px) {
@@ -265,17 +267,17 @@
 .CtxDialog .cxtModalContainer .ctxCaption {
     font-size: 18px;
     font-weight: bolder;
-    margin-bottom: 40px;
+    margin-bottom: 20px;
     text-align: left;
 }
 
 .CtxDialog .cxtModalContainer .ctxButtonsContainer {
-    position: absolute;
+    /*position: absolute;
     text-align: right;
     bottom: 0;
     padding-right: 30px;
     margin-bottom: 10px;
-    width: 100%;        
+    width: 100%;*/        
 }
 
 /* PopupMenu */

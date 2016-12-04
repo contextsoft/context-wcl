@@ -1,53 +1,60 @@
 <?php
 
-class HybridAuth 
+class Auth extends Adapter 
 {
-    function resultMessageDie($resultStr)
+    public static function generatePassword($word_length = 6, $allowed_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')    
     {
-        echo json_encode(array('message' => $resultStr));
-        die();
+        if (!isset($allowed_chars) || !strlen($allowed_chars))
+            $allowed_chars = '1234567890QWERTYUIOPASDFGHJKLZXCVBNM';
+        $str = array();
+        for ($i = 0; $i < $word_length; $i++)
+            $str[] = substr($allowed_chars, rand(1, strlen($allowed_chars)) - 1, 1);
+        shuffle($str);
+        return implode("", $str);
     }
 
-    function getAuthProviders()
+    protected function resultMessageDie($resultStr)
     {
-        $providers_enabled = array();
-        foreach($hibridauth_conf['providers'] as $provider => $provider_options)
+        //echo json_encode(array('message' => $resultStr));
+        //die();
+        throw new Exception($resultStr);
+    }
+
+    public function getAuthProviders($params)
+    {
+        if (!class_exists('AuthConfig')) {
+            throw new Exception('Auth not configured.');
+        }
+        $providers_enabled = [];
+        foreach(AuthConfig::$hybridAuthProviders['providers'] as $provider => $provider_options) {
             if (isset($provider_options['enabled']) && $provider_options['enabled'])
                 $providers_enabled[] = $provider;
-        echo json_encode(array('message' => 'ok', 'providers' => $providers_enabled));
-    }
-
-    function getUserInfo()
-    {
-        $content = array();
-        if (isset($_SESSION["CustomerId"]))
-        {
-            $content['photoURL'] = $_SESSION["CustomerPhotoURL"];
-            $content['displayName'] = $_SESSION["CustomerDisplayName"];
         }
-
-        echo json_encode(array('message' => 'ok', 'user_info' => $content));
+        return $providers_enabled;
     }
 
-    function doLogout()
+    public function getUserInfo($params)
     {
-        reset_session();
-        echo json_encode(array('message' => 'OK'));
-    }
-
-    function startLogin()
-    {
-        $secret = generateSecret(30);
-        $_SESSION['login_secret'] = $secret;
-        echo json_encode(array('message' => 'ok', 'secret' => $secret));
-    }
-
-    function doLogin()
-    {
-        if (isset($_SESSION['login_secret']) && isset($_POST['secret']) && $_SESSION['login_secret'] == $_POST['secret'] &&
-            isset($_POST['email']) && isset($_POST['password']))
+        $content = [];
+        if (UserSession::getValue('userId'))
         {
+            $content['userPhotoURL'] = UserSession::getValue("userPhotoURL");
+            $content['userDisplayName'] = UserSession::getValue("userDisplayName");
+        }
+        return $content;
+    }
 
+    public function startLogin($params)
+    {
+        $secret = Auth::generatePassword(30);
+        $_SESSION['loginSecret'] = $secret;
+        return $secret;
+    }
+
+    public function doLogin($params)
+    {
+        if (isset($params['secret']) && UserSession::getValue('loginSecret') == $params['secret'] && isset($_POST['email']) && isset($_POST['password']))
+        {
             $email = $_POST['email'];
             if (!($result_str = db_connect()))
                 if ($query =
@@ -57,7 +64,7 @@ class HybridAuth
                             'SELECT id, photoURL, displayName, firstName, lastName, emailConfirmed FROM user u WHERE UPPER(TRIM(u.email)) = UPPER(TRIM(:email)) AND u.password = MD5(:password)',
                             array('email' => $email, 'password' => $_POST['password']))
                     ))
-                {
+                    {
                     $row = db_fetch_assoc($query);
                     if ($row)
                     {
@@ -65,23 +72,29 @@ class HybridAuth
                         {
                             setCustomer($row['id'], $row['photoURL'], $row['displayName']);
                             $result_str = 'OK';
-                        } else $result_str = 'email_confirm_expected';
-                    } else $result_str = 'E-Mail or password not found. Please correct and try again';
-                } else $result_str = db_error().' Please contact system administrator';
+                        } 
+                        else 
+                          $result_str = 'email_confirm_expected';
+                    } 
+                    else 
+                        $result_str = 'E-Mail or password not found. Please correct and try again';
+                } 
+                else 
+                    $result_str = db_error().' Please contact system administrator';
             else ;
         } else $result_str = 'Parameters mismatch. Please refresh the page and try again';
 
         echo json_encode(array('message' => $result_str, 'email' => $email));
     }
 
-    function startEmailConfirm()
+    public function startEmailConfirm($params)
     {
-        $secret = generateSecret(30);
+        $secret = Auth::generatePassword(30);
         $_SESSION['email_confirm_secret'] = $secret;
         echo json_encode(array('message' => 'ok', 'secret' => $secret));
     }
 
-    function doEmailConfirm()
+    public function doEmailConfirm($params)
     {
         if (isset($_SESSION['email_confirm_secret']) && isset($_POST['secret']) && $_SESSION['email_confirm_secret'] == $_POST['secret'] &&
             isset($_POST['email']) && isset($_POST['code']))
@@ -116,7 +129,7 @@ class HybridAuth
         echo json_encode(array('message' => $result_str));
     }
 
-    function resendEmailConfirm()
+    public function resendEmailConfirm($params)
     {
         if (isset($_SESSION['email_confirm_secret']) && isset($_POST['secret']) && $_SESSION['email_confirm_secret'] == $_POST['secret'] && isset($_POST['email']))
             $result_str = startEmailConfirmation($_POST['email'], rootDir());
@@ -125,17 +138,17 @@ class HybridAuth
         echo json_encode(array('message' => $result_str ? $result_str : 'OK'));
     }
 
-   function startResetPassword()
+   public function startResetPassword($params)
     {
         if (isset($_SESSION['login_secret']) && isset($_POST['secret']) && $_SESSION['login_secret'] == $_POST['secret'])
         {
-            $secret = generateSecret(30);
+            $secret = Auth::generatePassword(30);
             $_SESSION['request_reset_password_secret'] = $secret;
             echo json_encode(array('message' => 'ok', 'email' => isset($_REQUEST['email']) ? $_REQUEST['email'] : null, 'secret' => $secret));
         } else echo json_encode(array('message' => 'Parameters mismatch. Please refresh the page and try again'));
     }
 
-    function requestResetPassword()
+    public function requestResetPassword($params)
     {
         if (isset($_SESSION['request_reset_password_secret']) && isset($_POST['secret']) && $_SESSION['request_reset_password_secret'] == $_POST['secret'] && isset($_POST['email']))
         {
@@ -152,7 +165,7 @@ class HybridAuth
                     $row = db_fetch_assoc($query);
                     if ($row)
                     {
-                        $passwordResetKey = generateSecret(30);
+                        $passwordResetKey = Auth::generatePassword(30);
                         if (db_query
                         (
                             query_params(
@@ -178,12 +191,12 @@ class HybridAuth
             else ;
         } else $result_str = 'Parameters mismatch. Please refresh the page and try again';
 
-        $secret = generateSecret(30);
+        $secret = Auth::generatePassword(30);
         $_SESSION['reset_password_secret'] = $secret;
         echo json_encode(array('message' => $result_str, 'secret' => $secret));
     }
 
-    function doResetPassword()
+    public function doResetPassword($params)
     {
         if (isset($_SESSION['reset_password_secret']) && isset($_POST['secret']) && $_SESSION['reset_password_secret'] == $_POST['secret'] &&
             isset($_POST['code']) && isset($_POST['password1']) && isset($_POST['password2']))
@@ -228,14 +241,14 @@ class HybridAuth
         } else resultMessageDie('Parameters mismatch. Please refresh the page and try again');
     }
 
-    function startRegister()
+    public function startRegister($params)
     {
-        $secret = generateSecret(30);
+        $secret = Auth::generatePassword(30);
         $_SESSION['register_secret'] = $secret;
         echo json_encode(array('message' => 'ok', 'secret' => $secret));
     }
 
-    function doRegister()
+    public function doRegister($params)
     {
         if (isset($_SESSION['register_secret']) && isset($_POST['secret']) && $_SESSION['register_secret'] == $_POST['secret'] && isset($_POST['email']))
         {
@@ -282,7 +295,7 @@ class HybridAuth
             if ($row[0])
                 resultMessageDie('This email is already registered!');
 
-            $query_text =
+            $query_text = 
                 query_params
                 (
                     'INSERT INTO user(photoURL, displayName, firstName, lastName, email, password)'.
@@ -313,7 +326,7 @@ class HybridAuth
         } else resultMessageDie('Parameters mismatch. Please refresh the page and try again');
     }
 
-    function startEditProfile()
+    public function startEditProfile($params)
     {
         if ($result_str = db_connect())
             resultMessageDie($result_str);
@@ -326,21 +339,19 @@ class HybridAuth
         if (!$row)
             resultMessageDie('Session is incorrect. Please relogin and try again');
 
-        $secret = generateSecret(30);
+        $secret = Auth::generatePassword(30);
         $_SESSION['edit_profile_secret'] = $secret;
-        echo json_encode(array
-        (
-            'message' => 'ok',
-            'secret' => $secret,
-            'photoURL' => $row['photoURL'],
-            'displayName' => $row['displayName'],
-            'firstName' => $row['firstName'],
-            'lastName' => $row['lastName'],
-            'email' => $row['email']
-        ));
+        return [
+            'Secret' => $secret,
+            'PhotoURL' => $row['photoURL'],
+            'DisplayName' => $row['displayName'],
+            'FirstName' => $row['firstName'],
+            'LastName' => $row['lastName'],
+            'Email' => $row['email']
+        ];
     }
 
-    function doEditProfile()
+    public function doEditProfile($params)
     {
         if (isset($_SESSION['edit_profile_secret']) && isset($_POST['secret']) && $_SESSION['edit_profile_secret'] == $_POST['secret'])
         {
