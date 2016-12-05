@@ -2,6 +2,16 @@
 
 class Auth extends Adapter
 {
+    public static $allowedMethods = [
+        'getAuthProviders',
+        'loginInit', 'login',
+        'confirmEmailInit', 'confirmEmail', 'confirmEmailResend',
+        'passwordResetInit', 'passwordResetEmailSend', 'passwordReset',
+        'registerInit', 'register',
+        'getUserProfile', 'saveUserProfile',
+        'getUser'
+    ];
+
     /** Generates password */
     public static function generateSecret($word_length = 10, $allowed_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
     {
