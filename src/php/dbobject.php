@@ -3,61 +3,75 @@
 /**
 * Basic database object
 */
-class DBObject extends Adapter
+class DbObject extends Adapter
 {
-    public static $allowedExternalCalls = [];
-
-    protected function getConnection()
+    protected static function getConnection()
     {
         return Application::getConnection();
     }
 
-    protected function internalExecSQL($sql, $params)
+    protected static function internalExecSql($sql, $params)
     {
-        $con = $this->getConnection();
+        $con = DbObject::getConnection();
         $query = $con->prepare($sql);
         $query->execute($params);
         return $query;
     }
 
-    protected function execSQL($sql, $params)
+    public static function execSql($sql, $params)
     {
-        $this->internalExecSQL($sql, $params);
+        DbObject::internalExecSql($sql, $params);
     }
 
-    protected function fetchSQL($sql, $params)
+    public static function fetchSql($sql, $params)
     {
-        $query = $this->internalExecSQL($sql, $params);
+        $query = DbObject::internalExecSql($sql, $params);
         return $query->fetchAll(PDO::FETCH_ASSOC);
     }
 }
 
 /**
+* Adapter with access to DbObject's execSQL and fetchSQL
+* Warning: potential sequrity vulnerability
+*/
+//class DataQuery extends DbObject
+//{
+//    public static $allowedMethods = ['execSQL', 'fetchSQL'];
+//}
+
+/**
 * Database table crud interface
 */
-class DataTable extends DBObject
+class DataTable extends DbObject
 {
     public static $allowedMethods = ['fill', 'applyUpdates'];
     
     public $tableName;
     public $idField = 'id';
-    public $sql;
+    public $selectSql;
 
-    public function __construct($tableName = '', $idField = '')
+    public function __construct($tableName = '', $idField = '', $selectSql = '')
     {
-        if ($tableName != '') {
+        if (!empty($tableName)) {
             $this->$tableName = $tableName;
         }
-        if ($idField != '') {
+        if (!empty($idField)) {
             $this->$idField = $idField;
+        }
+        if (!empty($selectSql)) {
+            $this->$selectSql = $selectSql;
         }
     }
     
     public function fill($params)
     {
         $data = [];
-        $sql = "select * from $this->tableName";
-        $data['records'] = $this->fetchSQL($sql, $params);
+        if (!empty($this->selectSql)) {
+            $sql = $this->selectSql;
+        } else {
+            $sql = "select * from $this->tableName";
+        }
+        $data['records'] = $this->fetchSql($sql, $params);
         return $data;
     }
 
@@ -93,7 +107,7 @@ class DataTable extends DBObject
             $values = $values . '"' . $value . '"';
         }
         $sql = "insert into $this->tableName ($fields) values ($values)";
-        $this->execSQL($sql);
+        $this->execSql($sql);
         $result = [];
         $result[$this->idField] = $params[$this->idField];
         return $result;
@@ -114,18 +128,18 @@ class DataTable extends DBObject
             }
         }
         $sql = "update $this->tableName set\n $sql \n where $this->idField = \"$idValue\"";
-        $this->execSQL($sql);
+        $this->execSql($sql);
     }
     
     public function deleteRecord($params)
     {
-        $this->execSQL('delete from '.$this->tableName.' where '.$this->idField.' = '.$params[$this->idField]);
+        $this->execSql("delete from .$this->tableName where $this->idField = ?", [$params[$this->idField]]);
     }
 
 
     public function generateId()
     {
-        $cnt = $this->fetchSQL("select max(id) + 1 as newId from $this->tableName");
+        $cnt = $this->fetchSql("select max(id) + 1 as newId from $this->tableName");
         return $cnt[0]['newId'];
     }
 }

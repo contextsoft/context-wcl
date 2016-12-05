@@ -7,6 +7,18 @@ class DatabaseConfig
     static $password = '';
 }
 
+class MailerConfig
+{
+    static $host = 'smtp.email.from';  // Specify main and backup server
+    static $SMTPAuth = true; // Enable SMTP authentication
+    static $SMTPSecure = 'ssl';  // Enable encryption, 'ssl' also accepted
+    static $username = 'firstlast@email.from';  // SMTP username
+    static $password = ''; // SMTP password
+    static $port = 465;
+    static $from = 'firstlast@email.from';
+    static $fromName = 'First Last';
+}
+
 class AuthConfig
 {
     /**

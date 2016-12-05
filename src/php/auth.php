@@ -1,407 +1,412 @@
 <?php
 
-class Auth extends Adapter 
+class Auth extends Adapter
 {
-    public static function generatePassword($word_length = 6, $allowed_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')    
+    /** Generates password */
+    public static function generateSecret($word_length = 10, $allowed_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
     {
-        if (!isset($allowed_chars) || !strlen($allowed_chars))
+        if (!isset($allowed_chars) || !strlen($allowed_chars)) {
             $allowed_chars = '1234567890QWERTYUIOPASDFGHJKLZXCVBNM';
+        }
         $str = array();
-        for ($i = 0; $i < $word_length; $i++)
+        for ($i = 0; $i < $word_length; $i++) {
             $str[] = substr($allowed_chars, rand(1, strlen($allowed_chars)) - 1, 1);
+        }
         shuffle($str);
         return implode("", $str);
     }
 
-    protected function resultMessageDie($resultStr)
-    {
-        //echo json_encode(array('message' => $resultStr));
-        //die();
-        throw new Exception($resultStr);
-    }
-
-    public function getAuthProviders($params)
+    /** Returns enabled hybridauth providers */
+    public function getAuthProviders()
     {
         if (!class_exists('AuthConfig')) {
-            throw new Exception('Auth not configured.');
+            Application::raise('Auth not configured.');
         }
         $providers_enabled = [];
-        foreach(AuthConfig::$hybridAuthProviders['providers'] as $provider => $provider_options) {
-            if (isset($provider_options['enabled']) && $provider_options['enabled'])
+        foreach (AuthConfig::$hybridAuthProviders['providers'] as $provider => $provider_options) {
+            if (isset($provider_options['enabled']) && $provider_options['enabled']) {
                 $providers_enabled[] = $provider;
+            }
         }
         return $providers_enabled;
     }
 
-    public function getUserInfo($params)
+    /** Init login procedure */
+    public function loginInit()
     {
-        $content = [];
-        if (UserSession::getValue('userId'))
-        {
-            $content['userPhotoURL'] = UserSession::getValue("userPhotoURL");
-            $content['userDisplayName'] = UserSession::getValue("userDisplayName");
+        $secret = Auth::generateSecret();
+        UserSession::setValue('loginSecret', $secret);
+        return ['secret' => $secret];
+    }
+
+    /** Logins user
+      * params: [secret, email, code]
+    **/
+    public function login($params)
+    {
+        if (!isset($params['secret']) || UserSession::getValue('loginSecret') != $params['secret']) {
+            Application::raise('Invalid Session. Please refresh the page and try again.');
         }
-        return $content;
+        if (empty($params['email']) || empty($params['password'])) {
+            Application::raise('Please enter Email and Password.');
+        }
+            
+        $user = DbObject::fetchSQL(
+            "SELECT id, photoURL, displayName, firstName, lastName, emailConfirmed FROM user u 
+              WHERE UPPER(TRIM(u.email)) = UPPER(TRIM(?)) AND u.password = MD5(?)",
+            [$params['email'], $params['password']]);
+
+        if (!count($user)) {
+            Application::raise('Email or password is incorrect. Please try again');
+        }
+
+        $user = $user[0];
+
+        if ($user['emailConfirmed'] != 'T') {
+            Application::raise('User registration is not confirmed. Please check your inbox for registration email.');
+        }
+
+        $this->setUser($user['id'], $user['photoURL'], $user['displayName']);
+        return $this->getUser();
     }
 
-    public function startLogin($params)
+    /** Inits confirmation email procedure */
+    public function confirmEmailInit()
+    {
+        $secret = Auth::generateSecret();
+        UserSession::setValue('emailConfirmSecret', $secret);
+        return ['secret' => $secret];
+    }
+
+    /** Confirms user email
+      * params: [secret, email, code]
+    **/
+    public function confirmEmail($params)
+    {
+        if (!isset($params['secret']) || UserSession::getValue('emailConfirmSecret') != $params['secret']) {
+            Application::raise('Invalid Session. Please refresh the page and try again.');
+        }
+        if (empty($params['email']) || empty($params['code'])) {
+            Application::raise('Please enter email and confirmation code.');
+        }
+        
+        $user = DbObject::fetchSql(
+            "SELECT id, photoURL, displayName, firstName, lastName FROM user u WHERE UPPER(TRIM(u.email)) = UPPER(TRIM(?)) AND u.emailConfirmationKey = ?",
+            [params['email'], params['code']]);
+
+        if (!count($user)) {
+            Application::raise('Confirmation code is invalid.');
+        }
+
+        $user = $user[0];
+
+        DbObject.execSql(
+            "UPDATE user SET emailConfirmed = :emailConfirmed, emailConfirmationKey = :emailConfirmationKey WHERE id = :id",
+            ['id' => $user['id'], 'emailConfirmed' => 'T', 'emailConfirmationKey' => null]);
+
+        $this->setUser($user['id'], $user['photoURL'], $user['displayName']);
+        return $this->getUser();
+    }
+
+    /** Sends password confirmation email
+      * params: [secret, email]
+    **/
+    public function confirmEmailResend($params)
+    {
+        if (!isset($params['secret']) || UserSession::getValue('emailConfirmSecret') != $params['secret']) {
+            Application::raise('Invalid Session. Please refresh the page and try again.');
+        }
+        if (empty($params['email'])) {
+            Application::raise('Please enter Email.');
+        }
+        $this->confirmEmailSend($params['email']);
+        return Application::L('Confirmation Email sent.');
+    }
+
+    /** Sends password confirmation email */
+    protected function confirmEmailSend($email)
+    {
+        $user = DbObject::execSql(
+            "SELECT id, displayName, emailConfirmed FROM user WHERE UPPER(TRIM(email)) = UPPER(TRIM(?))",
+            [$email]);
+
+        if (!count($user)) {
+            Application::raise('User not found. Please correct and try again.');
+        }
+
+        $user = $user[0];
+
+        $id = $user['id'];
+        $displayName = $user['displayName'];
+        $emailConfirmationKey = Auth::generateSecret(5);
+
+        DbObject::execSql(
+            "UPDATE user SET emailConfirmed = :emailConfirmed, emailConfirmationKey = :emailConfirmationKey WHERE id = :id",
+            [['id' => $id, 'emailConfirmed' => 'F', 'emailConfirmationKey' => $emailConfirmationKey]]);
+
+        Mailer::sendMail($email, $displayName, 'Email confirmation',
+            "Thank you for register'.\n".
+            "Email confirmation key is $emailConfirmationKey. Please use it for confirm.");
+    }
+
+    /** Inits password reset procedure */
+    public function passwordResetInit()
+    {
+        $secret = Auth::generateSecret();
+        UserSession::setValue('passwordResetSecret', $secret);
+        return ['secret' => $secret];
+    }
+
+    /** Sends password reset email.
+      * params: [secret, email]
+    **/
+    public function passwordResetEmailSend($params)
+    {
+        if (!isset($params['secret']) || UserSession::getValue('passwordResetSecret') != $params['secret']) {
+            Application::raise('Invalid Session. Please refresh the page and try again.');
+        }
+        if (empty($params['email'])) {
+            Application::raise('Please enter Email.');
+        }
+        $email = strtolower($params['email']);
+
+        $user = DbObject::fetchSql(
+            "SELECT id, displayName FROM user WHERE LOWER(TRIM(email)) = LOWER(TRIM(?))",
+            [$email]);
+
+        if (!count($user)) {
+            // For security reasons always telling that password sent
+            return Application::L('Password reset email sent.');
+        }
+
+        $user = $user[0];
+        $passwordResetKey = Auth::generateSecret();
+
+        DbObject::execSql(
+            "UPDATE user SET passwordResetKey = :passwordResetKey WHERE id = :id)",
+            ['id' => $user['id'], 'passwordResetKey' => $passwordResetKey]);
+
+        Mailer::sendMail($email, $user['displayName'], 'Password reset request',
+            "To reset your password please use the code: ".md5($email . '-' . $user['id'] . '-' . $passwordResetKey));
+
+        return Application::L('Password reset email sent.');
+    }
+
+    /** Changes password and logins user.
+      * params: [secret, password1 - old, password2 - new, code - from confirmation email]
+    **/
+    public function passwordReset($params)
+    {
+        if (!isset($params['secret']) || UserSession::getValue('passwordResetSecret') != $params['secret']) {
+            Application::raise('Invalid Session. Please refresh the page and try again.');
+        }
+        if (empty($params['password1']) || empty($_POST['password2'])) {
+            Application::raise('Password can not be empty.');
+        }
+        if ($params['password1'] != $params['password2']) {
+            Application::raise('Passwords do not match.');
+        }
+        $newPwd = $params['password2'];
+        $validate = Auth::validatePassword($newPwd);
+        if (!empty($validate)) {
+            Application::raise($validate);
+        }
+
+        $user = DbObject::fetchSql(
+            "SELECT u.id, u.photoURL, u.displayName 
+               FROM user u 
+              WHERE MD5(CONCAT(LOWER(u.email), '-', u.id, '-', u.passwordResetKey)) = ?",
+            [params['code']]);
+
+        if (!count($user)) {
+            Application::raise('Code is incorrect. Please request password change again.');
+        }
+
+        $user = $user[0];
+
+        DbObject::execSql(
+            "UPDATE user u SET password = md5(:password), passwordResetKey = null WHERE id = :id",
+            ['password' => $newPwd, 'id' => $user['id']]);
+
+        $this->setUser($user['id'], $user['photoURL'], $user['displayName']);
+        return $this->getUser();
+    }
+
+    /** Starts registration procedure */
+    public function registerInit()
     {
         $secret = Auth::generatePassword(30);
-        $_SESSION['loginSecret'] = $secret;
-        return $secret;
-    }
-
-    public function doLogin($params)
-    {
-        if (isset($params['secret']) && UserSession::getValue('loginSecret') == $params['secret'] && isset($_POST['email']) && isset($_POST['password']))
-        {
-            $email = $_POST['email'];
-            if (!($result_str = db_connect()))
-                if ($query =
-                    db_query
-                    (
-                        query_params(
-                            'SELECT id, photoURL, displayName, firstName, lastName, emailConfirmed FROM user u WHERE UPPER(TRIM(u.email)) = UPPER(TRIM(:email)) AND u.password = MD5(:password)',
-                            array('email' => $email, 'password' => $_POST['password']))
-                    ))
-                    {
-                    $row = db_fetch_assoc($query);
-                    if ($row)
-                    {
-                        if ($row['emailConfirmed'] == 'T')
-                        {
-                            setCustomer($row['id'], $row['photoURL'], $row['displayName']);
-                            $result_str = 'OK';
-                        } 
-                        else 
-                          $result_str = 'email_confirm_expected';
-                    } 
-                    else 
-                        $result_str = 'E-Mail or password not found. Please correct and try again';
-                } 
-                else 
-                    $result_str = db_error().' Please contact system administrator';
-            else ;
-        } else $result_str = 'Parameters mismatch. Please refresh the page and try again';
-
-        echo json_encode(array('message' => $result_str, 'email' => $email));
-    }
-
-    public function startEmailConfirm($params)
-    {
-        $secret = Auth::generatePassword(30);
-        $_SESSION['email_confirm_secret'] = $secret;
+        $_SESSION['registerSecret'] = $secret;
         echo json_encode(array('message' => 'ok', 'secret' => $secret));
     }
 
-    public function doEmailConfirm($params)
+    /** Registers user
+      * params: [secret, email, firstName, lastName, displayName, photoURL, password1, password2, captcha]
+    **/
+    public function register($params)
     {
-        if (isset($_SESSION['email_confirm_secret']) && isset($_POST['secret']) && $_SESSION['email_confirm_secret'] == $_POST['secret'] &&
-            isset($_POST['email']) && isset($_POST['code']))
-        {
-            if (!($result_str = db_connect()))
-                if ($query =
-                    db_query
-                    (
-                        query_params(
-                            'SELECT id, photoURL, displayName, firstName, lastName FROM user u WHERE UPPER(TRIM(u.email)) = UPPER(TRIM(:email)) AND u.emailConfirmationKey = :eConfirmationKey',
-                            array('email' => $_POST['email'], 'eConfirmationKey' => $_POST['code']))
-                    ))
-                {
-                    $row = db_fetch_assoc($query);
-                    if ($row)
-                    {
-                        if (db_query
-                        (
-                            query_params(
-                                'Update user Set emailConfirmed = :emailConfirmed, emailConfirmationKey = :emailConfirmationKey WHERE id = :id',
-                                array('id' => $row['id'], 'emailConfirmed' => 'T', 'emailConfirmationKey' => null))
-                        ))
-                        {
-                            setCustomer($row['id'], $row['photoURL'], $row['displayName']);
-                            $result_str = 'OK';
-                        } else $result_str = db_error().' Please contact system administrator';
-                    } else $result_str = 'E-Mail not found or code is not valid. Please correct and try again';
-                } else $result_str = db_error().' Please contact system administrator';
-            else ;
-        } else $result_str = 'Parameters mismatch. Please refresh the page and try again';
+        if (!isset($params['secret']) || UserSession::getValue('registerSecret') != $params['secret']) {
+            Application::raise('Invalid Session. Please refresh the page and try again.');
+        }
+        if (empty($params['email'])) {
+            Application::raise('Please enter Email.');
+        }
+        if (Mailer::checkEmail($params['email'])) {
+            Application::raise('Email is invalid.');
+        }
+        if (empty($params['firstName']) || empty($params['lastName'])) {
+            Application::raise('Please enter your name.');
+        }
+        if (empty($params['password1']) || empty($params['password2'])) {
+            Application::raise('Please enter password.');
+        }
+        if ($params['password1'] != $params['password2']) {
+            Application::raise('Passwords do not match.');
+        }
+        if (empty($params['captcha']) || md5($params['captcha']) != UserSession::GetValue('registerCaptcha')) {
+            Application::raise('Please enter the captcha more careful.');
+        }
 
-        echo json_encode(array('message' => $result_str));
+        $exists = DbObject::fetchSql(
+            "SELECT COUNT(*) FROM user WHERE UPPER(TRIM(email)) = UPPER(TRIM(?))"
+            [$params['email']]);
+        if (count(exists) && exists[0]) {
+            Application::raise("Such user already registered.");
+        }
+
+        DbObject::execSql(
+            "INSERT INTO user(email, firstName, lastName, displayName, photoURL, password, emailConfirmed)
+                 VALUES(:email, :firstName, :lastName, :displayName, :photoURL, md5(:password), 'F')",
+            [
+                'email' => $params['email'],
+                'firstName' => $params['firstName'],
+                'lastName' => $params['lastName'],
+                'displayName' => $params['displayName'],
+                'photoURL' => $params['photoURL'],
+                'password' => $params['password1']
+            ]);
+
+            $this->confirmEmailInit();
+            $this->confirmEmailSend($params['email']);
+            return Application::L('Registration confirmation email sent.');
     }
 
-    public function resendEmailConfirm($params)
+    /** Returns user profile for modifying */
+    public function getUserProfile($params)
     {
-        if (isset($_SESSION['email_confirm_secret']) && isset($_POST['secret']) && $_SESSION['email_confirm_secret'] == $_POST['secret'] && isset($_POST['email']))
-            $result_str = startEmailConfirmation($_POST['email'], rootDir());
-        else $result_str = 'Parameters mismatch. Please refresh the page and try again '.$_SESSION['email_confirm_secret'].' '.$_POST['secret'];
-
-        echo json_encode(array('message' => $result_str ? $result_str : 'OK'));
-    }
-
-   public function startResetPassword($params)
-    {
-        if (isset($_SESSION['login_secret']) && isset($_POST['secret']) && $_SESSION['login_secret'] == $_POST['secret'])
-        {
-            $secret = Auth::generatePassword(30);
-            $_SESSION['request_reset_password_secret'] = $secret;
-            echo json_encode(array('message' => 'ok', 'email' => isset($_REQUEST['email']) ? $_REQUEST['email'] : null, 'secret' => $secret));
-        } else echo json_encode(array('message' => 'Parameters mismatch. Please refresh the page and try again'));
-    }
-
-    public function requestResetPassword($params)
-    {
-        if (isset($_SESSION['request_reset_password_secret']) && isset($_POST['secret']) && $_SESSION['request_reset_password_secret'] == $_POST['secret'] && isset($_POST['email']))
-        {
-            $email = $_POST['email'];
-            if (!($result_str = db_connect()))
-                if ($query =
-                    db_query
-                    (
-                        query_params(
-                            'SELECT id, displayName FROM user WHERE UPPER(TRIM(email)) = UPPER(TRIM(:email))',
-                            array('email' => $email))
-                    ))
-                {
-                    $row = db_fetch_assoc($query);
-                    if ($row)
-                    {
-                        $passwordResetKey = Auth::generatePassword(30);
-                        if (db_query
-                        (
-                            query_params(
-                                'Update user Set passwordResetKey = :passwordResetKey WHERE UPPER(TRIM(email)) = UPPER(TRIM(:email))',
-                                array('email' => $email, 'passwordResetKey' => $passwordResetKey))
-                        ))
-                        {
-                            try
-                            {
-                                $result_str =
-                                    sendMail($email, $displayName, 'Password reset request',
-                                        'Password reset requested' . "\n" .
-                                        'Please use the code: '.md5($email . '-' . $row['id'] . '-' . $passwordResetKey));
-                                if (!$result_str)
-                                    $result_str = 'ok';
-                            } catch (Exception $e)
-                            {
-                                $result_str = $e->getMessage() . '!';
-                            }
-                        } else $result_str = db_error() . ' Please contact system administrator';
-                    } else $result_str = 'Parameters mismatch. Please refresh the page and try again '.$email;
-                } else $result_str = db_error().' Please contact system administrator';
-            else ;
-        } else $result_str = 'Parameters mismatch. Please refresh the page and try again';
-
-        $secret = Auth::generatePassword(30);
-        $_SESSION['reset_password_secret'] = $secret;
-        echo json_encode(array('message' => $result_str, 'secret' => $secret));
-    }
-
-    public function doResetPassword($params)
-    {
-        if (isset($_SESSION['reset_password_secret']) && isset($_POST['secret']) && $_SESSION['reset_password_secret'] == $_POST['secret'] &&
-            isset($_POST['code']) && isset($_POST['password1']) && isset($_POST['password2']))
-        {
-
-            if (!isset($_POST['password1']) || !isset($_POST['password2']))
-                resultMessageDie('password can not be empty');
-            if ($_POST['password1'] != $_POST['password2'])
-                resultMessageDie('password confirm error');
-            $password = $_POST['password1'];
-            if (!strlen($password))
-                resultMessageDie('password can not be empty');
-
-            if ($result_str = db_connect())
-                resultMessageDie($result_str);
-
-            $query =
-                db_query
-                (
-                    query_params(
-                        "SELECT u.id, u.photoURL, u.displayName FROM user u WHERE MD5(CONCAT(u.email, '-', u.id, '-', u.passwordResetKey)) = :passwordResetKey",
-                        array('passwordResetKey' => $_POST['code']))
-                );
-            if (!$query)
-                resultMessageDie(db_error().' Please contact system administrator');
-
-            $row = db_fetch_assoc($query);
-            if (!$row)
-                resultMessageDie('Code is not correct. Please request password change again');
-
-            if (!db_query
-            (
-                query_params(
-                    'Update user u Set password = md5(:password), passwordResetKey = null Where id = :id',
-                    array('password' => $password, 'id' => $row['id']))
-            ))
-                resultMessageDie(db_error().' Please contact system administrator');
-
-            setCustomer($row['id'], $row['photoURL'], $row['displayName']);
-            resultMessageDie('OK');
-
-        } else resultMessageDie('Parameters mismatch. Please refresh the page and try again');
-    }
-
-    public function startRegister($params)
-    {
-        $secret = Auth::generatePassword(30);
-        $_SESSION['register_secret'] = $secret;
-        echo json_encode(array('message' => 'ok', 'secret' => $secret));
-    }
-
-    public function doRegister($params)
-    {
-        if (isset($_SESSION['register_secret']) && isset($_POST['secret']) && $_SESSION['register_secret'] == $_POST['secret'] && isset($_POST['email']))
-        {
-            if (!isset($_POST['captcha']) || md5($_POST['captcha']) != $_SESSION['captcha_register'])
-                resultMessageDie('Please enter the captcha more careful');
-
-            $email = $_POST['email'];
-
-            if (!check_email_address($email))
-                resultMessageDie('email '.$email.' is not valid');
-            if (!strlen($email))
-                resultMessageDie('email can not be empty');
-
-            if (!isset($_POST['password1']) || !isset($_POST['password2']))
-                resultMessageDie('password can not be empty');
-            if ($_POST['password1'] != $_POST['password2'])
-                resultMessageDie('password confirm error');
-            $password = $_POST['password1'];
-            if (!strlen($password))
-                resultMessageDie('password can not be empty');
-
-            $firstName = $_POST['firstname'];
-            $lastName = $_POST['lastname'];
-
-            $displayname = $_POST['displayname'];
-            if (!strlen($displayname))
-            {
-                $displayname = strlen($firstName) ? $firstName.(strlen($lastName) ? ' '.$lastName : '') : $lastName;
-                if (!strlen($displayname))
-                    resultMessageDie('please enter the name');
-            }
-
-            if ($result_str = db_connect())
-                resultMessageDie($result_str);
-
-            $query = db_query(query_params('SELECT COUNT(*) FROM user WHERE UPPER(TRIM(email)) = UPPER(TRIM(:email))', array('email' => $email)));
-            if (!$query)
-                resultMessageDie(db_error().' Please contact system administrator');
-
-            $row = db_fetch_array($query);
-            if (!$row)
-                resultMessageDie('Email checking unexpected result. Please contact system administrator');
-
-            if ($row[0])
-                resultMessageDie('This email is already registered!');
-
-            $query_text = 
-                query_params
-                (
-                    'INSERT INTO user(photoURL, displayName, firstName, lastName, email, password)'.
-                    'VALUES(:photoURL, :displayName, :firstName, :lastName, :email, md5(:password))',
-                    array
-                    (
-                        'photoURL' => $_POST['photourl'],
-                        'displayName' => $displayname,
-                        'firstName' => $firstName,
-                        'lastName' => $lastName,
-                        'email' => $email,
-                        'password' => $password
-                    )
-                );
-            $query = db_query($query_text);
-            if (!$query)
-                resultMessageDie(db_error().' Please contact system administrator');
-
-            $result_str = startEmailConfirmation($email);
-            if ($result_str)
-            {
-                db_query(query_params('Delete From user WHERE UPPER(TRIM(email)) = UPPER(TRIM(:email))', array('email' => $email)));
-                resultMessageDie($result_str);
-            }
-
-            resultMessageDie('OK');
-
-        } else resultMessageDie('Parameters mismatch. Please refresh the page and try again');
-    }
-
-    public function startEditProfile($params)
-    {
-        if ($result_str = db_connect())
-            resultMessageDie($result_str);
+        $user = DbObject::fetchSql(
+            "SELECT * FROM user WHERE id=?",
+            []);
 
         $query = db_query(query_params('SELECT * FROM user WHERE id=:id', array('id' => $_SESSION["CustomerId"])));
-        if (!$query)
+        if (!$query) {
             resultMessageDie(db_error().' Please contact system administrator');
+        }
 
         $row = db_fetch_assoc($query);
-        if (!$row)
+        if (!$row) {
             resultMessageDie('Session is incorrect. Please relogin and try again');
+        }
 
-        $secret = Auth::generatePassword(30);
-        $_SESSION['edit_profile_secret'] = $secret;
+        $secret = Auth::generateSecret();
+        UserSession::setValue('editProfileSecret', $secret);
+
         return [
-            'Secret' => $secret,
-            'PhotoURL' => $row['photoURL'],
-            'DisplayName' => $row['displayName'],
-            'FirstName' => $row['firstName'],
-            'LastName' => $row['lastName'],
-            'Email' => $row['email']
+            'secret' => $secret,
+            'email' => $row['email'],
+            'firstName' => $row['firstName'],
+            'lastName' => $row['lastName'],
+            'displayName' => $row['displayName'],
+            'photoURL' => $row['photoURL']
         ];
     }
 
-    public function doEditProfile($params)
+    /** Saves user profile
+      * params: [secret, email, firstName, lastName, displayName, photoURL, password1, password2]
+    **/
+    public function saveUserProfile($params)
     {
-        if (isset($_SESSION['edit_profile_secret']) && isset($_POST['secret']) && $_SESSION['edit_profile_secret'] == $_POST['secret'])
-        {
-            if (!isset($_POST['captcha']) || md5($_POST['captcha']) != $_SESSION['captcha_profile'])
-                resultMessageDie('Please enter the captcha more careful');
+        if (empty($params['secret']) || UserSession::getValue('editProfileSecret') != $params['secret']) {
+            Application::raise('Invalid Session. Please refresh the page and try again.');
+        }
+        if (empty($params['email'])) {
+            Application::raise('Please enter Email.');
+        }
+        if (Mailer::checkEmail($params['email'])) {
+            Application::raise('Email is invalid.');
+        }
+        if (empty($params['firstName']) || empty($params['lastName'])) {
+            Application::raise('Please enter your name.');
+        }
 
-            if ((!isset($_POST['password1']) || !strlen($_POST['password1'])) &&
-                (!isset($_POST['password2']) || !strlen($_POST['password2'])))
-                $password = null;
-            else
-            {
-                if ($_POST['password1'] != $_POST['password2'])
-                    resultMessageDie('password confirm error');
-                $password = $_POST['password1'];
+        $user = DbObject::fetchSql(
+            "SELECT password FROM users WHERE id = ?",
+            [UserSession::GetValue("userId")]);
+        
+        if (!empty($params['password1']) && md5($params['password1']) != $user[0]['password']) {
+            Application::raise('Passwords do not match.');
+        }
+
+        if (!empty($params['password1']) && empty($params['password2'])) {
+            Application::raise('Please enter new password.');
+        }
+
+        if (!empty(password2)) {
+            $validate = Auth::validatePassword($password2);
+            if (!empty($validate)) {
+                Application::raise($validate);
             }
+        }
 
-            $firstName = $_POST['firstname'];
-            $lastName = $_POST['lastname'];
+        DbObject::exesSql(
+            "UPDATE user SET photoURL = :photoURL, displayName = :displayName, firstName = :firstName, lastName = :lastName WHERE id = :id",
+            [
+                'photoURL' => $params['photoURL'],
+                'displayName' => $params['displayName'],
+                'firstName' => $params['firstName'],
+                'lastName' => $params['lastName'],
+                'id' => UserSession::getValue("userId")
+            ]
+        );
 
-            $displayname = $_POST['displayname'];
-            if (!strlen($displayname))
-            {
-                $displayname = strlen($firstName) ? $firstName.(strlen($lastName) ? ' '.$lastName : '') : $lastName;
-                if (!strlen($displayname))
-                    resultMessageDie('please enter the name');
-            }
+        if (!empty($params['password2'])) {
+            DbObject::exesSql(
+                "UPDATE user SET password = md5(:password) WHERE id = :id",
+                [
+                    'id' => UserSession::getValue("userId"),
+                    'password' => $params['password2'],
+                    
+                ]);
+        }
+    }
 
-            if ($result_str = db_connect())
-                resultMessageDie($result_str);
+    protected static function setUser($id, $photoURL, $displayName)
+    {
+        UserSession::SetValue("userId", $id);
+        UserSession::SetValue("userPhotoURL", $photoURL);
+        UserSession::SetValue("userDisplayName", $displayName);
+        //UserSession::SetValue("loginSecret", null);
+        //UserSession::SetValue("loginBackPage", null);
+        //UserSession::SetValue("emailConfirmSecret", null);
+        //UserSession::SetValue("passwordResetSecret", null);
+        //UserSession::SetValue("registerSecret", null);
+    }
 
-            $query = db_query(query_params
-            (
-                'Update user Set photoURL = :photoURL, displayName = :displayName, firstName = :firstName, lastName = :lastName, password = IFNULL(:password, password) WHERE id = :id',
-                    array
-                    (
-                        'photoURL' => $_POST['photourl'],
-                        'displayName' => $displayname,
-                        'firstName' => $firstName,
-                        'lastName' => $lastName,
-                        'password' => $password,
-                        'id' => $_SESSION["CustomerId"]
-                    )
-            ));
-            if (!$query)
-                resultMessageDie(db_error().' Please contact system administrator');
+    public static function getUser()
+    {
+        if (!empty(UserSession::GetValue("userId"))) {
+            return [
+                'userId' => UserSession::GetValue("userId"),
+                'userPhotoURL' => UserSession::GetValue("userPhotoURL"),
+                'userDisplayName' => UserSession::GetValue("userDisplayName")
+            ];
+        }
+    }
 
-            resultMessageDie('OK');
-
-        } else resultMessageDie('Parameters mismatch. Please refresh the page and try again '.$_SESSION['edit_profile_secret'].' '.$_POST['secret']);
+    public static function validatePassword($password)
+    {
+        if (strlen($password) < 6) {
+            return 'Password lenght must be equal or greater than 6 characters.';
+        }
     }
 }
-
-?>

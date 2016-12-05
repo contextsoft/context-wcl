@@ -1,18 +1,10 @@
 <?php
 
+require_once('common.php');
 require_once('dbobject.php');
 require_once('auth.php');
 
-
-
-/** Basic adapter type (object directly called by client) */
-class Adapter
-{
-    /** List of methods that can be called */
-    public static $allowedMethods = [];
-}
-
-/** Response sent by service */
+/** Response sent to client by the service */
 class Response
 {
     public $data;
@@ -20,8 +12,15 @@ class Response
     public $errorCallstack;
 }
 
+/** Parent for all adapters (objects directly called by a client) */
+class Adapter
+{
+    /** List of methods that can be called */
+    public static $allowedMethods = [];
+}
+
 /**
-* Basic interface that handled requests, stores session info and database connection
+* Application entry point: handles requests, stores session info and database connection
 */
 class Application
 {
@@ -66,7 +65,6 @@ class Application
                     if (array_search($method, $adapter::$allowedMethods) === false) {
                         throw new Exception("'$method' is not allowed method for '$adapter'.");
                     }
-                    // starting session
                     UserSession::startSession();
                     $response->data = $obj->$method($params);
                 } else {
@@ -90,6 +88,18 @@ class Application
         return Application::$connection;
     }
 
+    /** TODO: Localizes string into selected language */
+    public static function L($str)
+    {
+        return $str;
+    }
+
+    /** Raises localized exception */
+    public static function raise($error)
+    {
+        throw new Exception(Application::L($error));
+    }
+
     /** Connects to DB */
     protected static function connectToDb()
     {
@@ -100,28 +110,22 @@ class Application
         Application::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
-    /** Returns Session object */
-    public static function getSession()
-    {
-        if (!Application::$session) {
-            Application::$session = new UserSession();
-        }
-        return Application::$session;
-    }
 
     /** Appends error to the response */
     protected static function handleException($e, $response)
     {
         $response->error = $e->getMessage();
-        $response->errorCallstack = nl2br('<br>Exception at:<br>'.$e->getTraceAsString());
+        $response->errorCallstack = nl2br('<br><b>Service Call Stack:</b><br>'.$e->getTraceAsString());
     }
 }
 
 /**
-* Stores session info
+* Provides utils for _SESSION access
 */
-class UserSession
+class UserSession extends Adapter
 {
+    public static $allowedMethods = ['getSession'];
+    
     public static function startSession()
     {
         session_start();
@@ -134,11 +138,20 @@ class UserSession
     
     public static function setValue($name, $value)
     {
-        $_SESSION[$name] = $value;
+        if (empty($value)) {
+            unset($_SESSION[$name]);
+        } else {
+            $_SESSION[$name] = $value;
+        }
     }
     
     public static function getValue($name)
     {
         return $_SESSION[$name] || null;
+    }
+
+    public static function getSession()
+    {
+        return $_SESSION;
     }
 }
