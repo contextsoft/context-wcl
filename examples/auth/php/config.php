@@ -8,21 +8,21 @@ class Libs
 
 class DatabaseConfig
 {
-    static $dsn = 'mysql:host=;dbname=';
-    static $username = '';
-    static $password = '';
+    static $dsn = 'mysql:host=localhost;dbname=test';
+    static $username = 'root';
+    static $password = '1234';
 }
 
 class MailerConfig
 {
-    static $host = 'smtp.email.from';  // Specify main and backup server
+    static $host = 'smtp.gmail.comm';  // Specify main and backup server
     static $SMTPAuth = true; // Enable SMTP authentication
     static $SMTPSecure = 'ssl';  // Enable encryption, 'ssl' also accepted
-    static $username = 'firstlast@email.from';  // SMTP username
-    static $password = ''; // SMTP password
+    static $username = 'test.contextsoft@gmail.com';  // SMTP username
+    static $password = 'context1151'; // SMTP password
     static $port = 465;
-    static $from = 'firstlast@email.from';
-    static $fromName = 'First Last';
+    static $from = 'test.contextsoft@gmail.com';
+    static $fromName = 'test.contextsoft@gmail.com';
 }
 
 class AuthConfig

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Ctx Lib Test - Remote</title>
+    <script>
+        var require = {
+            baseUrl: "../../",
+            deps: ['examples/auth/auth.example'],
+            paths: {
+                //"jquery": '../jquery/dist',
+                //"breeze-client": '../breeze-client'
+            },
+            packages: [
+                //{name: 'breeze-client', main: 'breeze.debug.js'}, 
+                //{name: 'jquery', main: 'jquery.js'} 
+            ],
+            callback: function() 
+            {
+                require(['examples/auth/auth.example'], function(app) 
+                {
+                    app.main();
+                });
+            }
+        };
+    </script>
+    <script type="text/javascript" src="../../../requirejs/require.js"></script>
+</head>
+
+<body>
+</body>
+
+</html>

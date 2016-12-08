@@ -5,10 +5,13 @@ class Mailer
 {
     public static function sendMail($email, $displayName, $subj, $body)
     {
+        if (!class_exists('Libs')) {
+            throw new Exception('External libs not configured.');
+        }
         if (!class_exists('MailerConfig')) {
             throw new Exception('Mailer not configured.');
         }
-        include_once('../PHPMailer/PHPMailerAutoload.php');
+        include_once(Libs::$phpMailer.'/PHPMailerAutoload.php');
         $mail = new PHPMailer;
         $mail->isSMTP(); // Set mailer to use SMTP
         $mail->Host = MailerConfig::$host;  // Specify main and backup server

@@ -1,6 +1,6 @@
 <?php
 
-require_once('common.php');
+require_once('utils.php');
 require_once('dbobject.php');
 require_once('auth.php');
 
@@ -124,7 +124,7 @@ class Application
 */
 class UserSession extends Adapter
 {
-    public static $allowedMethods = ['getSession'];
+    //public static $allowedMethods = ['getSession'];
     
     public static function startSession()
     {
@@ -150,8 +150,8 @@ class UserSession extends Adapter
         return $_SESSION[$name] || null;
     }
 
-    public static function getSession()
-    {
-        return $_SESSION;
-    }
+    // public static function getSession()
+    // {
+    //     return $_SESSION;
+    // }
 }
