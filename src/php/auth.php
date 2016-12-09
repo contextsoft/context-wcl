@@ -4,12 +4,13 @@ class Auth extends Adapter
 {
     public static $allowedMethods = [
         'getAuthProviders',
-        'loginInit', 'login', 'loginSocial',
-        'confirmEmailInit', 'confirmEmail', 'confirmEmailResend',
-        'passwordResetInit', 'passwordResetEmailSend', 'passwordReset',
-        'registerInit', 'register',
+        'initLogin', 'login', 'loginSocial',
+        'initRegistration', 'register',
+        'initRegistrationConfirmation', 'confirmRegistrationCode', 'resendRegistrationConfirmationCode',
+        'initPasswordReset', 'sendPasswordResetCode', 'confirmPasswordReset',
         'getUserProfile', 'saveUserProfile',
-        'getUser'
+        'getUser',
+        'generateCaptcha'
     ];
 
     /** Generates password */
@@ -39,10 +40,10 @@ class Auth extends Adapter
     }
 
     /** Init login procedure */
-    public function loginInit()
+    public function initLogin()
     {
         $secret = Auth::generateSecret();
-        UserSession::setValue('loginSecret', $secret);
+        UserSession::setValue('loginSecret', md5($secret));
         return ['secret' => $secret];
     }
 
@@ -51,7 +52,7 @@ class Auth extends Adapter
     **/
     public function login($params)
     {
-        if (!isset($params['secret']) || UserSession::getValue('loginSecret') != $params['secret']) {
+        if (!isset($params['secret']) || UserSession::getValue('loginSecret') != md5($params['secret'])) {
             Application::raise('Invalid Session. Please refresh the page and try again.');
         }
         if (empty($params['email']) || empty($params['password'])) {
@@ -157,19 +158,19 @@ class Auth extends Adapter
     }
 
     /** Inits confirmation email procedure */
-    public function confirmEmailInit()
+    public function initRegistrationConfirmation()
     {
         $secret = Auth::generateSecret();
-        UserSession::setValue('emailConfirmSecret', $secret);
+        UserSession::setValue('emailConfirmSecret', md5($secret));
         return ['secret' => $secret];
     }
 
-    /** Confirms user email
+    /** Confirms user registration
       * params: [secret, email, code]
     **/
-    public function confirmEmail($params)
+    public function confirmRegistrationCode($params)
     {
-        if (!isset($params['secret']) || UserSession::getValue('emailConfirmSecret') != $params['secret']) {
+        if (!isset($params['secret']) || UserSession::getValue('emailConfirmSecret') != md5($params['secret'])) {
             Application::raise('Invalid Session. Please refresh the page and try again.');
         }
         if (empty($params['email']) || empty($params['code'])) {
@@ -194,12 +195,12 @@ class Auth extends Adapter
         return $this->getUser();
     }
 
-    /** Sends password confirmation email
+    /** Sends registration confirmation email
       * params: [secret, email]
     **/
-    public function confirmEmailResend($params)
+    public function resendRegistrationConfirmationCode($params)
     {
-        if (!isset($params['secret']) || UserSession::getValue('emailConfirmSecret') != $params['secret']) {
+        if (!isset($params['secret']) || UserSession::getValue('emailConfirmSecret') != md5($params['secret'])) {
             Application::raise('Invalid Session. Please refresh the page and try again.');
         }
         if (empty($params['email'])) {
@@ -209,8 +210,8 @@ class Auth extends Adapter
         return Application::L('Confirmation Email sent.');
     }
 
-    /** Sends password confirmation email */
-    protected function confirmEmailSend($email)
+    /** Sends registration confirmation email */
+    protected function sendRegistrationConfirmationCode($email)
     {
         $user = DbObject::execSql(
             "SELECT id, displayName, emailConfirmed FROM user WHERE UPPER(TRIM(email)) = UPPER(TRIM(?))",
@@ -236,19 +237,19 @@ class Auth extends Adapter
     }
 
     /** Inits password reset procedure */
-    public function passwordResetInit()
+    public function initPasswordReset()
     {
         $secret = Auth::generateSecret();
-        UserSession::setValue('passwordResetSecret', $secret);
+        UserSession::setValue('passwordResetSecret', md5($secret));
         return ['secret' => $secret];
     }
 
     /** Sends password reset email.
       * params: [secret, email]
     **/
-    public function passwordResetEmailSend($params)
+    public function sendPasswordResetCode($params)
     {
-        if (!isset($params['secret']) || UserSession::getValue('passwordResetSecret') != $params['secret']) {
+        if (!isset($params['secret']) || UserSession::getValue('passwordResetSecret') != md5($params['secret'])) {
             Application::raise('Invalid Session. Please refresh the page and try again.');
         }
         if (empty($params['email'])) {
@@ -281,9 +282,9 @@ class Auth extends Adapter
     /** Changes password and logins user.
       * params: [secret, password1 - old, password2 - new, code - from confirmation email]
     **/
-    public function passwordReset($params)
+    public function confirmPasswordReset($params)
     {
-        if (!isset($params['secret']) || UserSession::getValue('passwordResetSecret') != $params['secret']) {
+        if (!isset($params['secret']) || UserSession::getValue('passwordResetSecret') != md5($params['secret'])) {
             Application::raise('Invalid Session. Please refresh the page and try again.');
         }
         if (empty($params['password1']) || empty($_POST['password2'])) {
@@ -319,11 +320,11 @@ class Auth extends Adapter
     }
 
     /** Starts registration procedure */
-    public function registerInit()
+    public function initRegistration()
     {
         $secret = Auth::generateSecret();
-        $_SESSION['registerSecret'] = $secret;
-        echo json_encode(array('message' => 'ok', 'secret' => $secret));
+        UserSession::setValue('registerSecret', md5($secret));
+        return ['secret' => $secret];
     }
 
     /** Registers user
@@ -331,7 +332,7 @@ class Auth extends Adapter
     **/
     public function register($params)
     {
-        if (!isset($params['secret']) || UserSession::getValue('registerSecret') != $params['secret']) {
+        if (!isset($params['secret']) || UserSession::getValue('registerSecret') != md5($params['secret'])) {
             Application::raise('Invalid Session. Please refresh the page and try again.');
         }
         if (empty($params['email'])) {
@@ -349,7 +350,7 @@ class Auth extends Adapter
         if ($params['password1'] != $params['password2']) {
             Application::raise('Passwords do not match.');
         }
-        if (empty($params['captcha']) || md5($params['captcha']) != UserSession::GetValue('registerCaptcha')) {
+        if (empty($params['captcha']) || md5(strtoupper($params['captcha'])) != UserSession::GetValue('registerCaptcha')) {
             Application::raise('Please enter the captcha more careful.');
         }
 
@@ -382,20 +383,10 @@ class Auth extends Adapter
     {
         $user = DbObject::fetchSql(
             "SELECT * FROM user WHERE id=?",
-            []);
-
-        $query = db_query(query_params('SELECT * FROM user WHERE id=:id', array('id' => $_SESSION["CustomerId"])));
-        if (!$query) {
-            resultMessageDie(db_error().' Please contact system administrator');
-        }
-
-        $row = db_fetch_assoc($query);
-        if (!$row) {
-            resultMessageDie('Session is incorrect. Please relogin and try again');
-        }
+            [UserSession::getValue("userId")]);
 
         $secret = Auth::generateSecret();
-        UserSession::setValue('editProfileSecret', $secret);
+        UserSession::setValue('editProfileSecret', md5($secret));
 
         return [
             'secret' => $secret,
@@ -412,7 +403,7 @@ class Auth extends Adapter
     **/
     public function saveUserProfile($params)
     {
-        if (empty($params['secret']) || UserSession::getValue('editProfileSecret') != $params['secret']) {
+        if (empty($params['secret']) || UserSession::getValue('editProfileSecret') != md5($params['secret'])) {
             Application::raise('Invalid Session. Please refresh the page and try again.');
         }
         if (empty($params['email'])) {
@@ -469,17 +460,17 @@ class Auth extends Adapter
     /** Generates captcha image
       * params: [captchaName]
     **/
-    public function captcha($params)
+    public function generateCaptcha($params)
     {
         $text_length = 7;
         $font_size = 22;
         $text_x_shift = 2;
         $text_angle_shift = 15;
         $text_y_shift = 3;
-        $font_name = 'times.ttf';
+        $font_name = Utils::scriptDir() . '/fonts/times.ttf';
         $garbage_lines_count = 5;
 
-        $text = Autth::generateCode($text_length);
+        $text = Auth::generateSecret($text_length, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
         $captchaName = 'captcha';
         if (!empty($params['captchaName'])) {
             $captchaName .= '_' . $params['captchaName'];
@@ -550,7 +541,7 @@ class Auth extends Adapter
         ob_end_clean(); //clear buffer
         imagedestroy($image); //destroy img
         
-        return ['image' => $imgString];
+        return ['image' => base64_encode($imgString)];
     }
 
     protected static function setUser($id, $photoURL, $firstName, $lastName, $displayName)
@@ -560,11 +551,6 @@ class Auth extends Adapter
         if(empty($displayName))
             $displayName = "$firstName $lastName";
         UserSession::SetValue("userDisplayName", $displayName);
-        //UserSession::SetValue("loginSecret", null);
-        //UserSession::SetValue("loginBackPage", null);
-        //UserSession::SetValue("emailConfirmSecret", null);
-        //UserSession::SetValue("passwordResetSecret", null);
-        //UserSession::SetValue("registerSecret", null);
     }
 
     public static function getUser()

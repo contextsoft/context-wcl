@@ -58,6 +58,7 @@
 
     .ctx_cell {
         display: table-cell;
+        vertical-align: middle;
     }
 }
 

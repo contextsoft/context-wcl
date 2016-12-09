@@ -1,9 +1,18 @@
 <?php
 
+/** Various handy routines */
+class Utils
+{
+    static function scriptDir()
+    {
+        return dirname(__FILE__);
+    }
+}
+
 /** Sends email using PHPMailer */
 class Mailer
 {
-    public static function sendMail($email, $displayName, $subj, $body)
+    static function sendMail($email, $displayName, $subj, $body)
     {
         if (!class_exists('Libs')) {
             throw new Exception('External libs not configured.');
@@ -34,7 +43,7 @@ class Mailer
         }
     }
 
-    public static function checkEmailAddress($email)
+    static function checkEmailAddress($email)
     {
 
         // First, we check that there's one @ symbol,

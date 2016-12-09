@@ -333,7 +333,7 @@ export class ContainerView extends View {
     protected currentView: View;
     protected priorView: View;
 
-    constructor(parent, name) {
+    constructor(parent, name?) {
         super(parent, name);
         this.currentView = null;
         this.animation = ContainerView.animSlideHorizontal();
@@ -376,7 +376,7 @@ export class ContainerView extends View {
             this.updateView();
     };
 
-    public showView(nextView: View, direction: number) {
+    public showView(nextView: View, direction: number = ContainerView.directionForward) {
         if (this.currentView && nextView && this.currentView === nextView)
             return;
 
@@ -395,7 +395,6 @@ export class ContainerView extends View {
         let _this = this;
         let cur = this.currentView;
         this.currentView = nextView;
-        direction = direction || ContainerView.directionForward;
 
         // update next view, make sure it's our child and is visible
         if (nextView) {
