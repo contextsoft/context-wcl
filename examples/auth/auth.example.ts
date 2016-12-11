@@ -82,11 +82,26 @@ class MainScreen extends ScreenView {
         let pwdLabel = new TextView(layout);
         pwdLabel.text = 'Password: ';
         let pwdEdit = new InputView(layout);
+        pwdEdit.attributes['type'] = 'password';
 
         layout.rows = [
             [userLabel, userEdit],
             [pwdLabel, pwdEdit]
         ];
+
+        let loginBtn = new ButtonView(grpBox);
+        loginBtn.text = 'Login';
+        loginBtn.events.onclick = () => {
+            let params = {
+                email: userEdit.value,
+                password: pwdEdit.value
+            };
+            application.service.execute('Auth', 'login', params).then(
+                (response) => {
+                    this.showActions();
+                });
+        };
+
 
         this.pageContainer.showView(this.loginPanel);
     }
@@ -120,10 +135,12 @@ class MainScreen extends ScreenView {
         let pwdLabel1 = new TextView(layout);
         pwdLabel1.text = 'Password: ';
         let pwdEdit1 = new InputView(layout);
+        pwdEdit1.attributes['type'] = 'password';
 
         let pwdLabel2 = new TextView(layout);
         pwdLabel2.text = 'Confirm Password: ';
         let pwdEdit2 = new InputView(layout);
+        pwdEdit2.attributes['type'] = 'password';
 
         let capthcaLabel = new TextView(layout);
         capthcaLabel.tag = 'img';
@@ -133,30 +150,30 @@ class MainScreen extends ScreenView {
             [emailLabel, emailEdit],
             [firstLabel, firstEdit],
             [lastLabel, lastEdit],
-            [pwdLabel1, pwdEdit2],
+            [pwdLabel1, pwdEdit1],
             [pwdLabel2, pwdEdit2],
             [capthcaLabel, capthcaEdit]
         ];
 
         let registerBtn = new ButtonView(grpBox);
-        registerBtn.text = 'Sign Up';
+        registerBtn.text = 'Register';
         registerBtn.events.onclick = () => {
             let params = {
-
+                email: emailEdit.value,
+                firstName: firstEdit.value,
+                lastName: lastEdit.value,
+                password1: pwdEdit1.value,
+                password2: pwdEdit2.value,
+                captcha: capthcaEdit.value
             };
             application.service.execute('Auth', 'register', params).then(
                 (response) => {
+                    application.service.execute('Auth', 'sendRegistrationConfirmationCode', { email: emailEdit.value });
                     this.showActions();
                 });
         };
 
-        application.service.execute('Auth', 'initRegistration').then(
-            (response) => {
-                application.sessionInfo.initRegister = response.data;
-            });
-
-
-        application.service.execute('Auth', 'generateCaptcha').then(
+        application.service.execute('Auth', 'generateRegisterCaptcha').then(
             (response) => {
                 (<HTMLImageElement>capthcaLabel.element).src = 'data:image/png;base64,' + response.data.image;
             });

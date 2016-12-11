@@ -59,16 +59,16 @@ class Application
                     $obj = new $adapter();
                     // checking is it an Adapter
                     if (!is_subclass_of($obj, 'Adapter')) {
-                        throw new Exception("'$adapter' is not an adapter.");
+                        throw new Exception("$adapter is not an adapter.");
                     }
                     // checking if method is allowed
                     if (array_search($method, $adapter::$allowedMethods) === false) {
-                        throw new Exception("'$method' is not allowed method for '$adapter'.");
+                        throw new Exception("$adapter.$method is not allowed call.");
                     }
                     UserSession::startSession();
                     $response->data = $obj->$method($params);
                 } else {
-                    throw new Exception("Adapter '$adapter' does not exists.");
+                    throw new Exception("Adapter $adapter does not exists.");
                 }
             } else {
                 throw new Exception("Adapter or method not provided.");
@@ -147,7 +147,7 @@ class UserSession extends Adapter
     
     public static function getValue($name)
     {
-        return $_SESSION[$name] || null;
+        return isset($_SESSION[$name]) ? $_SESSION[$name] : null;
     }
 
     // public static function getSession()

@@ -2,8 +2,14 @@
 
 class Libs
 {
-    static $hybridAuth = '../hybridauth/hybridauth/Hybrid';
-    static $phpMailer = '../PHPMailer';
+    static $hybridAuth = '../../../../../../php/hybridauth/hybridauth/Hybrid';
+    static $phpMailer = '../../../../../../php/PHPMailer';
+    static function checkPath($path)
+    {
+        if (!realpath($path)) {
+            throw new Exception("'$path' does not exists.");
+        }
+    }
 }
 
 class DatabaseConfig

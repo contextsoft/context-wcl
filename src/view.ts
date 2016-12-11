@@ -79,7 +79,7 @@ export abstract class View extends Component {
 
     // TODO: fix attributes always lowcase
     /** Object with additional control's DOM attributes */
-    public attributes: any = {};
+    public attributes = [];
 
     /** Fires on show/hide */
     public onVisibleChanged: IVoidEvent;

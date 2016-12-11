@@ -4,10 +4,10 @@ class Auth extends Adapter
 {
     public static $allowedMethods = [
         'getAuthProviders',
-        'initLogin', 'login', 'loginSocial',
-        'initRegistration', 'register',
-        'initRegistrationConfirmation', 'confirmRegistrationCode', 'resendRegistrationConfirmationCode',
-        'initPasswordReset', 'sendPasswordResetCode', 'confirmPasswordReset',
+        'login', 'loginSocial',
+        'generateRegisterCaptcha', 'register',
+        'sendRegistrationConfirmationCode', 'confirmRegistrationCode',
+        'sendPasswordResetCode', 'confirmPasswordReset',
         'getUserProfile', 'saveUserProfile',
         'getUser',
         'generateCaptcha'
@@ -39,22 +39,11 @@ class Auth extends Adapter
         return $providers_enabled;
     }
 
-    /** Init login procedure */
-    public function initLogin()
-    {
-        $secret = Auth::generateSecret();
-        UserSession::setValue('loginSecret', md5($secret));
-        return ['secret' => $secret];
-    }
-
     /** Logins user
-      * params: [secret, email, code]
+      * params: [email, password]
     **/
     public function login($params)
     {
-        if (!isset($params['secret']) || UserSession::getValue('loginSecret') != md5($params['secret'])) {
-            Application::raise('Invalid Session. Please refresh the page and try again.');
-        }
         if (empty($params['email']) || empty($params['password'])) {
             Application::raise('Please enter Email and Password.');
         }
@@ -71,10 +60,10 @@ class Auth extends Adapter
         $user = $user[0];
 
         if ($user['emailConfirmed'] != 'T') {
-            Application::raise('User registration is not confirmed. Please check your inbox for registration email.');
+            Application::raise('Registration is not completed. Please check your inbox for confirmation email.');
         }
 
-        $this->setUser($user['id'], $user['photoURL'], $user['firstName'], $user['lastName'], $user['displayName']);
+        $this->setUser($user['id'], $user['firstName'], $user['lastName'], $user['displayName'], $user['photoURL']);
         return $this->getUser();
     }
 
@@ -91,6 +80,7 @@ class Auth extends Adapter
         $providerName = $params["provider"];
         try {
             // inlcude HybridAuth library
+            Libs::checkPath(Libs::$hybridAuth);
             require_once(Libs::$hybridAuth.'/Auth.php') ;
     
             // initialize Hybrid_Auth class with the config file
@@ -154,25 +144,14 @@ class Auth extends Adapter
             $user = $user[0];
         }
 
-        $this->setUser($user['id'], $user['photoURL'], $user['firstName'], $user['lastName'], $user['displayName']);
-    }
-
-    /** Inits confirmation email procedure */
-    public function initRegistrationConfirmation()
-    {
-        $secret = Auth::generateSecret();
-        UserSession::setValue('emailConfirmSecret', md5($secret));
-        return ['secret' => $secret];
+        $this->setUser($user['id'], $user['firstName'], $user['lastName'], $user['displayName'], $user['photoURL']);
     }
 
     /** Confirms user registration
-      * params: [secret, email, code]
+      * params: [email, code]
     **/
     public function confirmRegistrationCode($params)
     {
-        if (!isset($params['secret']) || UserSession::getValue('emailConfirmSecret') != md5($params['secret'])) {
-            Application::raise('Invalid Session. Please refresh the page and try again.');
-        }
         if (empty($params['email']) || empty($params['code'])) {
             Application::raise('Please enter email and confirmation code.');
         }
@@ -188,34 +167,21 @@ class Auth extends Adapter
         $user = $user[0];
 
         DbObject.execSql(
-            "UPDATE user SET emailConfirmed = :emailConfirmed, emailConfirmationKey = :emailConfirmationKey WHERE id = :id",
-            ['id' => $user['id'], 'emailConfirmed' => 'T', 'emailConfirmationKey' => null]);
+            "UPDATE user SET emailConfirmed = 'T', emailConfirmationKey = NULL WHERE id = ?",
+            [$user['id']]);
 
         $this->setUser($user['id'], $user['photoURL'], $user['firstName'], $user['lastName'], $user['displayName']);
         return $this->getUser();
     }
 
-    /** Sends registration confirmation email
-      * params: [secret, email]
+    /** Sends via email registration confirmation code 
+      * params: [email]
     **/
-    public function resendRegistrationConfirmationCode($params)
+    public function sendRegistrationConfirmationCode($params)
     {
-        if (!isset($params['secret']) || UserSession::getValue('emailConfirmSecret') != md5($params['secret'])) {
-            Application::raise('Invalid Session. Please refresh the page and try again.');
-        }
-        if (empty($params['email'])) {
-            Application::raise('Please enter Email.');
-        }
-        $this->confirmEmailSend($params['email']);
-        return Application::L('Confirmation Email sent.');
-    }
-
-    /** Sends registration confirmation email */
-    protected function sendRegistrationConfirmationCode($email)
-    {
-        $user = DbObject::execSql(
-            "SELECT id, displayName, emailConfirmed FROM user WHERE UPPER(TRIM(email)) = UPPER(TRIM(?))",
-            [$email]);
+        $user = DbObject::fetchSql(
+            "SELECT id, firstName, lastName, displayName, emailConfirmed FROM user WHERE UPPER(TRIM(email)) = UPPER(TRIM(?))",
+            [$params['email']]);
 
         if (!count($user)) {
             Application::raise('User not found. Please correct and try again.');
@@ -225,33 +191,25 @@ class Auth extends Adapter
 
         $id = $user['id'];
         $displayName = $user['displayName'];
+        if(empty($displayName)) {
+            $displayName = $user['firstName'] . ' ' . $user['lastName']; 
+        }
         $emailConfirmationKey = Auth::generateSecret(5);
 
         DbObject::execSql(
             "UPDATE user SET emailConfirmed = :emailConfirmed, emailConfirmationKey = :emailConfirmationKey WHERE id = :id",
-            [['id' => $id, 'emailConfirmed' => 'F', 'emailConfirmationKey' => $emailConfirmationKey]]);
+            ['id' => $id, 'emailConfirmed' => 'F', 'emailConfirmationKey' => $emailConfirmationKey]);
 
-        Mailer::sendMail($email, $displayName, 'Email confirmation',
+        Mailer::sendMail($params['email'], $displayName, 'Registration Confirmation',
             "Thank you for register'.\n".
             "Email confirmation key is $emailConfirmationKey. Please use it for confirm.");
     }
 
-    /** Inits password reset procedure */
-    public function initPasswordReset()
-    {
-        $secret = Auth::generateSecret();
-        UserSession::setValue('passwordResetSecret', md5($secret));
-        return ['secret' => $secret];
-    }
-
     /** Sends password reset email.
-      * params: [secret, email]
+      * params: [email]
     **/
     public function sendPasswordResetCode($params)
     {
-        if (!isset($params['secret']) || UserSession::getValue('passwordResetSecret') != md5($params['secret'])) {
-            Application::raise('Invalid Session. Please refresh the page and try again.');
-        }
         if (empty($params['email'])) {
             Application::raise('Please enter Email.');
         }
@@ -262,8 +220,7 @@ class Auth extends Adapter
             [$email]);
 
         if (!count($user)) {
-            // For security reasons always telling that password sent
-            return Application::L('Password reset email sent.');
+            return;
         }
 
         $user = $user[0];
@@ -275,18 +232,13 @@ class Auth extends Adapter
 
         Mailer::sendMail($email, $user['displayName'], 'Password reset request',
             "To reset your password please use the code: ".md5($email . '-' . $user['id'] . '-' . $passwordResetKey));
-
-        return Application::L('Password reset email sent.');
     }
 
     /** Changes password and logins user.
-      * params: [secret, password1 - old, password2 - new, code - from confirmation email]
+      * params: [password1 - old, password2 - new, code - from confirmation email]
     **/
     public function confirmPasswordReset($params)
     {
-        if (!isset($params['secret']) || UserSession::getValue('passwordResetSecret') != md5($params['secret'])) {
-            Application::raise('Invalid Session. Please refresh the page and try again.');
-        }
         if (empty($params['password1']) || empty($_POST['password2'])) {
             Application::raise('Password can not be empty.');
         }
@@ -294,8 +246,7 @@ class Auth extends Adapter
             Application::raise('Passwords do not match.');
         }
         $newPwd = $params['password2'];
-        $validate = Auth::validatePassword($newPwd);
-        if (!empty($validate)) {
+        if (!empty($validate = Auth::validatePassword($newPwd))) {
             Application::raise($validate);
         }
 
@@ -315,30 +266,19 @@ class Auth extends Adapter
             "UPDATE user u SET password = md5(:password), passwordResetKey = null WHERE id = :id",
             ['password' => $newPwd, 'id' => $user['id']]);
 
-        $this->setUser($user['id'], $user['photoURL'], $user['firstName'], $user['lastName'], $user['displayName']);
+        $this->setUser($user['id'], $user['firstName'], $user['lastName'], $user['displayName'], $user['photoURL']);
         return $this->getUser();
     }
 
-    /** Starts registration procedure */
-    public function initRegistration()
-    {
-        $secret = Auth::generateSecret();
-        UserSession::setValue('registerSecret', md5($secret));
-        return ['secret' => $secret];
-    }
-
     /** Registers user
-      * params: [secret, email, firstName, lastName, displayName, photoURL, password1, password2, captcha]
+      * params: [email, firstName, lastName, displayName, photoURL, password1, password2, captcha]
     **/
     public function register($params)
     {
-        if (!isset($params['secret']) || UserSession::getValue('registerSecret') != md5($params['secret'])) {
-            Application::raise('Invalid Session. Please refresh the page and try again.');
-        }
         if (empty($params['email'])) {
             Application::raise('Please enter Email.');
         }
-        if (Mailer::checkEmail($params['email'])) {
+        if (!Mailer::validateEmail($params['email'])) {
             Application::raise('Email is invalid.');
         }
         if (empty($params['firstName']) || empty($params['lastName'])) {
@@ -350,32 +290,31 @@ class Auth extends Adapter
         if ($params['password1'] != $params['password2']) {
             Application::raise('Passwords do not match.');
         }
-        if (empty($params['captcha']) || md5(strtoupper($params['captcha'])) != UserSession::GetValue('registerCaptcha')) {
+        if (!empty($validate = Auth::validatePassword($params['password1']))) {
+            Application::raise($validate);
+        }
+        if (empty($params['captcha']) || md5(strtoupper($params['captcha'])) != UserSession::GetValue('captcha_register')) {
             Application::raise('Please enter the captcha more careful.');
         }
 
         $exists = DbObject::fetchSql(
-            "SELECT COUNT(*) FROM user WHERE UPPER(TRIM(email)) = UPPER(TRIM(?))"
+            "SELECT COUNT(*) as cnt FROM user WHERE UPPER(TRIM(email)) = UPPER(TRIM(?))",
             [$params['email']]);
-        if (!count(exists) && !exists[0]) {
+        if (count($exists) && $exists[0]['cnt']) {
             Application::raise("Such user already registered.");
         }
 
         DbObject::execSql(
             "INSERT INTO user(email, firstName, lastName, displayName, photoURL, password, emailConfirmed)
-                 VALUES(:email, :firstName, :lastName, :displayName, :photoURL, md5(:password), 'F')",
+                 VALUES(TRIM(LOWER(:email)), TRIM(:firstName), TRIM(:lastName), TRIM(:displayName), TRIM(:photoURL), md5(TRIM(:password)), 'F')",
             [
                 'email' => $params['email'],
                 'firstName' => $params['firstName'],
                 'lastName' => $params['lastName'],
-                'displayName' => $params['displayName'],
-                'photoURL' => $params['photoURL'],
+                'displayName' => isset($params['displayName']) ? $params['displayName'] : '',
+                'photoURL' => isset($params['photoURL']) ? $params['photoURL'] : '',
                 'password' => $params['password1']
             ]);
-
-            $this->confirmEmailInit();
-            $this->confirmEmailSend($params['email']);
-            return Application::L('Registration confirmation email sent.');
     }
 
     /** Returns user profile for modifying */
@@ -384,34 +323,21 @@ class Auth extends Adapter
         $user = DbObject::fetchSql(
             "SELECT * FROM user WHERE id=?",
             [UserSession::getValue("userId")]);
-
-        $secret = Auth::generateSecret();
-        UserSession::setValue('editProfileSecret', md5($secret));
+        $user = $user[0];
 
         return [
-            'secret' => $secret,
-            'email' => $row['email'],
-            'firstName' => $row['firstName'],
-            'lastName' => $row['lastName'],
-            'displayName' => $row['displayName'],
-            'photoURL' => $row['photoURL']
+            'firstName' => $user['firstName'],
+            'lastName' => $user['lastName'],
+            'displayName' => $user['displayName'],
+            'photoURL' => $user['photoURL']
         ];
     }
 
     /** Saves user profile
-      * params: [secret, email, firstName, lastName, displayName, photoURL, password1, password2]
+      * params: [firstName, lastName, displayName, photoURL, password1 - old, password2 - new, password3 - new confirm]
     **/
     public function saveUserProfile($params)
     {
-        if (empty($params['secret']) || UserSession::getValue('editProfileSecret') != md5($params['secret'])) {
-            Application::raise('Invalid Session. Please refresh the page and try again.');
-        }
-        if (empty($params['email'])) {
-            Application::raise('Please enter Email.');
-        }
-        if (Mailer::checkEmail($params['email'])) {
-            Application::raise('Email is invalid.');
-        }
         if (empty($params['firstName']) || empty($params['lastName'])) {
             Application::raise('Please enter your name.');
         }
@@ -420,19 +346,17 @@ class Auth extends Adapter
             "SELECT password FROM users WHERE id = ?",
             [UserSession::GetValue("userId")]);
         
-        if (!empty($params['password1']) && md5($params['password1']) != $user[0]['password']) {
+        if (empty($params['password1']) || empty($params['password2']) || empty($params['password3'])) {
+            Application::raise('Please enter old and new passwords.');
+        }
+
+        if (md5($params['password1']) != $user[0]['password'] || $params['password2'] != $params['password3']) {
             Application::raise('Passwords do not match.');
         }
 
-        if (!empty($params['password1']) && empty($params['password2'])) {
-            Application::raise('Please enter new password.');
-        }
-
-        if (!empty(password2)) {
-            $validate = Auth::validatePassword($password2);
-            if (!empty($validate)) {
-                Application::raise($validate);
-            }
+        $validate = Auth::validatePassword($password2);
+        if (!empty($validate)) {
+            Application::raise($validate);
         }
 
         DbObject::exesSql(
@@ -544,13 +468,19 @@ class Auth extends Adapter
         return ['image' => base64_encode($imgString)];
     }
 
-    protected static function setUser($id, $photoURL, $firstName, $lastName, $displayName)
+    /** Generates register captcha image */
+    public function generateRegisterCaptcha()
+    {
+        return $this->generateCaptcha(['captchaName' => 'register']);
+    }
+
+    protected function setUser($id, $firstName, $lastName, $displayName, $photoURL)
     {
         UserSession::SetValue("userId", $id);
-        UserSession::SetValue("userPhotoURL", $photoURL);
         if(empty($displayName))
             $displayName = "$firstName $lastName";
         UserSession::SetValue("userDisplayName", $displayName);
+        UserSession::SetValue("userPhotoURL", $photoURL);
     }
 
     public static function getUser()
@@ -558,8 +488,8 @@ class Auth extends Adapter
         if (!empty(UserSession::GetValue("userId"))) {
             return [
                 'userId' => UserSession::GetValue("userId"),
-                'userPhotoURL' => UserSession::GetValue("userPhotoURL"),
-                'userDisplayName' => UserSession::GetValue("userDisplayName")
+                'userDisplayName' => UserSession::GetValue("userDisplayName"),
+                'userPhotoURL' => UserSession::GetValue("userPhotoURL")
             ];
         }
     }
