@@ -147,9 +147,9 @@ export class PageView extends View {
         this.pagesSwitcher = new TabsView(this, 'pagesSwitcher');
         this.pagesSwitcher.listData.displayField = 'text';
         this.pagesSwitcher.listData.keyField = 'view';
-        var _this = this;
+        let __this = this;
         this.pagesSwitcher.onChange = function (page) {
-            _this.pagesContainer.showView(_this.pagesSwitcher.getValue(), ContainerView.directionForward);
+            __this.pagesContainer.showView(__this.pagesSwitcher.getValue(), ContainerView.directionForward);
         };
 
         // Container for pages

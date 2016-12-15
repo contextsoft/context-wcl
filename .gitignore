@@ -4,4 +4,5 @@ context.vcl.legacy
 *.js
 !dist/*
 .DS_Store
-
+*.dsd.autosave
+*.~dsd

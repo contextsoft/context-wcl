@@ -392,16 +392,16 @@ export class ContainerView extends View {
                 return;
         }
 
-        let _this = this;
+        let __this = this;
         let cur = this.currentView;
         this.currentView = nextView;
 
         // update next view, make sure it's our child and is visible
         if (nextView) {
-            if (nextView.parent !== _this || !nextView.visible || !nextView.element)
+            if (nextView.parent !== __this || !nextView.visible || !nextView.element)
                 nextView.update(function () {
                     // make sure this view is our child
-                    nextView.setParent(_this);
+                    nextView.setParent(__this);
                     // this will ensure that we element rendered
                     nextView.setVisible(true);
                 });
@@ -450,8 +450,8 @@ export class ContainerView extends View {
         // perform animated transition
         let animateDurationTo = (this.animation.durationTo) ? this.animation.durationTo : this.animation.duration;
         setTimeout(function () {
-            _this.updateView(cur, direction);
-            _this.updateView(nextView, direction);
+            __this.updateView(cur, direction);
+            __this.updateView(nextView, direction);
         }, animateDurationTo * 1000);
 
         transitions.apply();
