@@ -1,28 +1,28 @@
 /** 
  * Controls displaing list 
- **/
-import { utils } from './utils';
-import { resources } from './resources';
-import { View, ValueView } from './view';
-import { InputView, ButtonView } from './std.controls';
-import { IRecord, IExpression, LookupDataLink, DataEventType } from './data';
+ */
+import { utils } from "./utils";
+import { resources } from "./resources";
+import { View, ValueView } from "./view";
+import { InputView, ButtonView } from "./std.controls";
+import { IRecord, IExpression, LookupDataLink, DataEventType } from "./data";
 
-resources.register('context-wcl',
+resources.register("context-wcl",
     [
-        'css/list.controls.css'
+        "css/list.controls.css"
     ]
 );
 
 /**
  * <select> wrapper
- **/
+ */
 export class SelectView extends ValueView {
     /** Source of records displayed inside the list */
     public lookupData: LookupDataLink;
 
     constructor(parent: View, name?: string) {
         super(parent, name);
-        this.tag = 'select';
+        this.tag = "select";
         this.renderClientArea = false;
         this.lookupData = new LookupDataLink((eventType: DataEventType, data: any): void => {
             this.updateView();
@@ -32,19 +32,19 @@ export class SelectView extends ValueView {
         return this.renderTag(this.renderItems() + this.renderChildren());
     }
     protected renderItems() {
-        let html = '', rec: IRecord, val: string, displayText: string;
+        let html = "", rec: IRecord, val: string, displayText: string;
         for (let i = 0; i < this.lookupData.dataSource.recordCount(); i++) {
             rec = this.lookupData.dataSource.getRecord(i);
             if (this.lookupData.keyField)
                 val = 'value="' + rec[this.lookupData.keyField] + '"';
             displayText = this.lookupData.getDisplayValue(rec);
-            html += '<option ' + utils.escapeHTML(val) + '>' + utils.escapeHTML(displayText) + '</option>';
+            html += "<option " + utils.escapeHTML(val) + ">" + utils.escapeHTML(displayText) + "</option>";
         }
         return html;
     }
     protected afterUpdateView() {
         super.afterUpdateView();
-        this.handleEvent('onchange', this.handleChange);
+        this.handleEvent("onchange", this.handleChange);
     }
     protected handleChange() {
         // retrieve value from element
@@ -59,7 +59,7 @@ export class SelectView extends ValueView {
 
 /**
  * Displays list
- **/
+ */
 export class ListView extends ValueView {
     /** Source of records displayed inside the list */
     public listData: LookupDataLink;
@@ -67,7 +67,7 @@ export class ListView extends ValueView {
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.listData = new LookupDataLink((eventType: DataEventType, data: any): void => {
-            if (eventType == DataEventType.CursorMoved)
+            if (eventType === DataEventType.CursorMoved)
                 this.updateSelectedRecord();
             else
                 this.updateView();
@@ -79,30 +79,30 @@ export class ListView extends ValueView {
     }
 
     protected renderItems() {
-        let html = '', rec: IRecord;
+        let html = "", rec: IRecord;
         for (let i = 0; i < this.listData.dataSource.recordCount(); i++) {
             rec = this.listData.dataSource.getRecord(i);
-            html += this.getRecordHtml(rec, i, this.listData.dataSource.currentIndex == i) + '\n';
+            html += this.getRecordHtml(rec, i, this.listData.dataSource.currentIndex === i) + "\n";
         }
         return html;
     }
 
     protected getRecordHtml(record: IRecord, index: number, selected: boolean) {
-        let val = '';
+        let val = "";
         if (this.listData.keyField && record[this.listData.keyField])
             val = ' value="' + utils.escapeHTML(record[this.listData.keyField].toString()) + '"';
         let displayText = utils.escapeHTML(this.getRecordDisplayText(record));
         let attr = utils.formatStr('index="{0}" class="ctx_list_item', [index]);
         if (selected)
-            attr += ' ctx_selected';
-        attr += ' ' + this.getRecordCSSClass(record) + '"' + val;
+            attr += " ctx_selected";
+        attr += " " + this.getRecordCSSClass(record) + '"' + val;
 
-        return View.getTag('div', attr, displayText) + '\n';
+        return View.getTag("div", attr, displayText) + "\n";
     }
 
     /** Returns additional CSS class for record */
     protected getRecordCSSClass(record) {
-        return '';
+        return "";
     }
 
     /** Returns record's display text */
@@ -116,18 +116,18 @@ export class ListView extends ValueView {
         children = children || this.element.children;
         for (let i = 0; i < children.length; i++) {
             el = children[i];
-            idx = el.getAttribute('index');
-            if (typeof idx !== undefined && idx != selectedIdx)
-                el.setAttribute('class', 'ctx_list_item');
-            else if (idx == selectedIdx)
-                el.setAttribute('class', 'ctx_list_item ctx_selected');
+            idx = el.getAttribute("index");
+            if (typeof idx !== undefined && idx !== selectedIdx)
+                el.setAttribute("class", "ctx_list_item");
+            else if (idx === selectedIdx)
+                el.setAttribute("class", "ctx_list_item ctx_selected");
         }
     }
 
     protected afterUpdateView() {
         super.afterUpdateView();
-        this.handleEvent('onmousedown', this.handleMouseDown);
-        this.handleEvent('ontouchstart', this.handleClick);
+        this.handleEvent("onmousedown", this.handleMouseDown);
+        this.handleEvent("ontouchstart", this.handleClick);
     }
 
     protected handleChange() {
@@ -145,12 +145,12 @@ export class ListView extends ValueView {
         let listElement = event.toElement || event.target;
         if (!listElement)
             return null;
-        let idx = listElement.getAttribute('index');
+        let idx = listElement.getAttribute("index");
         while (listElement && !idx) {
             listElement = listElement.parentElement;
             if (!listElement)
                 continue;
-            idx = listElement.getAttribute('index');
+            idx = listElement.getAttribute("index");
         }
         if (!idx)
             return null;
@@ -162,7 +162,7 @@ export class ListView extends ValueView {
         let el = this.getEventListElement(event);
         if (!el)
             return -1;
-        return el.getAttribute('index');
+        return el.getAttribute("index");
     }
 
     protected handleMouseDown(event) {
@@ -208,28 +208,28 @@ export class LookupView extends ListView {
         super(parent, name);
 
         this.listData = new LookupDataLink((eventType: DataEventType, data: any): void => {
-            if (eventType == DataEventType.CursorMoved)
+            if (eventType === DataEventType.CursorMoved)
                 this.updateSelectedRecord(document.getElementById(this.listId).children);
             else
                 this.updateView();
         });
 
-        this.input = new InputView(this, 'ctxInternalInput');
+        this.input = new InputView(this, "ctxInternalInput");
         this.input.onChange = this.onInputChange;
         this.input.events.onblur = this.onInputBlur;
         this.input.events.onkeypress = this.onInputKeyPress;
 
-        this.inputBtn = new ButtonView(this, 'ctxInternalInputButton');
+        this.inputBtn = new ButtonView(this, "ctxInternalInputButton");
         this.inputBtn.text = '<span class="ctx_icon-caret"</span>';
         this.inputBtn.doNotEscapeHtml = true;
         this.inputBtn.events.onclick = this.onInputBtnClick;
     }
 
     public render() {
-        this.listId = 'ctxLookupView' + LookupView.listIdCounter++;
+        this.listId = "ctxLookupView" + LookupView.listIdCounter++;
         return this.renderTag('<div class="ctxInputBlock">' + this.input.internalRender() +
-            '<div class="ctxInputBtnGroup">' + this.inputBtn.internalRender() + '</div></div>' +
-            View.getTag('div', 'class="ctxInnerList" id="' + this.listId + '"', this.renderItems()));
+            '<div class="ctxInputBtnGroup">' + this.inputBtn.internalRender() + "</div></div>" +
+            View.getTag("div", 'class="ctxInnerList" id="' + this.listId + '"', this.renderItems()));
     }
 
     public setValue(value) {
@@ -242,23 +242,23 @@ export class LookupView extends ListView {
     }
 
     protected renderItems() {
-        let html = '', renderedCnt = 0;
+        let html = "", renderedCnt = 0;
         for (let i = 0; i < this.listData.dataSource.recordCount(); i++) {
             let rec = this.listData.dataSource.getRecord(i);
             if (++renderedCnt > this.maxItemsToRender)
                 break;
-            html += this.getRecordHtml(rec, i, this.listData.dataSource.currentIndex == i) + '\n';
+            html += this.getRecordHtml(rec, i, this.listData.dataSource.currentIndex === i) + "\n";
         }
         return html;
     }
 
     protected afterUpdateView() {
         super.afterUpdateView();
-        this.handleEvent('onkeydown', this.handleKeyDown);
+        this.handleEvent("onkeydown", this.handleKeyDown);
     }
 
     protected handleKeyDown(event) {
-        let keyCode = ('which' in event) ? event.which : event.keyCode;
+        let keyCode = ("which" in event) ? event.which : event.keyCode;
         switch (parseInt(keyCode)) {
             case 38:
                 this.listData.dataSource.prior();
@@ -270,13 +270,13 @@ export class LookupView extends ListView {
                 this.value = this.getRecordDisplayText(this.listData.dataSource.current);
                 this.showDropdown(false);
                 break;
+            default:
         }
     };
 
     protected onInputChange() {
         (<LookupView>this.parent).doInputChange(false);
     }
-
 
     protected doInputChange(forceShow: boolean) {
         if (this.updatingValue || !this.getEnabled())
@@ -293,7 +293,7 @@ export class LookupView extends ListView {
                 if (!this.caseSensitive)
                     value = value.toLowerCase();
                 let pos = value.indexOf(inputVal);
-                return ((this.partialLookup && pos >= 0) || (!this.partialLookup && pos == 0));
+                return ((this.partialLookup && pos >= 0) || (!this.partialLookup && pos === 0));
             });
         }
 
@@ -304,7 +304,7 @@ export class LookupView extends ListView {
 
     protected onInputBlur(event) {
         let lookup: LookupView = <LookupView>this.parent;
-        if (event.relatedTarget && event.relatedTarget.className.indexOf('ctxInternalInputButton') >= 0)
+        if (event.relatedTarget && event.relatedTarget.className.indexOf("ctxInternalInputButton") >= 0)
             return;
         lookup.showDropdown(false);
     }
@@ -318,8 +318,8 @@ export class LookupView extends ListView {
 
         lookup.handleKeyDown(event);
 
-        let keyCode = ('which' in event) ? event.which : event.keyCode;
-        if (parseInt(keyCode) == 38 || parseInt(keyCode) == 40) {
+        let keyCode = ("which" in event) ? event.which : event.keyCode;
+        if (parseInt(keyCode) === 38 || parseInt(keyCode) === 40) {
             event.preventDefault();
         }
     }
@@ -338,9 +338,9 @@ export class LookupView extends ListView {
     protected showDropdown(show: boolean) {
         let el = document.getElementById(this.listId);
         if (show)
-            el.style.visibility = 'visible';
+            el.style.visibility = "visible";
         else
-            el.style.visibility = 'hidden';
+            el.style.visibility = "hidden";
         this.listVisible = show;
     }
 
@@ -361,7 +361,7 @@ export class DatePicker extends LookupView {
     public firstDayOfWeek = 0;
 
     /** Date format (as in utils.formatDate function), default locale dependent */
-    public dateFormat = '';
+    public dateFormat = "";
 
     /** Show or not prev and next month days, default true */
     get showPrevNextMonthDays() {
@@ -378,7 +378,7 @@ export class DatePicker extends LookupView {
     /** Highlight or not weekends, default true */
     public highlightWeekends = true;
 
-    protected monthToShow: Date = new Date;
+    protected monthToShow: Date = new Date();
 
     protected input: InputView;
     protected inputBtn: ButtonView;
@@ -391,25 +391,25 @@ export class DatePicker extends LookupView {
         this.showPrevNextMonthDays = true;
 
         // edit control
-        this.input = new InputView(this, 'ctxInternalInput');
+        this.input = new InputView(this, "ctxInternalInput");
         this.input.attributes.readonly = true;
         this.input.events.onblur = this.onInputBlur;
         this.input.events.onkeypress = this.onInputKeyPress;
 
         // show calendar buttom
-        this.inputBtn = new ButtonView(this, 'ctxInternalInputButton');
+        this.inputBtn = new ButtonView(this, "ctxInternalInputButton");
         this.inputBtn.text = '<span class="ctx_icon-caret"</span>';
         this.inputBtn.doNotEscapeHtml = true;
         this.inputBtn.events.onclick = this.onInputBtnClick;
 
         // prev month button
-        this.prevMonthBtn = new ButtonView(this, 'ctxPrevMonthBtn');
-        this.prevMonthBtn.attributes.type = 'chevronLeft';
+        this.prevMonthBtn = new ButtonView(this, "ctxPrevMonthBtn");
+        this.prevMonthBtn.attributes.type = "chevronLeft";
         this.prevMonthBtn.events.onclick = this.onPrevMonthBtnClick;
 
         // next month button
-        this.nextMonthBtn = new ButtonView(this, 'ctxNextMonthBtn');
-        this.nextMonthBtn.attributes.type = 'chevronRight';
+        this.nextMonthBtn = new ButtonView(this, "ctxNextMonthBtn");
+        this.nextMonthBtn.attributes.type = "chevronRight";
         this.nextMonthBtn.events.onclick = this.onNextMonthBtnClick;
     }
 
@@ -422,22 +422,22 @@ export class DatePicker extends LookupView {
         if (value)
             this.input.setValue(utils.formatDate(this._value, this.dateFormat));
         else
-            this.input.setValue('');
+            this.input.setValue("");
         this.updateCalendar(false);
     }
 
     protected onInputBlur(event) {
-        if (event.relatedTarget && (event.relatedTarget.className.indexOf('internalInputButton') >= 0
-            || event.relatedTarget.className.indexOf('ctxPrevMonthBtn') >= 0
-            || event.relatedTarget.className.indexOf('ctxNextMonthBtn') >= 0))
+        if (event.relatedTarget && (event.relatedTarget.className.indexOf("internalInputButton") >= 0
+            || event.relatedTarget.className.indexOf("ctxPrevMonthBtn") >= 0
+            || event.relatedTarget.className.indexOf("ctxNextMonthBtn") >= 0))
             return;
         (<DatePicker>this.parent).showDropdown(false);
     }
 
     protected onInputKeyPress(event) {
         this.handleKeyDown(event);
-        let keyCode = ('which' in event) ? event.which : event.keyCode;
-        if (parseInt(keyCode) == 38 || parseInt(keyCode) == 40)
+        let keyCode = ("which" in event) ? event.which : event.keyCode;
+        if (parseInt(keyCode) === 38 || parseInt(keyCode) === 40)
             event.preventDefault();
     }
 
@@ -462,7 +462,6 @@ export class DatePicker extends LookupView {
         picker.updateCalendar(true);
     }
 
-
     protected updateCalendar(dontGoToSelectedDate: boolean) {
         if (!this.listId)
             return;
@@ -474,10 +473,10 @@ export class DatePicker extends LookupView {
     }
 
     protected weekday(dayOfWeek) {
-        if (this.firstDayOfWeek == 0)
-            return dayOfWeek == 0 || dayOfWeek == 6 ? ' weekend' : '';
+        if (this.firstDayOfWeek === 0)
+            return dayOfWeek === 0 || dayOfWeek === 6 ? " weekend" : "";
         else
-            return dayOfWeek == 5 || dayOfWeek == 6 ? ' weekend' : '';
+            return dayOfWeek === 5 || dayOfWeek === 6 ? " weekend" : "";
     }
 
     protected renderItems() {
@@ -485,7 +484,7 @@ export class DatePicker extends LookupView {
     }
 
     protected doRenderItems(dontGoToSelectedDate = false) {
-        let html = '', i, j, d;
+        let html = "", i, j, d;
         let monthToShow = this.monthToShow;
         if (!dontGoToSelectedDate && this.getValue())
             monthToShow = this.getValue();
@@ -493,21 +492,21 @@ export class DatePicker extends LookupView {
         let daysInMonth = new Date(monthToShow.getFullYear(), monthToShow.getMonth() + 1, 0).getDate();
         let dayOfWeek = new Date(monthToShow.getFullYear(), monthToShow.getMonth(), 1).getDay() - this.firstDayOfWeek;
         let daysInPrevMonth = new Date(monthToShow.getFullYear(), monthToShow.getMonth(), 0).getDate();
-        let weekDays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+        let weekDays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
         let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
         // month name
         html += '<div class="ctxMonthNameTable">\n<div class="ctxRow">\n';
-        html += View.getTag('div', 'class="ctxMonthBtnContainer"', this.prevMonthBtn.internalRender());
-        html += View.getTag('div', 'class="ctxMonthName"', utils.formatStr('<b>{0}</b> {1}', [this.L(months[monthToShow.getMonth()]), monthToShow.getFullYear()]));
-        html += View.getTag('div', 'class="ctxMonthBtnContainer"', this.nextMonthBtn.internalRender());
-        html += '</div>\n</div>\n';
+        html += View.getTag("div", 'class="ctxMonthBtnContainer"', this.prevMonthBtn.internalRender());
+        html += View.getTag("div", 'class="ctxMonthName"', utils.formatStr("<b>{0}</b> {1}", [this.L(months[monthToShow.getMonth()]), monthToShow.getFullYear()]));
+        html += View.getTag("div", 'class="ctxMonthBtnContainer"', this.nextMonthBtn.internalRender());
+        html += "</div>\n</div>\n";
 
         // week days names
         j = this.firstDayOfWeek;
         html += '<div class="ctxDaysTable"><div class="ctxRow">\n';
         for (i = 0; i <= 6; i++) {
-            html += View.getTag('div', 'class="ctxWeekDay"' + this.weekday(i), this.L(weekDays[j]));
+            html += View.getTag("div", 'class="ctxWeekDay"' + this.weekday(i), this.L(weekDays[j]));
             j++;
             if (j > 6)
                 j = 0;
@@ -518,7 +517,7 @@ export class DatePicker extends LookupView {
         daysInPrevMonth = daysInPrevMonth - dayOfWeek;
         for (i = 0; i < dayOfWeek; i++) {
             daysInPrevMonth++;
-            html += View.getTag('div', 'class="ctxPrevMonthDay"' + this.weekday(i), daysInPrevMonth.toString());
+            html += View.getTag("div", 'class="ctxPrevMonthDay"' + this.weekday(i), daysInPrevMonth.toString());
         }
 
         // days
@@ -529,10 +528,10 @@ export class DatePicker extends LookupView {
                 dayOfWeek = 0;
             }
             d = new Date(monthToShow.getFullYear(), monthToShow.getMonth(), i);
-            s = d.toDateString() == today.toDateString() ? ' today' : '';
-            if (this.getValue() && this.getValue().toDateString() == d.toDateString())
-                s += ' selected';
-            html += View.getTag('div',
+            s = d.toDateString() === today.toDateString() ? " today" : "";
+            if (this.getValue() && this.getValue().toDateString() === d.toDateString())
+                s += " selected";
+            html += View.getTag("div",
                 utils.formatStr('class="ctxDay" value="{0}" index="{1}"' + this.weekday(dayOfWeek) + s, [utils.formatDate(d, this.dateFormat), i]),
                 i.toString());
 
@@ -541,9 +540,9 @@ export class DatePicker extends LookupView {
 
         // next month days
         for (i = dayOfWeek, j = 1; i <= 6; i++ , j++)
-            html += View.getTag('div', 'class="ctxNextMonthDay"' + this.weekday(i), j);
+            html += View.getTag("div", 'class="ctxNextMonthDay"' + this.weekday(i), j);
 
-        html += '</div></div>';
+        html += "</div></div>";
         return html;
     }
 
@@ -552,8 +551,8 @@ export class DatePicker extends LookupView {
         if (!el)
             return;
         this.updatingValue = true;
-        //this.setValue(new Date(el.getAttribute('value')));
-        this.value = new Date(el.getAttribute('value'));
+        // this.setValue(new Date(el.getAttribute('value')));
+        this.value = new Date(el.getAttribute("value"));
         this.showDropdown(false);
         this.updatingValue = false;
     }

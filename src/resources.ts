@@ -1,8 +1,8 @@
 /**
  * Resources & resource loader classes
  */
-import { utils } from './utils';
-import { IVoidEvent, IDOMEvent } from './component';
+import { utils } from "./utils";
+import { IVoidEvent, IDOMEvent } from "./component";
 
 interface ILibraryResource {
     library: string;
@@ -42,7 +42,7 @@ export class Resources {
         if (this.resources) {
             for (let i = 0; i < this.resources.length; i++) {
                 let res = this.resources[i];
-                let path = this.libraries[res.library] || '';
+                let path = this.libraries[res.library] || "";
                 r.push({
                     path: path,
                     baseUrl: baseUrl,
@@ -56,7 +56,7 @@ export class Resources {
     }
 }
 
-export var resources = new Resources();
+export let resources = new Resources();
 
 /** Resources loader */
 export class ResourseLoader {
@@ -82,7 +82,7 @@ export class ResourseLoader {
 
         for (let i = 0; i < resources.length; i++) {
             let res = resources[i].resources;
-            let url = resources[i].path || '';
+            let url = resources[i].path || "";
             if (url.search("http:") < 0 && url.search("https:") < 0 && resources[i].baseUrl)
                 url = resources[i].baseUrl + url;
             for (let j = 0; j < res.length; j++) {
@@ -110,8 +110,8 @@ export class ResourseLoader {
     }
 
     protected baseUri(baseUri: string, uri: string) {
-        uri = uri || ''; // make sure to avoid null here
-        if (uri == '')
+        uri = uri || ""; // make sure to avoid null here
+        if (uri === "")
             return uri;
         if (baseUri && baseUri.length > 0 && uri.indexOf(baseUri) === 0)
             uri = uri.substr(baseUri.length);
@@ -119,11 +119,11 @@ export class ResourseLoader {
     }
 
     protected getResourceType(resource) {
-        let ext = resource.substring(resource.lastIndexOf('.') + 1).toLowerCase();
-        if (ext === 'js' || ext === 'css')
+        let ext = resource.substring(resource.lastIndexOf(".") + 1).toLowerCase();
+        if (ext === "js" || ext === "css")
             return ext;
         else
-            return 'img';
+            return "img";
     }
 
     protected checkAllLoaded() {
@@ -149,7 +149,7 @@ export class ResourseLoader {
                 }
 
             // if resourceType is a JavaScript file
-            fileref = document.createElement('script');
+            fileref = document.createElement("script");
             fileref.type = "text/javascript";
             fileref.onload = fileref.onerror = () => { this.loadCallback(fileref); };
 

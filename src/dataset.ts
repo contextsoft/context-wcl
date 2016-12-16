@@ -1,9 +1,9 @@
-//import { utils } from './utils';
-import { Component, InstanceFactory } from './component';
-import { IRecord, IField, IDataSource, RecordState, DataEventType, RecordSetSource } from './data';
-import { application } from './application';
-import { IService, IResponse } from './service';
-import { utils } from './utils';
+// import { utils } from './utils';
+import { Component, InstanceFactory } from "./component";
+import { IRecord, IField, IDataSource, RecordState, DataEventType, RecordSetSource } from "./data";
+import { application } from "./application";
+import { IService, IResponse } from "./service";
+import { utils } from "./utils";
 
 // Interfaces
 
@@ -68,7 +68,6 @@ export interface IDataTableSetAdapter extends IDataAdapter {
     applyUpdates(tableSet: IDataTableSet): Promise<void>;
 }
 
-
 // Implementation
 
 /** Object contaning its metainfo and table */
@@ -110,13 +109,13 @@ class RecordsUpdates {
         let update = this.updates[idx];
 
         // inserted and then deleted records just removing from updates
-        if (updateType == RecordUpdateType.Delete && (update.updateType !== undefined && update.updateType == RecordUpdateType.Insert)) {
+        if (updateType === RecordUpdateType.Delete && (update.updateType !== undefined && update.updateType === RecordUpdateType.Insert)) {
             this.updates.splice(idx);
             return;
         }
 
         // updates other than Modified have higher priority
-        if (!update.updateType || (update.updateType && update.updateType == RecordUpdateType.Update))
+        if (!update.updateType || (update.updateType && update.updateType === RecordUpdateType.Update))
             update.updateType = updateType;
 
         return update;
@@ -169,7 +168,7 @@ export class DataSetLink<T extends IDataSet> implements IDataSetLink {
     }
 
     protected setDataSet(value: T) {
-        if (this._dataSet != value) {
+        if (this._dataSet !== value) {
             if (this._dataSet)
                 this._dataSet.removeLink(this);
             this._dataSet = value;
@@ -182,7 +181,7 @@ export class DataSetLink<T extends IDataSet> implements IDataSetLink {
 
 /** 
  * DataSet containing one table
- **/
+ */
 export class DataTable<R extends Record> implements IDataTable {
     /** Table name, used in default DataAdapter */
     public tableName: string;
@@ -307,7 +306,7 @@ export class DataTable<R extends Record> implements IDataTable {
 
 /** 
  * Data table crud adapter  
- **/
+ */
 export class DataTableAdapter implements IDataTableAdapter {
     public adapter: string;
     public service: IService;
@@ -323,9 +322,9 @@ export class DataTableAdapter implements IDataTableAdapter {
     }
 
     public fill(table: IDataTable): Promise<void> {
-        return this.execute('fill').then((data) => {
+        return this.execute("fill").then((data) => {
             if (!data || !data.records)
-                throw 'Service did not returned any data';
+                throw "Service did not returned any data";
             table.fillRecords(data);
         });
     }
@@ -334,7 +333,7 @@ export class DataTableAdapter implements IDataTableAdapter {
         let params = table.recordsUpdates.getUpdateParams();
         if (!params)
             return;
-        return this.execute('applyUpdates', params).then(() => {
+        return this.execute("applyUpdates", params).then(() => {
             table.recordsUpdates.clear();
         });
     }
@@ -346,14 +345,14 @@ export class DataTableAdapter implements IDataTableAdapter {
 
 /** 
  * DataTable's DataSource  
- **/
+ */
 export class TableDataSource<R extends Record> extends RecordSetSource {
     protected _data: DataSetLink<DataTable<R>>;
 
     constructor(dataTable?: DataTable<R>) {
         super();
         this._data = new DataSetLink<DataTable<R>>((eventType: DataSetEventType, data: any) => {
-            if (eventType == DataSetEventType.Refreshed) {
+            if (eventType === DataSetEventType.Refreshed) {
                 this.records = this.dataTable.records;
                 if (!this._state)
                     this.setState(RecordState.Browse);
@@ -367,7 +366,7 @@ export class TableDataSource<R extends Record> extends RecordSetSource {
         return this._data.dataSet;
     }
     public set dataTable(dataTable: DataTable<R>) {
-        if (this._data.dataSet != dataTable) {
+        if (this._data.dataSet !== dataTable) {
             if (this._data.dataSet)
                 this._data.dataSet.removeLink(this._data);
             dataTable.addLink(this._data);
@@ -375,7 +374,7 @@ export class TableDataSource<R extends Record> extends RecordSetSource {
     }
 
     public post() {
-        if (this._state && this._state != RecordState.Browse) {
+        if (this._state && this._state !== RecordState.Browse) {
             this.dataTable.update(<R>this.current);
             super.post();
         }
@@ -403,10 +402,9 @@ export class TableDataSource<R extends Record> extends RecordSetSource {
     }
 }
 
-
 /** 
  * DataSet containing several tables 
- **/
+ */
 export class DataTableSet implements IDataTableSet {
     /** Maintained tables */
     public tables: IDataTable[] = [];
@@ -414,11 +412,11 @@ export class DataTableSet implements IDataTableSet {
     public adapter: IDataTableSetAdapter;
 
     constructor(adapter: IDataTableSetAdapter | string) {
-        if (typeof adapter === 'object')
+        if (typeof adapter === "object")
             this.adapter = adapter;
         else {
-            //let p = Object.getPrototypeOf(this);
-            //let c = Component.getFunctionName(p.constructor);
+            // let p = Object.getPrototypeOf(this);
+            // let c = Component.getFunctionName(p.constructor);
             this.adapter = new DataTableSetAdapter(adapter);
         }
     }
@@ -452,7 +450,7 @@ export class DataTableSet implements IDataTableSet {
 
 /** 
  * Table set crud adapter  
- **/
+ */
 export class DataTableSetAdapter implements IDataTableSetAdapter {
     public adapter: string;
     public service: IService;
@@ -468,10 +466,10 @@ export class DataTableSetAdapter implements IDataTableSetAdapter {
     }
 
     public fill(tableSet: IDataTableSet): Promise<void> {
-        return this.execute('fill').then((data) => {
+        return this.execute("fill").then((data) => {
             let dataTable;
             for (let table in data) {
-                if (data.hasOwnProperty(table) && data[table].hasOwnProperty('records') && (dataTable = tableSet.tableByName(table))) {
+                if (data.hasOwnProperty(table) && data[table].hasOwnProperty("records") && (dataTable === tableSet.tableByName(table))) {
                     dataTable.fillRecords(data[table]);
                 }
             }
@@ -485,7 +483,7 @@ export class DataTableSetAdapter implements IDataTableSetAdapter {
             if (tableSet.tables[i].recordsUpdates.updates.length > 0)
                 params[tableSet.tables[i].tableName] = tableSet.tables[i].recordsUpdates.getUpdateParams();
         }
-        return this.execute('applyUpdates', params).then(() => {
+        return this.execute("applyUpdates", params).then(() => {
             for (let i = 0; i < tableSet.tables.length; i++) {
                 tableSet.tables[i].recordsUpdates.clear();
             }
@@ -496,8 +494,6 @@ export class DataTableSetAdapter implements IDataTableSetAdapter {
         return this.service || application.service;
     }
 }
-
-
 
 // example code 
 
@@ -541,4 +537,3 @@ order.applyUpdates();
 let customerTable = new DataTable(Customer);
 
 */
-

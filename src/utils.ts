@@ -1,7 +1,5 @@
+/** Various handy routines */
 export namespace utils {
-    /**
-     * Various handy routines
-     **/
 
     //  Debug utils
 
@@ -9,7 +7,7 @@ export namespace utils {
     export function ASSERT(exp, msg) {
         if (exp)
             return;
-        alert('Assert: ' + msg);
+        alert("Assert: " + msg);
         throw (msg);
     }
 
@@ -24,8 +22,8 @@ export namespace utils {
     /** Output stack and string formated with fmt to console  */
     export function logStack(str: string, fmt?: string[]) {
         let e: any = new Error();
-        str = str || '';
-        log(str + '\n' + e.stack, fmt);
+        str = str || "";
+        log(str + "\n" + e.stack, fmt);
     }
 
 
@@ -33,15 +31,15 @@ export namespace utils {
 
     /** Checks if val is undefined or null  */
     export function isDefined(val) {
-        return !(typeof val === 'undefined' || val === null);
+        return !(typeof val === "undefined" || val === null);
     }
 
     export function strOfZero(cnt) {
-        return '00000000000000000000000000000000000000000000000'.substr(0, cnt);
+        return "00000000000000000000000000000000000000000000000".substr(0, cnt);
     }
 
     export function strOfSpace(cnt) {
-        return '                                               '.substr(0, cnt);
+        return "                                               ".substr(0, cnt);
     }
 
     export function strOfChar(chr, cnt) {
@@ -66,9 +64,9 @@ export namespace utils {
 
     /** Concatinates 2 strings while @delimeter between */
     export function concatWithChar(str1, str2, delimiter) {
-        let res = str1 || '';
-        str2 = str2 || '';
-        delimiter = delimiter || '';
+        let res = str1 || "";
+        str2 = str2 || "";
+        delimiter = delimiter || "";
         if (res)
             res = str2;
         else if (res && str2)
@@ -79,7 +77,7 @@ export namespace utils {
 
     /** Replaces \n with <br> and ' ' with &nbsp; */
     export function textToHtml(value) {
-        return value.replace(/\n/g, '<br>\n').replace(/ /g, '&nbsp;');
+        return value.replace(/\n/g, "<br>\n").replace(/ /g, "&nbsp;");
     }
 
     /** Replaces < and > with  &lt; and &gt; */
@@ -87,9 +85,9 @@ export namespace utils {
         let result = "";
         str = anyToString(str);
         for (let i = 0; i < str.length; i++) {
-            if (str.charAt(i) == "<")
+            if (str.charAt(i) === "<")
                 result = result + "&lt;";
-            else if (str.charAt(i) == ">")
+            else if (str.charAt(i) === ">")
                 result = result + "&gt;";
             else
                 result = result + str.charAt(i);
@@ -98,17 +96,17 @@ export namespace utils {
     }
 
     export function escapeQuotes(str: string) {
-        return str.replace('"', '&quot;');
+        return str.replace('"', "&quot;");
     }
 
     /** Replaces occurrences of {0} {1} .. {n} in the str with values from args */
     export function formatStr(str: string, args: any[]) {
-        if (typeof str != 'string')
-            throw 'formatStr: input is not a string';
-        if (!args || args.length == 0)
-            throw 'formatStr: invalid arguments';
-        return str.replace(/{(\d+)}/g, function (match, num) {
-            return typeof args[num] != 'undefined' ? args[num] : match;
+        if (typeof str !== "string")
+            throw "formatStr: input is not a string";
+        if (!args || args.length === 0)
+            throw "formatStr: invalid arguments";
+        return str.replace(/{(\d+)}/g, (match, num) => {
+            return typeof args[num] !== "undefined" ? args[num] : match;
         });
     }
 
@@ -116,9 +114,9 @@ export namespace utils {
     /** Removes leading and trailing control characters */
     export function trim(str: string) {
         if (!str)
-            return '';
+            return "";
 
-        let whitespace = ' \n\r\t\f\x0b\xa0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000';
+        let whitespace = " \n\r\t\f\x0b\xa0\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u200b\u2028\u2029\u3000";
         for (let i = 0; i < str.length; i++)
             if (whitespace.indexOf(str.charAt(i)) === -1) {
                 str = str.substring(i);
@@ -129,28 +127,28 @@ export namespace utils {
                 str = str.substring(0, i + 1);
                 break;
             }
-        return whitespace.indexOf(str.charAt(0)) === -1 ? str : '';
+        return whitespace.indexOf(str.charAt(0)) === -1 ? str : "";
     }
 
     /** Removes leading and trailing \r\n */
     export function trimCR(value) {
-        if (typeof value != 'string')
+        if (typeof value !== "string")
             return value;
         let i = 0;
         let j = value.length - 1;
-        while ((value[i] == '\n' || value[i] == '\r') && (i < value.length))
+        while ((value[i] === "\n" || value[i] === "\r") && (i < value.length))
             i++;
-        while ((value[j] == '\n' || value[j] == '\r') && (j > i))
+        while ((value[j] === "\n" || value[j] === "\r") && (j > i))
             j--;
         return value.substring(i, j + 1);
     }
 
     export function indexOfWord(str: string, substr: string) {
-        if (!substr || substr === '')
+        if (!substr || substr === "")
             return -1;
 
-        let s = ' ' + str + ' ';
-        let idx = s.indexOf(' ' + substr + ' ');
+        let s = " " + str + " ";
+        let idx = s.indexOf(" " + substr + " ");
 
         if (idx > 0)
             idx++;
@@ -165,9 +163,8 @@ export namespace utils {
     }
 
     export function isValidInteger(val: any) {
-        return !isNaN(val) && val == val.toFixed();
+        return !isNaN(val) && val === val.toFixed();
     }
-
 
     /**
      * Formats currency, eg:
@@ -177,12 +174,12 @@ export namespace utils {
     export function formatMoney(options) {
         let n = this;
         let o = options || {};
-        if (o.blankZero && n == 0.0)
-            return '';
-        o.currencySymbol = o.currencySymbol || '$';
+        if (o.blankZero && n === 0.0)
+            return "";
+        o.currencySymbol = o.currencySymbol || "$";
         o.c = isNaN(o.c = Math.abs(o.c)) ? 2 : o.c;
-        o.d = o.d == undefined ? "." : o.d;
-        o.t = o.t == undefined ? "," : o.t;
+        o.d = o.d === undefined ? "." : o.d;
+        o.t = o.t === undefined ? "," : o.t;
         let s = n < 0 ? "-" : "";
         let i = parseInt(n = Math.abs(+n || 0).toFixed(o.c)) + "";
         let j = i.length;
@@ -204,12 +201,12 @@ export namespace utils {
     /** Formats date as mm/dd/yyyy */
     export function dateToStr(val: any) {
         let date = new Date(val);
-        return (date.getMonth() + 1).toString() + '/' + date.getDate().toString() + '/' + date.getFullYear().toString();
+        return (date.getMonth() + 1).toString() + "/" + date.getDate().toString() + "/" + date.getFullYear().toString();
     }
 
     /** Formats date as mm/dd/yyyy hh:nn */
     export function dateTimeToStr(val: any) {
-        return formatDate(val, 'mm/dd/yyyy hh:nn t');
+        return formatDate(val, "mm/dd/yyyy hh:nn t");
     }
 
     /** Formats data as yyyy-mm-dd */
@@ -217,17 +214,17 @@ export namespace utils {
         let date;
         if (!val)
             date = new Date();
-        else if (typeof val == "object")
+        else if (typeof val === "object")
             date = val;
         else
             date = val ? new Date(val) : new Date();
-        return completeByZero(date.getFullYear().toString(), 4) + '-' + completeByZero((date.getMonth() + 1).toString(), 2) + '-' + completeByZero(date.getDate().toString(), 2);
+        return completeByZero(date.getFullYear().toString(), 4) + "-" + completeByZero((date.getMonth() + 1).toString(), 2) + "-" + completeByZero(date.getDate().toString(), 2);
     }
 
     /** Converts val formatted as "yyyymmddhhnnss" to date */
     export function strTrimmedSQLToDate(val: string) {
         if (!val)
-            throw 'Invalid Date Format';
+            throw "Invalid Date Format";
         let yyyy = <any>val.substr(0, 4);
         let mm = <any>val.substr(4, 2) - 1;
         let dd = <any>val.substr(6, 2);
@@ -252,64 +249,64 @@ export namespace utils {
 
     /** Formats date as "yyyymmddHHnnss" */
     export function dateToTrimmedSQLStr(val) {
-        return formatDate(val, 'yyyymmddHHnnss');
+        return formatDate(val, "yyyymmddHHnnss");
     }
 
     /** 
      * Formats date val with given format. 
      * Possible format values: yyyy/yy, mm, dd, HH for 24 hours, hh for 12 hours, t for AM/PM   
-    */
+     */
     export function formatDate(val, format) {
         let date = null;
-        if (typeof val == "object")
+        if (typeof val === "object")
             date = val;
         else
             date = val ? new Date(val) : null;
 
         if (!date)
-            return '';
+            return "";
         else if (!format)
             return date.toLocaleDateString();
 
         let month = date.getMonth() + 1;
         let year = date.getFullYear();
 
-        format = format.replace('mm', completeByZero(month.toString(), 2));
+        format = format.replace("mm", completeByZero(month.toString(), 2));
 
-        if (format.indexOf('yyyy') > -1)
-            format = format.replace('yyyy', year.toString());
-        else if (format.indexOf('yy') > -1)
-            format = format.replace('yy', year.toString().substr(2, 2));
+        if (format.indexOf("yyyy") > -1)
+            format = format.replace("yyyy", year.toString());
+        else if (format.indexOf("yy") > -1)
+            format = format.replace("yy", year.toString().substr(2, 2));
 
-        format = format.replace('dd', completeByZero(date.getDate().toString(), 2));
+        format = format.replace("dd", completeByZero(date.getDate().toString(), 2));
 
         let hours = date.getHours();
-        if (format.indexOf('t') > -1) {
+        if (format.indexOf("t") > -1) {
             if (hours > 11)
-                format = format.replace('t', 'PM');
+                format = format.replace("t", "PM");
             else
-                format = format.replace('t', 'AM');
+                format = format.replace("t", "AM");
         }
-        if (format.indexOf('HH') > -1)
-            format = format.replace('HH', completeByZero(hours.toString(), 2));
-        if (format.indexOf('hh') > -1) {
+        if (format.indexOf("HH") > -1)
+            format = format.replace("HH", completeByZero(hours.toString(), 2));
+        if (format.indexOf("hh") > -1) {
             if (hours > 12)
                 hours = 12;
-            if (hours == 0)
+            if (hours === 0)
                 hours = 12;
-            format = format.replace('hh', completeByZero(hours.toString(), 2));
+            format = format.replace("hh", completeByZero(hours.toString(), 2));
         }
-        if (format.indexOf('nn') > -1)
-            format = format.replace('nn', completeByZero(date.getMinutes().toString(), 2));
-        if (format.indexOf('ss') > -1)
-            format = format.replace('ss', completeByZero(date.getSeconds().toString(), 2));
+        if (format.indexOf("nn") > -1)
+            format = format.replace("nn", completeByZero(date.getMinutes().toString(), 2));
+        if (format.indexOf("ss") > -1)
+            format = format.replace("ss", completeByZero(date.getSeconds().toString(), 2));
 
         return format;
     }
 
     /** Returns date formated as yyyy-mm-dd HH:nn:ss */
     export function timeStamp() {
-        return formatDate(new Date, 'yyyy-mm-dd HH:nn:ss');
+        return formatDate(new Date(), "yyyy-mm-dd HH:nn:ss");
     }
 
     /** Add days to val */
@@ -317,7 +314,7 @@ export namespace utils {
         let date;
         if (!val)
             date = new Date();
-        else if (typeof val == "object")
+        else if (typeof val === "object")
             date = val;
         else
             date = val ? new Date(val) : new Date();
@@ -331,7 +328,7 @@ export namespace utils {
 
     /** Returns attributes = {a1: v1, a2: v2, ...} as 'a1="v1" a2="v2" ...' */
     export function attributesToString(attributes) {
-        let res = '';
+        let res = "";
         if (typeof attributes === "object")
             for (let i in attributes)
                 if (attributes.hasOwnProperty(i))
@@ -343,19 +340,20 @@ export namespace utils {
 
     /** Returns style = {s1: v1, s2: v2, ...} as "s1=v1 \n s2=v2 \n ..."  */
     export function styleToString(style) {
-        let res = '';
+        let res = "";
         for (let i in style)
-            res += i + ' = ' + style[i] + '\n';
+            if (style.hasOwnProperty(i))
+                res += i + " = " + style[i] + "\n";
         return res;
     }
 
     /** Convert any value to string if necessary */
     export function anyToString(val: any): string {
-        if (typeof val === 'string')
+        if (typeof val === "string")
             return val;
         else if (val)
             return val.toString();
-        else return '';
+        else return "";
     }
 
     // Cookies
@@ -370,14 +368,14 @@ export namespace utils {
     export function getCookie(cookieName) {
         let c_value = document.cookie;
         let c_start = c_value.indexOf(" " + cookieName + "=");
-        if (c_start == -1)
+        if (c_start === -1)
             c_start = c_value.indexOf(cookieName + "=");
-        if (c_start == -1)
+        if (c_start === -1)
             c_value = null;
         else {
             c_start = c_value.indexOf("=", c_start) + 1;
             let c_end = c_value.indexOf(";", c_start);
-            if (c_end == -1)
+            if (c_end === -1)
                 c_end = c_value.length;
             c_value = c_value.substring(c_start, c_end);
         }
@@ -389,15 +387,17 @@ export namespace utils {
     export function paramsToJSON(params: any) {
         let res = {};
         for (let i in params) {
-            let v = params[i];
-            res[i] = !v ? '' : v;
+            if (params.hasOwnProperty) {
+                let v = params[i];
+                res[i] = !v ? "" : v;
+            }
         }
         return res;
     }
 
     /** Returns fast non RFC-compliant GUID */
     export function guid() {
-        let _p8 = function (s) {
+        let _p8 = (s) => {
             let p = (Math.random().toString(16) + "000000000").substr(2, 8);
             return s ? "-" + p.substr(0, 4) + "-" + p.substr(4, 4) : p;
         };
@@ -420,7 +420,7 @@ export namespace utils {
             return dest;
         }
 
-        if (!src || typeof src != "object" || Object.prototype.toString.call(src) === "[object Function]")
+        if (!src || typeof src !== "object" || Object.prototype.toString.call(src) === "[object Function]")
             // null, undefined, any non-object, or function
             return src; // anything
         if (src.nodeType && "cloneNode" in src)
@@ -481,7 +481,7 @@ export namespace utils {
 
     /** Checks is object empty */
     export function isEmptyObject(obj) {
-        for (var prop in obj) {
+        for (let prop in obj) {
             if (Object.prototype.hasOwnProperty.call(obj, prop)) {
                 return false;
             }
@@ -502,7 +502,7 @@ export namespace utils {
         L = localeFunc;
     }
 
-    export var L: IStringFunc = (str: string): string => { return str; };
+    export let L: IStringFunc = (str: string): string => { return str; };
 
 
 }

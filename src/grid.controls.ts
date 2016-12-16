@@ -2,14 +2,14 @@
  * Controls displaing grid
  **/
 
-import { utils } from './utils';
-import { resources } from './resources';
-import { View } from './view';
-import { DataEventType, IRecord, RecordSetDataLink, IRecordSetSource } from './data';
+import { utils } from "./utils";
+import { resources } from "./resources";
+import { View } from "./view";
+import { DataEventType, IRecord, RecordSetDataLink, IRecordSetSource } from "./data";
 
-resources.register('context-wcl',
+resources.register("context-wcl",
     [
-        'css/grid.controls.css'
+        "css/grid.controls.css"
     ]
 );
 
@@ -36,7 +36,7 @@ interface IGridColumn {
 
 /**
  * Grid control
- **/
+ */
 export class GridView extends View {
     protected static innerGridCounter = 0;
 
@@ -72,9 +72,9 @@ export class GridView extends View {
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.data = new RecordSetDataLink((eventType: DataEventType, data: any): void => {
-            if (eventType == DataEventType.CursorMoved)
+            if (eventType === DataEventType.CursorMoved)
                 this.updateSelectedRow();
-            else //if (eventType == DataEventType.Refreshed)
+            else // if (eventType == DataEventType.Refreshed)
                 this.updateView();
         });
         this.renderClientArea = true;
@@ -106,7 +106,7 @@ export class GridView extends View {
     }
 
     protected renderSelf(): string {
-        var html = '';
+        let html = "";
 
         this.createDefaultColumns();
 
@@ -118,63 +118,63 @@ export class GridView extends View {
     }
 
     /** Returns cell html */
-    protected getCellHtml(row, col, attr, text, tag = 'div'): string {
+    protected getCellHtml(row, col, attr, text, tag = "div"): string {
         if (text === null)
-            text = '';
-        attr = attr || '';
+            text = "";
+        attr = attr || "";
         attr += utils.formatStr('class="ctx_grid_cell" row="{0}" col="{1}"', [row, col]);
         return View.getTag(tag, attr, text);
     }
 
     /** Returns grid header */
     protected renderHeader(): string {
-        if (!this.showHeader || this.columns.length == 0)
-            return '';
+        if (!this.showHeader || this.columns.length === 0)
+            return "";
         let attr, column;
         let h = '<div class="ctx_grid_header_outer">\n<div class="ctx_grid_header">\n';
         for (let col = 0; col < this.columns.length; col++) {
             column = this.columns[col];
-            attr = column.captionAttr || column.attributes || '';
+            attr = column.captionAttr || column.attributes || "";
             h += this.getCellHtml(0, col, attr, column.caption);
         }
-        h += '</div>\n</div>\n';
+        h += "</div>\n</div>\n";
         return h;
     }
 
     /** Returns grid footer */
     protected renderFooter(): string {
-        if (!this.showFooter || this.columns.length == 0)
-            return '';
+        if (!this.showFooter || this.columns.length === 0)
+            return "";
         let column: IGridColumn, colAttr, v;
         let footer = '<div class="ctx_grid_footer_outer">\n<div class="ctx_grid_footer">\n';
         for (let col = 0; col < this.columns.length; col++) {
             column = this.columns[col];
-            colAttr = column.footerAttributes || column.attributes || '';
-            if (typeof colAttr === 'object')
+            colAttr = column.footerAttributes || column.attributes || "";
+            if (typeof colAttr === "object")
                 colAttr = utils.attributesToString(colAttr);
-            v = '';
-            if (typeof this.onGetFooterText == 'function')
+            v = "";
+            if (typeof this.onGetFooterText === "function")
                 v = this.onGetFooterText(col);
             else if (column.footerField)
                 v = this.data.dataSource.current[column.footerField];
             else
-                v = column.caption || '';
+                v = column.caption || "";
             footer += this.getCellHtml(0, col, colAttr, v);
         }
-        footer += '</div>\n</div>\n';
+        footer += "</div>\n</div>\n";
         return footer;
     }
 
     /** Returns grid rows */
     protected renderRows(): string {
-        this.innerListId = 'ctx_grid_body_' + (++GridView.innerGridCounter).toString();
+        this.innerListId = "ctx_grid_body_" + (++GridView.innerGridCounter).toString();
         let ds = <IRecordSetSource>this.data.dataSource;
         let rec: IRecord;
 
         if (!ds)
             return;
 
-        //let rows = utils.formatStr('<div class="ctx_grid_body_outer">\n<div class="ctx_grid_body_scroller">\n<div class="ctx_grid_body" id="{0}">\n',
+        // let rows = utils.formatStr('<div class="ctx_grid_body_outer">\n<div class="ctx_grid_body_scroller">\n<div class="ctx_grid_body" id="{0}">\n',
         //     [this.innerListId.toString()]);
 
         let rows = utils.formatStr('<div class="ctx_grid_body_outer">\n<div class="ctx_grid_body" id="{0}">\n',
@@ -184,19 +184,19 @@ export class GridView extends View {
             rec = ds.getRecord(row);
 
             // rendering row
-            let rowClass = 'ctx_grid_row';
-            if (ds.currentIndex == row)
-                rowClass += ' ctx_selected';
+            let rowClass = "ctx_grid_row";
+            if (ds.currentIndex === row)
+                rowClass += " ctx_selected";
 
-            let rowAttr = '';
-            if (typeof this.onGetRowAttr == 'function')
+            let rowAttr = "";
+            if (typeof this.onGetRowAttr === "function")
                 rowAttr = this.onGetRowAttr(row);
-            rows += utils.formatStr('<div class="{0}" row="{1}"', [rowClass, row.toString()]) + rowAttr + '>';
+            rows += utils.formatStr('<div class="{0}" row="{1}"', [rowClass, row.toString()]) + rowAttr + ">";
 
             // rendering row's columns
             for (let col = 0; col < this.columns.length; col++) {
-                let v = '';
-                let colAttr = '';
+                let v = "";
+                let colAttr = "";
                 let column = this.columns[col];
                 if (column.view) {
                     let wasVisible = column.view.visible;
@@ -207,23 +207,23 @@ export class GridView extends View {
                 }
                 else
                     v = rec[column.fieldName];
-                if (typeof this.onGetColumnAttr == 'function')
+                if (typeof this.onGetColumnAttr === "function")
                     colAttr = this.onGetColumnAttr(row, col, v);
                 else if (column.attributes)
                     colAttr = column.attributes;
                 rows += this.getCellHtml(row, col, colAttr, v);
             }
-            rows += '</div>\n';
+            rows += "</div>\n";
         }
-        //rows += '</div>\n</div>\n</div>\n';
-        rows += '</div>\n</div>\n';
+        // rows += '</div>\n</div>\n</div>\n';
+        rows += "</div>\n</div>\n";
         return rows;
     }
 
     protected afterUpdateView() {
         super.afterUpdateView();
-        this.handleEvent('onmousedown', this.handleMouseDown);
-        this.handleEvent('ontouchstart', this.handleClick);
+        this.handleEvent("onmousedown", this.handleMouseDown);
+        this.handleEvent("ontouchstart", this.handleClick);
     }
 
     protected getEventRowElement(event) {
@@ -231,12 +231,12 @@ export class GridView extends View {
         let listElement = event.toElement || event.target;
         if (!listElement)
             return null;
-        let idx = listElement.getAttribute('row');
+        let idx = listElement.getAttribute("row");
         while (listElement && !idx) {
             listElement = listElement.parentElement;
             if (!listElement)
                 continue;
-            idx = listElement.getAttribute('row');
+            idx = listElement.getAttribute("row");
         }
         if (!idx)
             return null;
@@ -248,7 +248,7 @@ export class GridView extends View {
         let el = this.getEventRowElement(event);
         if (!el)
             return -1;
-        return el.getAttribute('row');
+        return el.getAttribute("row");
     }
 
     protected handleMouseDown(event) {
@@ -273,11 +273,11 @@ export class GridView extends View {
         let el: Element, row;
         for (let i = 0; i < children.length; i++) {
             el = children[i];
-            row = el.getAttribute('row');
-            if (typeof row !== undefined && row != selectedIdx)
-                el.setAttribute('class', 'ctx_grid_row');
-            else if (row == selectedIdx)
-                el.setAttribute('class', 'ctx_grid_row ctx_selected');
+            row = el.getAttribute("row");
+            if (typeof row !== undefined && row !== selectedIdx)
+                el.setAttribute("class", "ctx_grid_row");
+            else if (row === selectedIdx)
+                el.setAttribute("class", "ctx_grid_row ctx_selected");
         }
     }
 
@@ -287,10 +287,7 @@ export class GridView extends View {
             drawRowSelection: this.drawRowSelection,
             fixedHeader: this.fixedHeader
         };
-        attr += (attr ? ' ' : '') + utils.attributesToString(attr2);
+        attr += (attr ? " " : "") + utils.attributesToString(attr2);
         return attr;
     }
-
-
-
 }

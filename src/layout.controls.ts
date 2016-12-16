@@ -2,20 +2,19 @@
  * Controls that layouts its content 
  */
 
-import { utils } from './utils';
-import { View } from './view';
-import { resources } from './resources';
+import { utils } from "./utils";
+import { View } from "./view";
+import { resources } from "./resources";
 
-resources.register('context-wcl',
+resources.register("context-wcl",
     [
-        'css/layout.controls.css'
+        "css/layout.controls.css"
     ]
 );
 
-
 /**
  * Cotrols layouter that discretely/responsively changes its size
- **/
+ */
 export class WorkAreaLayout extends View {
     constructor(parent, name?) {
         super(parent, name);
@@ -30,17 +29,17 @@ export class GridLayout extends View {
     public rows = [];
 
     public render() {
-        let bodyOfTable = '';
+        let bodyOfTable = "";
 
         for (let r = 0; r < this.rows.length; r++) {
             bodyOfTable += utils.formatStr('<div class="ctx_row" row="{0}">', [r]);
-            var cols = this.rows[r];
+            let cols = this.rows[r];
 
-            for (var c = 0; c < cols.length; c++) {
-                var cell = cols[c];
-                var controls = null;
-                var cellAttr = '';
-                var cellHtml = '';
+            for (let c = 0; c < cols.length; c++) {
+                let cell = cols[c];
+                let controls = null;
+                let cellAttr = "";
+                let cellHtml = "";
 
                 if (typeof cell === "string")
                     cell = this[cell];
@@ -50,7 +49,7 @@ export class GridLayout extends View {
                         controls = cell.views;
                     else
                         controls = cell;
-                    if (typeof cell.style == 'string')
+                    if (typeof cell.style === "string")
                         cellAttr = utils.formatStr('style="{0}" ', [cell.style]);
                     cellAttr += utils.attributesToString(cell.cellAttributes);
                 }
@@ -58,20 +57,20 @@ export class GridLayout extends View {
                     if (!Array.isArray(controls))
                         controls = [controls];
 
-                    for (var i = 0; i < controls.length; i++)
+                    for (let i = 0; i < controls.length; i++)
                         cellHtml += controls[i].internalRender();
                 }
 
-                if (cellHtml === '')
+                if (cellHtml === "")
                     cellHtml = '<div class="ctx_transparent">null</div>';
 
                 bodyOfTable += utils.formatStr('<div class="ctx_cell" ctx_row="{0}" ctx_cell="{1}"{2}>{3}</div>', [r, c, cellAttr, cellHtml]);
             }
 
             if (cols.length === 0)
-                bodyOfTable += '<div><div class=ctx_null></div></div>';
+                bodyOfTable += "<div><div class=ctx_null></div></div>";
 
-            bodyOfTable += '</div>';
+            bodyOfTable += "</div>";
         }
 
         return this.renderTag(bodyOfTable);

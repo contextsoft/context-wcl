@@ -1,22 +1,21 @@
-import { utils } from './utils';
-import { IVoidEvent, Component } from './component';
-import { FieldDataLink, DataEventType } from './data';
-import { IAction } from './actions';
+import { utils } from "./utils";
+import { IVoidEvent, Component } from "./component";
+import { FieldDataLink, DataEventType } from "./data";
+import { IAction } from "./actions";
 
 /** Views's Align */
 export class Align {
-    static left: IAlign = { id: 'left', style: 'position: absolute; left: 0; top: 0; bottom: 0' };
-    static top: IAlign = { id: 'top', style: 'position: absolute; left: 0; top: 0; right: 0' };
-    static right: IAlign = { id: 'right', style: 'position: absolute; top: 0; right: 0; bottom: 0' };
-    static bottom: IAlign = { id: 'bottom', style: 'position: absolute; left: 0; right: 0; bottom: 0' };
-    static client: IAlign = { id: 'client', style: 'position: absolute; left: 0; top: 0; right: 0; bottom: 0' };
+    public static left: IAlign = { id: "left", style: "position: absolute; left: 0; top: 0; bottom: 0" };
+    public static top: IAlign = { id: "top", style: "position: absolute; left: 0; top: 0; right: 0" };
+    public static right: IAlign = { id: "right", style: "position: absolute; top: 0; right: 0; bottom: 0" };
+    public static bottom: IAlign = { id: "bottom", style: "position: absolute; left: 0; right: 0; bottom: 0" };
+    public static client: IAlign = { id: "client", style: "position: absolute; left: 0; top: 0; right: 0; bottom: 0" };
 }
 
 export interface IAlign {
     id: string;
     style: string;
 }
-
 
 /* TODO:
    * IScroll???
@@ -25,17 +24,17 @@ export interface IAlign {
 
 /** 
  * Root for all controls 
- **/
+ */
 export abstract class View extends Component {
     /** Returns html <tag attr>innerHtml</tag>
      * leaveOpen means close or not tag
      */
     public static getTag(tag: string, attr: string, innerHtml: string, leaveOpen = false): string {
-        let t = tag || 'div';
-        let res = '<' + t + ' ' + (attr || '');
-        res += (t === 'input') ? '/' : '';
-        res += '>' + (innerHtml || '');
-        res += (!leaveOpen) ? '</' + t + '>' : '';
+        let t = tag || "div";
+        let res = "<" + t + " " + (attr || "");
+        res += (t === "input") ? "/" : "";
+        res += ">" + (innerHtml || "");
+        res += (!leaveOpen) ? "</" + t + ">" : "";
         return res;
     }
 
@@ -57,19 +56,19 @@ export abstract class View extends Component {
     }
 
     /** Control's html tag type e.g. div */
-    public tag = 'div';
+    public tag = "div";
 
     /** Render or not view with client area
      *  the reason for this is to be able to layout child views this allows to use padding to create internal margins
      */
     public renderClientArea = true;
     /** Control's client area CSS style */
-    public clientAreaStyle = '';
+    public clientAreaStyle = "";
     /** Indicates is control rendered in client area of parent control or not */
     public renderInNonClientArea = false;
 
     /** Control's child controls */
-    public children: Array<View> = [];
+    public children: View[] = [];
 
     /** DOM events wich receives view instance as "this" */
     public events: any = {};
@@ -103,13 +102,13 @@ export abstract class View extends Component {
     public doNotEscapeHtml = false;
 
     /** Control style/theme. Use ControlType.themes to assign */
-    public theme: string = '';
+    public theme: string = "";
 
-    //protected isController = false; //TODO: used in serialization 
-    protected clientAreaTag = 'div';
-    protected clientAreaClass = 'ctx_view_client_area';
-    protected hiddenViewClass = 'ctx_view_hidden';
-    protected cssPrefix = 'Ctx';
+    // protected isController = false; //TODO: used in serialization 
+    protected clientAreaTag = "div";
+    protected clientAreaClass = "ctx_view_client_area";
+    protected hiddenViewClass = "ctx_view_hidden";
+    protected cssPrefix = "Ctx";
     protected updating = 0;
 
     protected _id: string;
@@ -125,7 +124,7 @@ export abstract class View extends Component {
 
     constructor(parent: View, name?: string) {
         super(name);
-        this._id = 'w' + (View.nextViewId++);
+        this._id = "w" + (View.nextViewId++);
         this._parent = parent;
         if (parent)
             parent.addView(this);
@@ -154,11 +153,11 @@ export abstract class View extends Component {
 
     /** Sets/Gets CSS class in addition to generated one e.g. 'TextView View additionalCSSClass'  */
     public get additionalCSSClass() {
-        let cl = '';
+        let cl = "";
         if (this.theme)
             cl = this.theme;
         if (this._additionalCSSClass)
-            cl += (cl ? ' ' : '') + this._additionalCSSClass;
+            cl += (cl ? " " : "") + this._additionalCSSClass;
         return cl;
     }
     public set additionalCSSClass(value) {
@@ -174,7 +173,7 @@ export abstract class View extends Component {
         if (!this._bodyElement && this._bodyElementId)
             this._bodyElement = document.getElementById(this._bodyElementId);
         if (!this._bodyElement)
-            this._bodyElement = document.getElementsByTagName('body')[0];
+            this._bodyElement = document.getElementsByTagName("body")[0];
         return this._bodyElement;
     };
 
@@ -211,7 +210,7 @@ export abstract class View extends Component {
         }
     }
     public getText(): string {
-        let result = '';
+        let result = "";
         if (typeof this.onGetText === "function")
             result = this.onGetText();
         else if (this._text)
@@ -252,7 +251,7 @@ export abstract class View extends Component {
     }
 
     public getClientElementId() {
-        return this.id + '_client';
+        return this.id + "_client";
     }
 
     /** Returns   */
@@ -385,7 +384,7 @@ export abstract class View extends Component {
             this.beforeUpdateView();
             // update body
             this._element = null;
-            let e = document.createElement('div');
+            let e = document.createElement("div");
             this.bodyElement.appendChild(e);
             // it is important to render self while element == null
             // in this case we will not try to use element's style and attributes, otherwise we will
@@ -417,7 +416,7 @@ export abstract class View extends Component {
         else if (this.action && this.action.icon)
             return this.action.icon;
         else
-            return '';
+            return "";
     }
 
     /** Return icon withing <img> tag */
@@ -426,7 +425,7 @@ export abstract class View extends Component {
         if (icon)
             return '<img src="' + icon + '">';
         else
-            return '';
+            return "";
     }
 
     /** Return controls html without children */
@@ -453,7 +452,7 @@ export abstract class View extends Component {
             return this.render();
 
         else
-            return '<div class="' + this.hiddenViewClass + '" id=' + this.id + '></div>';
+            return '<div class="' + this.hiddenViewClass + '" id=' + this.id + "></div>";
     }
 
     /** Aligns control's children when alignChildren = true */
@@ -462,11 +461,11 @@ export abstract class View extends Component {
             return;
 
         offset = offset || {
-            'left': { left: 0, top: 0, bottom: 0 },
-            'top': { left: 0, top: 0, right: 0 },
-            'right': { top: 0, right: 0, bottom: 0 },
-            'bottom': { left: 0, right: 0, bottom: 0 },
-            'client': { left: 0, top: 0, right: 0, bottom: 0 }
+            left: { left: 0, top: 0, bottom: 0 },
+            top: { left: 0, top: 0, right: 0 },
+            right: { top: 0, right: 0, bottom: 0 },
+            bottom: { left: 0, right: 0, bottom: 0 },
+            client: { left: 0, top: 0, right: 0, bottom: 0 }
         };
 
         function incOffset(id, value) {
@@ -483,20 +482,20 @@ export abstract class View extends Component {
             if (!el)
                 continue;
 
-            el.style['left'] = offset[aid].left + 'px';
-            el.style['right'] = offset[aid].right + 'px';
-            el.style['top'] = offset[aid].top + 'px';
-            el.style['bottom'] = offset[aid].bottom + 'px';
+            el.style["left"] = offset[aid].left + "px";
+            el.style["right"] = offset[aid].right + "px";
+            el.style["top"] = offset[aid].top + "px";
+            el.style["bottom"] = offset[aid].bottom + "px";
 
             if (c.align) {
-                if (aid == Align.left.id)
-                    incOffset('left', el.offsetWidth);
-                else if (aid == Align.right.id)
-                    incOffset('right', el.offsetWidth);
-                else if (aid == Align.top.id)
-                    incOffset('top', el.offsetHeight);
-                else if (aid == Align.bottom.id)
-                    incOffset('bottom', el.offsetHeight);
+                if (aid === Align.left.id)
+                    incOffset("left", el.offsetWidth);
+                else if (aid === Align.right.id)
+                    incOffset("right", el.offsetWidth);
+                else if (aid === Align.top.id)
+                    incOffset("top", el.offsetHeight);
+                else if (aid === Align.bottom.id)
+                    incOffset("bottom", el.offsetHeight);
             }
 
             if (c.scrollBar)
@@ -536,7 +535,6 @@ export abstract class View extends Component {
         if (this.onVisibleChanged)
             this.onVisibleChanged();
     }
-
 
     /** Resets all children elements to null */
     protected resetChildrenElements() {
@@ -580,12 +578,12 @@ export abstract class View extends Component {
     }
 
     protected beforeUpdateView() {
-
+        // Override in descendants
     }
 
     protected internalAfterUpdateView() {
         this.afterUpdateView();
-        //this.realignChildren();
+        // this.realignChildren();
         setTimeout(() => {
             this.realignChildren();
         }, 0);
@@ -620,14 +618,14 @@ export abstract class View extends Component {
             this.children[i].internalAfterUpdateView();
 
         // assign events
-        if (typeof this.events === 'object')
+        if (typeof this.events === "object")
             for (let e in this.events)
                 if (this.events.hasOwnProperty(e))
                     this.element[e] = (event) => { this.events[e].call(this, event); };
 
         // handle on click if we have action assigned
         if (this.action)
-            this.handleEvent('onclick', this.handleClick);
+            this.handleEvent("onclick", this.handleClick);
     }
 
     protected handleClick(event: Event) {
@@ -641,11 +639,11 @@ export abstract class View extends Component {
 
     /** Returns control's CSS class */
     protected getCSSClass() {
-        let c = this.name ? this.name + ' ' : '';
+        let c = this.name ? this.name + " " : "";
         if (!this._classPath) {
-            let t: any = Object.getPrototypeOf(this), cp = '';
+            let t: any = Object.getPrototypeOf(this), cp = "";
             while (t) {
-                cp += (cp == '' ? '' : ' ') + this.cssPrefix + Component.getFunctionName(t.constructor);
+                cp += (cp === "" ? "" : " ") + this.cssPrefix + Component.getFunctionName(t.constructor);
                 t = Object.getPrototypeOf(t);
                 if (!t || !t.constructor || t.constructor === Component)
                     t = null;
@@ -656,8 +654,8 @@ export abstract class View extends Component {
         c += this._classPath;
         let a = this.additionalCSSClass;
         if (a)
-            c += ' ' + a;
-        c += !this.getEnabled() ? ' ctx_disabled' : '';
+            c += " " + a;
+        c += !this.getEnabled() ? " ctx_disabled" : "";
         // c += this.float? ' float-' + this.float : '';
         // c += this.position? ' position-' + this.position : '';
         // c += this.scrollbars? ' scrollbars-' + this.scrollbars : '';
@@ -668,23 +666,23 @@ export abstract class View extends Component {
     /** Returns all control element's attributes */
     protected internalGetTagAttr(): string {
         let e = this.element;
-        let s = (e && e.className !== this.hiddenViewClass) ? e.style.cssText : (typeof this.style == 'string' ? this.style : '');
-        let align = '';
+        let s = (e && e.className !== this.hiddenViewClass) ? e.style.cssText : (typeof this.style === "string" ? this.style : "");
+        let align = "";
 
         if (this.alignChildren)
-            s += (s ? '; ' : '') + 'position: relative';
+            s += (s ? "; " : "") + "position: relative";
 
         if (this.align) {
-            s += s ? ('; ' + this.align.style) : this.align.style;
+            s += s ? ("; " + this.align.style) : this.align.style;
             align = utils.formatStr(' ctx_align="{0}"', [this.align.id]);
         }
 
-        if (typeof s === "string" && s !== '')
+        if (typeof s === "string" && s !== "")
             this.attributes.style = s;
         else
             delete this.attributes.style;
 
-        return 'class="' + this.getCSSClass() + '" ' + this.getTagAttr() + (this.getEnabled() ? '' : 'ctx_disabled') + ' id="' + this.id + '"' + align;
+        return 'class="' + this.getCSSClass() + '" ' + this.getTagAttr() + (this.getEnabled() ? "" : "ctx_disabled") + ' id="' + this.id + '"' + align;
     }
 
     /** Return control element's this.attrubutes */
@@ -696,7 +694,7 @@ export abstract class View extends Component {
         // this renders view with client area
         // the reason for this is to be able to layout child views
         // this allows to use padding to create internal margins
-        let clientAreaStyle = (this.clientAreaStyle) ? ' style="' + this.clientAreaStyle + '" ' : '';
+        let clientAreaStyle = (this.clientAreaStyle) ? ' style="' + this.clientAreaStyle + '" ' : "";
         return 'class="' + this.clientAreaClass + '" id="' + this.id + '_client"' + clientAreaStyle;
     }
 
@@ -707,11 +705,11 @@ export abstract class View extends Component {
 
     /** Returns control's childs html 
      * nonClientArea indicates if client area or not rendered at the moment 
-     * */
+     */
     protected renderChildren(nonClientArea = false): string {
-        let contentHtml = '';
+        let contentHtml = "";
         for (let i = 0; i < this.children.length; i++)
-            if (nonClientArea == this.children[i].renderInNonClientArea)
+            if (nonClientArea === this.children[i].renderInNonClientArea)
                 contentHtml += this.children[i].internalRender();
         return contentHtml;
     }
@@ -719,14 +717,14 @@ export abstract class View extends Component {
 
 /** 
  * Control with a value 
- **/
+ */
 export abstract class ValueView extends View {
     /** Fires on value changed */
     public onChange: (newValue) => void;
 
     /** FieldDataLink used as value store */
     public data = new FieldDataLink((eventType: DataEventType, data: any): void => {
-        this.setValue((this.data).value || '');
+        this.setValue((this.data).value || "");
     });
 
     protected _value: any;
@@ -760,8 +758,7 @@ export abstract class ValueView extends View {
     }
     protected afterUpdateView() {
         super.afterUpdateView();
-        if (this._element && typeof this._value !== 'undefined')
+        if (this._element && typeof this._value !== "undefined")
             (<any>this._element).value = this._value;
     }
 }
-

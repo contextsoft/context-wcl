@@ -1,11 +1,11 @@
 /**
  * Application object
  */
-import { utils } from './utils';
-import { resources } from './resources';
-import { IVoidEvent, IDOMEvent } from './component';
-import { IService, Service } from './service';
-import { Dialog } from './ext.controls';
+import { utils } from "./utils";
+import { resources } from "./resources";
+import { IVoidEvent, IDOMEvent } from "./component";
+import { IService, Service } from "./service";
+import { Dialog } from "./ext.controls";
 
 /** Global Application instance */
 export let application: Application = null;
@@ -25,7 +25,7 @@ export interface IAppConfig {
 /** Application control and config */
 export class Application {
     /** Locales supported by application */
-    static locales = {
+    public static locales = {
         en: {
             "$locale": "English"
         }
@@ -34,16 +34,16 @@ export class Application {
     /** Returns WebBrowser info */
     public static getAgentInfo() {
         let r: any = {};
-        r.vendor = (/webkit/i).test(navigator.appVersion) ? 'webkit' : (/firefox/i).test(navigator.userAgent) ? 'moz' : (/trident/i).test(navigator.userAgent) ? 'ms' : 'opera' in window ? 'o' : '';
+        r.vendor = (/webkit/i).test(navigator.appVersion) ? "webkit" : (/firefox/i).test(navigator.userAgent) ? "moz" : (/trident/i).test(navigator.userAgent) ? "ms" : "opera" in window ? "o" : "";
         // Browser capabilities
         r.isAndroid = (/android/gi).test(navigator.appVersion);
         r.isIDevice = (/iphone|ipad/gi).test(navigator.appVersion);
         r.isPlaybook = (/playbook/gi).test(navigator.appVersion);
         r.isTouchPad = (/hp-tablet/gi).test(navigator.appVersion);
-        r.hasTouch = 'ontouchstart' in window && !r.isTouchPad;
+        r.hasTouch = "ontouchstart" in window && !r.isTouchPad;
         r.isMobileDevice = false; // this will be set in device ready event
         // Events
-        r.CLICK_EV = r.hasTouch ? 'touchstart' : 'click';
+        r.CLICK_EV = r.hasTouch ? "touchstart" : "click";
         return r;
     };
 
@@ -87,7 +87,7 @@ export class Application {
 
     /** Default settings */
     protected defaultSettings = {
-        locale: 'en'
+        locale: "en"
     };
 
     protected _agentInfo;
@@ -100,7 +100,7 @@ export class Application {
             this.onReady = onReady;
 
         utils.setLocaleFunc((str: string): string => {
-            let locale = this.settings['locale'];
+            let locale = this.settings["locale"];
             let localeStr;
             if (Application.locales[locale])
                 localeStr = Application.locales[locale][str];
@@ -108,8 +108,8 @@ export class Application {
             if (localeStr)
                 return localeStr;
             else {
-                if (this.settings['debug'])
-                    utils.log('NOT TRANSLATED: [' + str + ']');
+                if (this.settings["debug"])
+                    utils.log("NOT TRANSLATED: [" + str + "]");
                 return str;
             }
         });
@@ -140,28 +140,27 @@ export class Application {
 
     /** Save options to localStorage */
     public saveSettings() {
-        localStorage['settings'] = JSON.stringify(this.settings);
+        localStorage["settings"] = JSON.stringify(this.settings);
     }
 
     /** Load options from localStorage */
     public loadSettings() {
-        if (localStorage['settings'])
-            this.settings = JSON.parse(localStorage['settings']);
+        if (localStorage["settings"])
+            this.settings = JSON.parse(localStorage["settings"]);
         else
             this.settings = this.defaultSettings;
     }
 
-
     /** Shows localized alert */
     public showMessage(msg: string) {
-        if (msg && msg !== '')
-            //alert(this.L(msg));
+        if (msg && msg !== "")
+            // alert(this.L(msg));
             Dialog.showDialog(msg);
     }
 
     /** Throws localized exception */
     public error(msg: string) {
-        if (msg && msg !== '')
+        if (msg && msg !== "")
             throw (this.L(msg));
     }
 
@@ -171,9 +170,9 @@ export class Application {
         resources.loadResources(this.config.appUrl, (): void => { this.afterResourcesLoaded(); });
     };
 
-    /** Returns DOM body element*/
+    /** Returns DOM body element */
     public getBody() {
-        return document.getElementsByTagName('body')[0];
+        return document.getElementsByTagName("body")[0];
     }
 
     /** Localizes string into selected language */
@@ -185,22 +184,22 @@ export class Application {
     public makeBodyUnmoveable() {
         let body = this.getBody();
 
-        let bodyTouchMove = function (event) {
+        let bodyTouchMove = (event) => {
             event.preventDefault();
         };
 
         if (body.addEventListener)
-            body.addEventListener('touchmove', bodyTouchMove, false);
+            body.addEventListener("touchmove", bodyTouchMove, false);
     };
 
     /** Returns body's size as {width, height}  */
     public getViewportSize() {
-        let e: any = window, a: any = 'inner';
-        if (!('innerWidth' in window)) {
-            a = 'client';
+        let e: any = window, a: any = "inner";
+        if (!("innerWidth" in window)) {
+            a = "client";
             e = document.documentElement || document.body;
         }
-        return { width: e[a + 'Width'], height: e[a + 'Height'] };
+        return { width: e[a + "Width"], height: e[a + "Height"] };
     }
 
     protected run() {
@@ -220,5 +219,3 @@ export class Application {
     }
 
 }
-
-

@@ -1,4 +1,4 @@
-import { utils } from './utils';
+import { utils } from "./utils";
 
 /**
  * Interface with RTTI
@@ -29,18 +29,17 @@ export interface IDOMEvent {
     (event: Event): void;
 }
 
-
 /** Root for all components */
 export class Component {
     public static getFunctionName(func) {
-        if (typeof func !== 'function')
-            throw ('Not a function');
+        if (typeof func !== "function")
+            throw ("Not a function");
         let funcNameRegex = /function (.{1,})\(/;
         if (func.name)
             return func.name;
         else {
             let results = funcNameRegex.exec(func.toString());
-            return (results && results.length > 1) ? results[1] : '';
+            return (results && results.length > 1) ? results[1] : "";
         }
     }
 
@@ -74,10 +73,3 @@ export class Component {
         return n;
     }
 }
-
-
-
-
-
-
-

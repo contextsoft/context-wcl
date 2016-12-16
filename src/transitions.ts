@@ -14,7 +14,7 @@ export interface ICSSTransitionOptions {
 }
 
 /**
- Allows to create a set of transitions that can be grouped and performed together.
+ * Allows to create a set of transitions that can be grouped and performed together.
  */
 export class CSSTransition {
     /** 
@@ -56,34 +56,34 @@ export class CSSTransition {
         // set up properties
         let properties = (params.properties) ? params.properties : CSSTransition.DEFAULTS.properties;
         // set up durations
-        let duration = ((params.duration !== undefined) ? params.duration : CSSTransition.DEFAULTS.duration) + 's';
+        let duration = ((params.duration !== undefined) ? params.duration : CSSTransition.DEFAULTS.duration) + "s";
         let durations = [];
         for (let i = 0; i < properties.length; i++) {
             durations.push(duration);
         }
         // from/to animation
         if (params.from) {
-            this.addInstantOperation(function () {
-                style.webkitTransitionProperty = 'none';
+            this.addInstantOperation(() => {
+                style.webkitTransitionProperty = "none";
                 for (let i = 0; i < properties.length; i++) {
-                    style.setProperty(properties[i], params.from[i], '');
+                    style.setProperty(properties[i], params.from[i], "");
                 }
             });
-            this.addDeferredOperation(function () {
-                style.webkitTransitionProperty = properties.join(', ');
-                style.webkitTransitionDuration = durations.join(', ');
+            this.addDeferredOperation(() => {
+                style.webkitTransitionProperty = properties.join(", ");
+                style.webkitTransitionDuration = durations.join(", ");
                 for (let i = 0; i < properties.length; i++) {
-                    style.setProperty(properties[i], params.to[i], '');
+                    style.setProperty(properties[i], params.to[i], "");
                 }
             });
         }
         // to-only animation
         else {
-            this.addDeferredOperation(function () {
-                style.webkitTransitionProperty = properties.join(', ');
-                style.webkitTransitionDuration = durations.join(', ');
+            this.addDeferredOperation(() => {
+                style.webkitTransitionProperty = properties.join(", ");
+                style.webkitTransitionDuration = durations.join(", ");
                 for (let i = 0; i < properties.length; i++) {
-                    style.setProperty(properties[i], params.to[i], '');
+                    style.setProperty(properties[i], params.to[i], "");
                 }
             });
         }
@@ -97,8 +97,8 @@ export class CSSTransition {
 
     /** Adds a new operation to the set of instant operations */
     protected addInstantOperation(newOperation) {
-        var previousInstantOperations = this.instantOperations;
-        this.instantOperations = function () {
+        let previousInstantOperations = this.instantOperations;
+        this.instantOperations = () => {
             if (previousInstantOperations)
                 previousInstantOperations();
             newOperation();
@@ -106,12 +106,12 @@ export class CSSTransition {
     }
 
     /** Adds a new operation to the set of deferred operations */
-    protected addDeferredOperation(new_operation) {
-        var previousDeferredOperations = this.deferredOperations;
-        this.deferredOperations = function () {
+    protected addDeferredOperation(newOperation) {
+        let previousDeferredOperations = this.deferredOperations;
+        this.deferredOperations = () => {
             if (previousDeferredOperations)
                 previousDeferredOperations();
-            new_operation();
+            newOperation();
         };
     }
 }
