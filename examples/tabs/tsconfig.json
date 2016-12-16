@@ -13,7 +13,7 @@
         "moduleResolution": "node",
         "inlineSourceMap": true,
         //"sourceMap": true,
-        "baseUrl": "./../../../../node_modules",
+        "baseUrl": "../../..",
         "paths": {
             "jquery": [
                 "jquery/dist/jquery"

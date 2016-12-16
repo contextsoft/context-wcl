@@ -2,10 +2,10 @@ import {
     Application, ScreenView, HeaderView, FooterView, TextView, /*Ajax, Service,*/ TableDataSource, DataTable,
     GridView, PanelView, Align, InputView, GridLayout, Splitter, ButtonView, PostAction, EditAction, CancelAction,
     DeleteAction, InsertAction, Record, DataTableSet
-} from 'context-wcl';
+} from "context-wcl";
 
-import { config } from './config';
-//import { application } from 'application';
+import { config } from "./config";
+// import { application } from 'application';
 
 export function main() {
     new MyApp(config);
@@ -14,7 +14,7 @@ export function main() {
 class MyApp extends Application {
     public mainScreen;
     public run() {
-        this.mainScreen = new MainScreen('mainScreen');
+        this.mainScreen = new MainScreen("mainScreen");
         this.mainScreen.show();
     }
 }
@@ -25,38 +25,38 @@ class MainScreen extends ScreenView {
         this.createHeaderFooter();
 
         // data
-        let testDataSet = new DataTableSet('TestTableSet');
-        let testTable = new DataTable(null, testDataSet, 'test');
-        let test2Table = new DataTable(null, testDataSet, 'test1');
+        let testDataSet = new DataTableSet("TestTableSet");
+        let testTable = new DataTable(null, testDataSet, "test");
+        let test2Table = new DataTable(null, testDataSet, "test1");
         let testTableSource = new TableDataSource(testTable);
 
         // controls 
 
         let clientPanel = new PanelView(this);
-        clientPanel.style = 'position: absolute; width: 100%; top: 30px; bottom: 30px;';
+        clientPanel.style = "position: absolute; width: 100%; top: 30px; bottom: 30px;";
         clientPanel.alignChildren = true;
 
         let topPanel = new PanelView(clientPanel);
-        topPanel.style = 'height: 220px; padding: 10px';
+        topPanel.style = "height: 220px; padding: 10px";
         topPanel.align = Align.top;
 
         let leftLayout = new GridLayout(topPanel);
 
         let idCap = new TextView(leftLayout);
-        idCap.text = 'Id: ';
+        idCap.text = "Id: ";
         let idEdit = new InputView(leftLayout);
         idEdit.enabled = false;
 
         let col1Cap = new TextView(leftLayout);
-        col1Cap.text = 'Col1: ';
+        col1Cap.text = "Col1: ";
         let col1Edit = new InputView(leftLayout);
 
         let col2Cap = new TextView(leftLayout);
-        col2Cap.text = 'Col2: ';
+        col2Cap.text = "Col2: ";
         let col2Edit = new InputView(leftLayout);
 
         let col3Cap = new TextView(leftLayout);
-        col3Cap.text = 'Col3: ';
+        col3Cap.text = "Col3: ";
         let col3Edit = new InputView(leftLayout);
 
         leftLayout.rows = [
@@ -68,7 +68,7 @@ class MainScreen extends ScreenView {
 
         // buttons
         let btnPanel = new PanelView(topPanel);
-        btnPanel.style = 'margin-top: 10px';
+        btnPanel.style = "margin-top: 10px";
 
         let editBtn = new ButtonView(btnPanel);
         editBtn.theme = ButtonView.themes.primary;
@@ -80,12 +80,12 @@ class MainScreen extends ScreenView {
         cancelBtn.theme = ButtonView.themes.danger;
 
         let newBtn = new ButtonView(btnPanel);
-        newBtn.style = 'margin-left: 20px';
+        newBtn.style = "margin-left: 20px";
 
         let delBtn = new ButtonView(btnPanel);
 
         let applyBtn = new ButtonView(btnPanel);
-        applyBtn.text = 'Save to database';
+        applyBtn.text = "Save to database";
         applyBtn.theme = ButtonView.themes.warning;
         applyBtn.events.onclick = function () {
             testDataSet.applyUpdates().then(() => {
@@ -97,8 +97,8 @@ class MainScreen extends ScreenView {
         let splitter = new Splitter(clientPanel);
         splitter.align = Align.top;
 
-        let bottomPanel = new PanelView(clientPanel, 'BottomPanel');
-        bottomPanel.style = 'padding: 10px';
+        let bottomPanel = new PanelView(clientPanel, "BottomPanel");
+        bottomPanel.style = "padding: 10px";
         bottomPanel.align = Align.client;
 
         let grid = new GridView(bottomPanel);
@@ -107,13 +107,13 @@ class MainScreen extends ScreenView {
         // binding data
 
         idEdit.data.dataSource = testTableSource;
-        idEdit.data.dataField = 'id';
+        idEdit.data.dataField = "id";
         col1Edit.data.dataSource = testTableSource;
-        col1Edit.data.dataField = 'col1';
+        col1Edit.data.dataField = "col1";
         col2Edit.data.dataSource = testTableSource;
-        col2Edit.data.dataField = 'col2';
+        col2Edit.data.dataField = "col2";
         col3Edit.data.dataSource = testTableSource;
-        col3Edit.data.dataField = 'col3';
+        col3Edit.data.dataField = "col3";
 
         editBtn.action = new EditAction(testTableSource);
         postBtn.action = new PostAction(testTableSource);
@@ -128,11 +128,11 @@ class MainScreen extends ScreenView {
     }
 
     protected createHeaderFooter() {
-        let header = new HeaderView(this, 'header');
-        header.text = 'Context Web Components Library - Test Project';
-        let footer = new FooterView(this, 'footer');
-        footer.text = '(c) 2016 Context Software LLC.';
-        header.style = footer.style = 'min-height: 30px; padding-top: 6px;';
+        let header = new HeaderView(this, "header");
+        header.text = "Context Web Components Library - Test Project";
+        let footer = new FooterView(this, "footer");
+        footer.text = "(c) 2016 Context Software LLC.";
+        header.style = footer.style = "min-height: 30px; padding-top: 6px;";
     }
 
     /*protected otherTests() {

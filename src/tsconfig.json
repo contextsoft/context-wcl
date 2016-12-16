@@ -1,6 +1,8 @@
 {
     "compilerOptions": {
-        "module": "amd",
+        "noUnusedParameters": true,
+        "noUnusedLocals": true,
+		"module": "amd",
         "outDir": "../dist",
         "target": "es5",
         "lib": [
