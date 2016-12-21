@@ -13,7 +13,7 @@ class Auth extends Adapter
         'generateCaptcha'
     ];
 
-    /** Generates Password */
+    /** Generates password */
     public static function generateSecret($word_length = 10, $allowed_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890')
     {
         $str = array();
@@ -40,21 +40,21 @@ class Auth extends Adapter
     }
 
     /** Logins user
-      * params: [email, Password]
+      * params: [email, password]
     **/
     public function login($params)
     {
-        if (empty($params['email']) || empty($params['Password'])) {
-            Application::raise('Please enter email and Password.');
+        if (empty($params['email']) || empty($params['password'])) {
+            Application::raise('Please enter email and password.');
         }
             
         $user = DbObject::fetchSQL(
             "SELECT id, Photo_Url, display_name, first_name, last_name, email_confirmed FROM user u 
-              WHERE UPPER(TRIM(u.email)) = UPPER(TRIM(?)) AND u.Password = MD5(?)",
-            [$params['email'], $params['Password']]);
+              WHERE UPPER(TRIM(u.email)) = UPPER(TRIM(?)) AND u.password = MD5(?)",
+            [$params['email'], $params['password']]);
 
         if (!count($user)) {
-            Application::raise('email or Password is incorrect. Please try again');
+            Application::raise('email or password is incorrect. Please try again');
         }
 
         $user = $user[0];
@@ -205,7 +205,7 @@ class Auth extends Adapter
             "email confirmation key is $email_confirmation_key. Please use it for confirm.");
     }
 
-    /** Sends Password reset email.
+    /** Sends password reset email.
       * params: [email]
     **/
     public function sendPasswordResetCode($params)
@@ -230,22 +230,22 @@ class Auth extends Adapter
             "UPDATE user SET Password_Reset_Key = :Password_Reset_Key WHERE id = :id)",
             ['id' => $user['id'], 'Password_Reset_Key' => $Password_Reset_Key]);
 
-        Mailer::sendMail($email, $user['display_name'], 'Password reset request',
-            "To reset your Password please use the code: ".md5($email . '-' . $user['id'] . '-' . $Password_Reset_Key));
+        Mailer::sendMail($email, $user['display_name'], 'password reset request',
+            "To reset your password please use the code: ".md5($email . '-' . $user['id'] . '-' . $Password_Reset_Key));
     }
 
-    /** Changes Password and logins user.
-      * params: [Password1 - old, Password2 - new, code - from confirmation email]
+    /** Changes password and logins user.
+      * params: [password1 - old, password2 - new, code - from confirmation email]
     **/
     public function confirmPasswordReset($params)
     {
-        if (empty($params['Password1']) || empty($_POST['Password2'])) {
-            Application::raise('Password can not be empty.');
+        if (empty($params['password1']) || empty($_POST['password2'])) {
+            Application::raise('password can not be empty.');
         }
-        if ($params['Password1'] != $params['Password2']) {
+        if ($params['password1'] != $params['password2']) {
             Application::raise('Passwords do not match.');
         }
-        $newPwd = $params['Password2'];
+        $newPwd = $params['password2'];
         if (!empty($validate = Auth::validatePassword($newPwd))) {
             Application::raise($validate);
         }
@@ -257,21 +257,21 @@ class Auth extends Adapter
             [params['code']]);
 
         if (!count($user)) {
-            Application::raise('Code is incorrect. Please request Password change again.');
+            Application::raise('Code is incorrect. Please request password change again.');
         }
 
         $user = $user[0];
 
         DbObject::execSql(
-            "UPDATE user u SET Password = md5(:Password), Password_Reset_Key = null WHERE id = :id",
-            ['Password' => $newPwd, 'id' => $user['id']]);
+            "UPDATE user u SET password = md5(:password), Password_Reset_Key = null WHERE id = :id",
+            ['password' => $newPwd, 'id' => $user['id']]);
 
         $this->setUser($user['id'], $user['first_name'], $user['last_name'], $user['display_name'], $user['photo_url']);
         return $this->getUser();
     }
 
     /** Registers user
-      * params: [email, first_name, last_name, display_name, photo_url, Password1, Password2, captcha]
+      * params: [email, first_name, last_name, display_name, photo_url, password1, password2, captcha]
     **/
     public function register($params)
     {
@@ -279,18 +279,18 @@ class Auth extends Adapter
             Application::raise('Please enter email.');
         }
         if (!Mailer::validateEmail($params['email'])) {
-            Application::raise('email is invalid.');
+            Application::raise('Email is invalid.');
         }
         if (empty($params['first_name']) || empty($params['last_name'])) {
             Application::raise('Please enter your name.');
         }
-        if (empty($params['Password1']) || empty($params['Password2'])) {
-            Application::raise('Please enter Password.');
+        if (empty($params['password1']) || empty($params['password2'])) {
+            Application::raise('Please enter password.');
         }
-        if ($params['Password1'] != $params['Password2']) {
+        if ($params['password1'] != $params['password2']) {
             Application::raise('Passwords do not match.');
         }
-        if (!empty($validate = Auth::validatePassword($params['Password1']))) {
+        if (!empty($validate = Auth::validatePassword($params['password1']))) {
             Application::raise($validate);
         }
         if (empty($params['captcha']) || md5(strtoupper($params['captcha'])) != UserSession::GetValue('captcha_register')) {
@@ -305,15 +305,15 @@ class Auth extends Adapter
         }
 
         DbObject::execSql(
-            "INSERT INTO user(email, first_name, last_name, display_name, photo_url, Password, email_confirmed)
-                 VALUES(TRIM(LOWER(:email)), TRIM(:first_name), TRIM(:last_name), TRIM(:display_name), TRIM(:photo_url), md5(TRIM(:Password)), 'F')",
+            "INSERT INTO user(email, first_name, last_name, display_name, photo_url, password, email_confirmed)
+                 VALUES(TRIM(LOWER(:email)), TRIM(:first_name), TRIM(:last_name), TRIM(:display_name), TRIM(:photo_url), md5(TRIM(:password)), 'F')",
             [
                 'email' => $params['email'],
                 'first_name' => $params['first_name'],
                 'last_name' => $params['last_name'],
                 'display_name' => isset($params['display_name']) ? $params['display_name'] : '',
                 'photo_url' => isset($params['photo_url']) ? $params['photo_url'] : '',
-                'Password' => $params['Password1']
+                'password' => $params['password1']
             ]);
     }
 
@@ -334,7 +334,7 @@ class Auth extends Adapter
     }
 
     /** Saves user profile
-      * params: [first_name, last_name, display_name, photo_url, Password1 - old, Password2 - new, Password3 - new confirm]
+      * params: [first_name, last_name, display_name, photo_url, password1 - old, password2 - new, Password3 - new confirm]
     **/
     public function saveUserProfile($params)
     {
@@ -343,18 +343,18 @@ class Auth extends Adapter
         }
 
         $user = DbObject::fetchSql(
-            "SELECT Password FROM users WHERE id = ?",
+            "SELECT password FROM users WHERE id = ?",
             [UserSession::GetValue("userId")]);
         
-        if (empty($params['Password1']) || empty($params['Password2']) || empty($params['Password3'])) {
+        if (empty($params['password1']) || empty($params['password2']) || empty($params['Password3'])) {
             Application::raise('Please enter old and new Passwords.');
         }
 
-        if (md5($params['Password1']) != $user[0]['Password'] || $params['Password2'] != $params['Password3']) {
+        if (md5($params['password1']) != $user[0]['password'] || $params['password2'] != $params['Password3']) {
             Application::raise('Passwords do not match.');
         }
 
-        $validate = Auth::validatePassword($Password2);
+        $validate = Auth::validatePassword($password2);
         if (!empty($validate)) {
             Application::raise($validate);
         }
@@ -370,12 +370,12 @@ class Auth extends Adapter
             ]
         );
 
-        if (!empty($params['Password2'])) {
+        if (!empty($params['password2'])) {
             DbObject::exesSql(
-                "UPDATE user SET Password = md5(:Password) WHERE id = :id",
+                "UPDATE user SET password = md5(:password) WHERE id = :id",
                 [
                     'id' => UserSession::getValue("userId"),
-                    'Password' => $params['Password2'],
+                    'password' => $params['password2'],
                     
                 ]);
         }
@@ -476,28 +476,28 @@ class Auth extends Adapter
 
     protected function setUser($id, $first_name, $last_name, $display_name, $photo_url)
     {
-        UserSession::SetValue("userId", $id);
+        UserSession::SetValue("user_id", $id);
         if(empty($display_name))
             $display_name = "$first_name $last_name";
-        UserSession::SetValue("userDisplay_Name", $display_name);
-        UserSession::SetValue("userPhoto_URL", $photo_url);
+        UserSession::SetValue("user_display_mame", $display_name);
+        UserSession::SetValue("user_photo_url", $photo_url);
     }
 
     public static function getUser()
     {
         if (!empty(UserSession::GetValue("userId"))) {
             return [
-                'userId' => UserSession::GetValue("userId"),
-                'userDisplay_Name' => UserSession::GetValue("userDisplay_Name"),
-                'userPhoto_URL' => UserSession::GetValue("userPhoto_URL")
+                'user_id' => UserSession::GetValue("user_id"),
+                'user_display_name' => UserSession::GetValue("user_display_name"),
+                'user_photo_url' => UserSession::GetValue("user_photo_url")
             ];
         }
     }
 
-    public static function validatePassword($Password)
+    public static function validatePassword($password)
     {
-        if (strlen($Password) < 6) {
-            return 'Password lenght must be equal or greater than 6 characters.';
+        if (strlen($password) < 6) {
+            return 'password lenght must be equal or greater than 6 characters.';
         }
     }
 }
