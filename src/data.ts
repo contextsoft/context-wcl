@@ -1,5 +1,5 @@
 import { utils } from "./utils";
-import { IFuture, InstanceFactory } from "./component";
+import { IFuture } from "./component";
 
 /** Enumeration of possible data types for fields */
 export enum DataType {

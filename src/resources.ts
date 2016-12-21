@@ -1,8 +1,8 @@
 /**
  * Resources & resource loader classes
  */
-import { utils } from "./utils";
-import { IVoidEvent, IDOMEvent } from "./component";
+// import { utils } from "./utils";
+import { IVoidEvent } from "./component";
 
 interface ILibraryResource {
     library: string;
@@ -29,7 +29,7 @@ export class Resources {
 
     /** Resource registration methods */
     public register(libraryName: string, resources: string[]) {
-        this.resources.push({ library: libraryName, resources: resources });
+        this.resources.push({ library: libraryName, resources });
     }
 
     public setLibraryPath(libraryName: string, path: string) {
@@ -44,8 +44,8 @@ export class Resources {
                 let res = this.resources[i];
                 let path = this.libraries[res.library] || "";
                 r.push({
-                    path: path,
-                    baseUrl: baseUrl,
+                    path,
+                    baseUrl,
                     resources: this.resources[i].resources
                 });
             }
@@ -66,12 +66,12 @@ export class ResourseLoader {
     protected resourceCount = 0;
 
     /** Loads application resources */
-    public loadResources(resources: IResource[], progressHandler: any, onload: IVoidEvent) {
+    public loadResources(res: IResource[], progressHandler: any, onload: IVoidEvent) {
         this.onLoad = onload;
         this.progressHandler = progressHandler;
 
-        for (let i = 0; i < resources.length; i++)
-            this.resourceCount += resources[i].resources.length;
+        for (let i = 0; i < res.length; i++)
+            this.resourceCount += res[i].resources.length;
 
         this.totalResourceCount = this.resourceCount;
 
@@ -80,14 +80,14 @@ export class ResourseLoader {
 
         this.showProgress();
 
-        for (let i = 0; i < resources.length; i++) {
-            let res = resources[i].resources;
-            let url = resources[i].path || "";
-            if (url.search("http:") < 0 && url.search("https:") < 0 && resources[i].baseUrl)
-                url = resources[i].baseUrl + url;
-            for (let j = 0; j < res.length; j++) {
-                let resType = this.getResourceType(res[j]);
-                this.loadResource(url + res[j], resType);
+        for (let i = 0; i < res.length; i++) {
+            let r = res[i].resources;
+            let url = res[i].path || "";
+            if (url.search("http:") < 0 && url.search("https:") < 0 && res[i].baseUrl)
+                url = res[i].baseUrl + url;
+            for (let j = 0; j < r.length; j++) {
+                let resType = this.getResourceType(r[j]);
+                this.loadResource(url + r[j], resType);
             }
         }
     }

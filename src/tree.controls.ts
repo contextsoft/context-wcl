@@ -55,7 +55,6 @@ export abstract class Nodes extends View {
         this.expandNode(node, false);
     }
 
-
     public expandAll(expand = true) {
         for (let i = 0; i < this.nodes.length; i++)
             this.expandNode(this.nodes[i], expand, true);
@@ -65,7 +64,7 @@ export abstract class Nodes extends View {
         this.expandAll(false);
     }
 
-    public getNodeById(id): INode {
+    public getNodeById(nodeId): INode {
         let getChildById = (node: INode, id: string) => {
             if (node.id === id)
                 return node;
@@ -81,7 +80,7 @@ export abstract class Nodes extends View {
         let result = null;
 
         for (let i = 0; result == null && i < this.nodes.length; i++)
-            result = getChildById(this.nodes[i], id);
+            result = getChildById(this.nodes[i], nodeId);
 
         return result;
     }
@@ -241,7 +240,7 @@ export class TreeView extends Nodes {
             this.expandNode(n.node, !n.node.expanded);
             this.updateView();
             return;
-        };
+        }
 
         this.setActiveNodeElement(n.node, n.element);
 

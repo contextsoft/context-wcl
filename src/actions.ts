@@ -30,32 +30,32 @@ export class BaseAction implements IAction {
     protected _caption: string;
     protected _targets: IActionTarget[] = [];
 
-    constructor(public onExecute?: IOnActionExecute) {}
+    constructor(public onExecute?: IOnActionExecute) { }
 
     get enabled(): boolean { return this._enabled; }
     set enabled(value) {
-        if (this._enabled != value) {
+        if (this._enabled !== value) {
             this._enabled = value;
             this.notifyTargets();
         }
     }
     get visible(): boolean { return this._visible; }
     set visible(value) {
-        if (this._visible != value) {
+        if (this._visible !== value) {
             this._visible = value;
             this.notifyTargets();
         }
     }
     get icon(): string { return this._icon; }
     set icon(value) {
-        if (this._icon != value) {
+        if (this._icon !== value) {
             this._icon = value;
             this.notifyTargets();
         }
     }
     get caption(): string { return this._caption; }
     set caption(value) {
-        if (this._caption != value) {
+        if (this._caption !== value) {
             this._caption = value;
             this.notifyTargets();
         }
@@ -76,6 +76,5 @@ export class BaseAction implements IAction {
         for (let i = 0; i < this._targets.length; i++) {
             this._targets[i].onActionChanged(this);
         }
-    }        
+    }
 }
-

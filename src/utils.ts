@@ -26,7 +26,6 @@ export namespace utils {
         log(str + "\n" + e.stack, fmt);
     }
 
-
     // String utils
 
     /** Checks if val is undefined or null  */
@@ -110,7 +109,6 @@ export namespace utils {
         });
     }
 
-
     /** Removes leading and trailing control characters */
     export function trim(str: string) {
         if (!str)
@@ -186,7 +184,6 @@ export namespace utils {
         j = j > 3 ? j % 3 : 0;
         return s + o.currencySymbol + (j ? i.substr(0, j) + o.t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + o.t) + (o.c ? o.d + Math.abs(n - <any>i).toFixed(o.c).slice(2) : "");
     };
-
 
     // Date utils
 
@@ -361,25 +358,25 @@ export namespace utils {
     export function setCookie(cookieName: string, cookieValue: string, expireDays?: number) {
         let exdate = new Date();
         exdate.setDate(exdate.getDate() + expireDays);
-        let c_value = cookieValue + ((expireDays == null) ? "" : "; expires=" + exdate.toUTCString());
-        document.cookie = cookieName + "=" + c_value;
+        let cValue = cookieValue + ((expireDays == null) ? "" : "; expires=" + exdate.toUTCString());
+        document.cookie = cookieName + "=" + cValue;
     }
 
     export function getCookie(cookieName) {
-        let c_value = document.cookie;
-        let c_start = c_value.indexOf(" " + cookieName + "=");
-        if (c_start === -1)
-            c_start = c_value.indexOf(cookieName + "=");
-        if (c_start === -1)
-            c_value = null;
+        let cValue = document.cookie;
+        let cStart = cValue.indexOf(" " + cookieName + "=");
+        if (cStart === -1)
+            cStart = cValue.indexOf(cookieName + "=");
+        if (cStart === -1)
+            cValue = null;
         else {
-            c_start = c_value.indexOf("=", c_start) + 1;
-            let c_end = c_value.indexOf(";", c_start);
-            if (c_end === -1)
-                c_end = c_value.length;
-            c_value = c_value.substring(c_start, c_end);
+            cStart = cValue.indexOf("=", cStart) + 1;
+            let cEnd = cValue.indexOf(";", cStart);
+            if (cEnd === -1)
+                cEnd = cValue.length;
+            cValue = cValue.substring(cStart, cEnd);
         }
-        return c_value;
+        return cValue;
     }
 
     // Other routines
@@ -489,7 +486,6 @@ export namespace utils {
         return true;
     }
 
-
     export function RaiseError(msg: string): void {
         throw new Error(msg);
     }
@@ -503,8 +499,6 @@ export namespace utils {
     }
 
     export let L: IStringFunc = (str: string): string => { return str; };
-
-
 }
 
 // Object extensions, polyfill

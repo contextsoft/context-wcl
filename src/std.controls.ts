@@ -1,6 +1,6 @@
 /** 
  * Standart Controls 
- **/
+ */
 import { utils } from "./utils";
 import { resources } from "./resources";
 import { Align, IAlign, View, ValueView } from "./view";
@@ -15,7 +15,7 @@ resources.register("context-wcl",
 
 /** 
  * Topmost control containg other controls, used for layouting 
- **/
+ */
 export class ScreenView extends View {
     constructor(name?: string) {
         super(null, name);

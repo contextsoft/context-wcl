@@ -1,6 +1,6 @@
 // import { utils } from './utils';
-import { Component, InstanceFactory } from "./component";
-import { IRecord, IField, IDataSource, RecordState, DataEventType, RecordSetSource } from "./data";
+import { InstanceFactory } from "./component";
+import { IRecord, IField, RecordState, DataEventType, RecordSetSource } from "./data";
 import { application } from "./application";
 import { IService, IResponse } from "./service";
 import { utils } from "./utils";

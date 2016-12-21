@@ -27,7 +27,7 @@ export class Application {
     /** Locales supported by application */
     public static locales = {
         en: {
-            "$locale": "English"
+            $locale: "English"
         }
     };
 
@@ -217,5 +217,4 @@ export class Application {
             for (let i = 0; i < this.onWindowResize.length; i++)
                 this.onWindowResize[i](event);
     }
-
 }
