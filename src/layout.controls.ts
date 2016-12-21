@@ -8,7 +8,7 @@ import { resources } from "./resources";
 
 resources.register("context-wcl",
     [
-        "css/layout.controls.css"
+        "../css/layout.controls.css"
     ]
 );
 

@@ -9,7 +9,7 @@ import { IRecord, IExpression, LookupDataLink, DataEventType } from "./data";
 
 resources.register("context-wcl",
     [
-        "css/list.controls.css"
+        "../css/list.controls.css"
     ]
 );
 

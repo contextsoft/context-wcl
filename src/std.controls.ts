@@ -9,7 +9,7 @@ import { CSSTransition } from "./transitions";
 
 resources.register("context-wcl",
     [
-        "css/std.controls.css"
+        "../css/std.controls.css"
     ]
 );
 

@@ -1,6 +1,6 @@
 /** 
  * Controls displaing grid
- **/
+ */
 
 import { utils } from "./utils";
 import { resources } from "./resources";
@@ -9,7 +9,7 @@ import { DataEventType, IRecord, RecordSetDataLink, IRecordSetSource } from "./d
 
 resources.register("context-wcl",
     [
-        "css/grid.controls.css"
+        "../css/grid.controls.css"
     ]
 );
 

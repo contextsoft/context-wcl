@@ -7,7 +7,7 @@ import { LookupDataLink, RecordSource, RecordSetSource, DataEventType } from "./
 
 resources.register("context-wcl",
     [
-        "css/ext.controls.css"
+        "../css/ext.controls.css"
     ]
 );
 
@@ -91,7 +91,6 @@ export class TabsView extends ListView {
         if (this.droppedDown)
             this.showDropDown(false);
     }
-
 
     public render() {
         this.listId = "ctxTabsView" + TabsView._listIdCounter++;
@@ -251,7 +250,6 @@ export class Dialog extends ModalView {
         dlg.show();
     }
 
-
     /** Set/gets dialog's buttons set */
     public get buttons(): IDialogButton[] {
         return this._buttons;
@@ -378,7 +376,3 @@ export class PopupMenu extends ListView {
         return t;
     }
 }
-
-
-
-

@@ -46,6 +46,14 @@
         ],
         "no-console": [
             false
+        ],
+        "quotemark": [
+            false,
+            "double",
+            "avoid-escape"
+        ],
+        "comment-format": [
+            false
         ]
     }
 }

@@ -3,7 +3,7 @@
         //"noUnusedParameters": true,
         "noUnusedLocals": true,
         "module": "amd",
-        "outDir": "../dist",
+        "outDir": "./../dist",
         "target": "es5",
         "lib": [
             "dom",

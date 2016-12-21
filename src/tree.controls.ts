@@ -7,7 +7,7 @@ import { View } from "./view";
 
 resources.register("context-wcl",
     [
-        "css/tree.controls.css"
+        "../css/tree.controls.css"
     ]
 );
 
