@@ -1,8 +1,8 @@
 <?php
 
 /**
-* Basic database object
-*/
+ * Basic database object
+ */
 class DbObject extends Adapter
 {
     protected static function getConnection()
@@ -40,8 +40,8 @@ class DbObject extends Adapter
 //}
 
 /**
-* Database table crud interface
-*/
+ * Database table crud interface
+ */
 class DataTable extends DbObject
 {
     public static $allowedMethods = ['fill', 'applyUpdates'];
@@ -145,8 +145,8 @@ class DataTable extends DbObject
 }
 
 /**
-* Database table set crud interface
-*/
+ * Database table set crud interface
+ */
 class DataTableSet extends Adapter
 {
     public static $allowedMethods = ['fill', 'applyUpdates'];

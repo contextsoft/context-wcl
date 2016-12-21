@@ -374,6 +374,7 @@ export class ContainerView extends View {
             this.updateView();
     };
 
+    /** Shows view (page) using selected transition */
     public showView(nextView: View, direction: number = ContainerView.directionForward) {
         if (this.currentView && nextView && this.currentView === nextView)
             return;

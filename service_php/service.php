@@ -20,8 +20,8 @@ class Adapter
 }
 
 /**
-* Application entry point: handles requests, stores session info and database connection
-*/
+ * Application entry point: handles requests, stores session info and database connection
+ */
 class Application
 {
     protected static $connection;
@@ -120,8 +120,8 @@ class Application
 }
 
 /**
-* Provides utils for _SESSION access
-*/
+ * Provides utils for _SESSION access
+ */
 class UserSession extends Adapter
 {
     //public static $allowedMethods = ['getSession'];

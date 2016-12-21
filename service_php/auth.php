@@ -40,8 +40,8 @@ class Auth extends Adapter
     }
 
     /** Logins user
-      * params: [email, password]
-    **/
+     * params: [email, password]
+     */
     public function login($params)
     {
         if (empty($params['email']) || empty($params['password'])) {
@@ -68,8 +68,8 @@ class Auth extends Adapter
     }
 
     /** Logins user via social network
-      * params: [provider]
-    **/
+     * params: [provider]
+     */
     public function loginSocial($params)
     {
         if (!class_exists('Libs')) {
@@ -148,8 +148,8 @@ class Auth extends Adapter
     }
 
     /** Confirms user registration
-      * params: [email, code]
-    **/
+     * params: [email, code]
+     */
     public function confirmRegistrationCode($params)
     {
         if (empty($params['email']) || empty($params['code'])) {
@@ -175,8 +175,8 @@ class Auth extends Adapter
     }
 
     /** Sends via email registration confirmation code 
-      * params: [email]
-    **/
+     * params: [email]
+     */
     public function sendRegistrationConfirmationCode($params)
     {
         $user = DbObject::fetchSql(
@@ -206,8 +206,8 @@ class Auth extends Adapter
     }
 
     /** Sends password reset email.
-      * params: [email]
-    **/
+     * params: [email]
+     */
     public function sendPasswordResetCode($params)
     {
         if (empty($params['email'])) {
@@ -235,8 +235,8 @@ class Auth extends Adapter
     }
 
     /** Changes password and logins user.
-      * params: [password1 - old, password2 - new, code - from confirmation email]
-    **/
+     * params: [password1 - old, password2 - new, code - from confirmation email]
+     */
     public function confirmPasswordReset($params)
     {
         if (empty($params['password1']) || empty($_POST['password2'])) {
@@ -271,8 +271,8 @@ class Auth extends Adapter
     }
 
     /** Registers user
-      * params: [email, first_name, last_name, display_name, photo_url, password1, password2, captcha]
-    **/
+     * params: [email, first_name, last_name, display_name, photo_url, password1, password2, captcha]
+     */
     public function register($params)
     {
         if (empty($params['email'])) {
@@ -334,8 +334,8 @@ class Auth extends Adapter
     }
 
     /** Saves user profile
-      * params: [first_name, last_name, display_name, photo_url, password1 - old, password2 - new, Password3 - new confirm]
-    **/
+     * params: [first_name, last_name, display_name, photo_url, password1 - old, password2 - new, Password3 - new confirm]
+     */
     public function saveUserProfile($params)
     {
         if (empty($params['first_name']) || empty($params['last_name'])) {
@@ -382,8 +382,8 @@ class Auth extends Adapter
     }
 
     /** Generates captcha image
-      * params: [captchaName]
-    **/
+     * params: [captchaName]
+     */
     public function generateCaptcha($params)
     {
         $text_length = 7;
