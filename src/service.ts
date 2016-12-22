@@ -133,7 +133,7 @@ export class Service implements IService {
                         msg += '<div style="font-weight: normal; font-size: 12px; color: rgba(0,0,0,0.8);">' + result.errorCallstack + "</div>";
                     }
                     if (application.config.showServiceRawOutput && raw)
-                        msg += '<div style="margin-top: 10px"><div style="margin-bottom: -10px; font-size: 14px">PHP:</div>' + raw + "</div>";
+                        msg += '<div style="margin-top: 10px"><div style="margin-bottom: -10px; font-size: 16px">PHP:</div>' + raw + "</div>";
                     application.showMessage(msg);
                     if (result && !result.error)
                         resolve(result);
