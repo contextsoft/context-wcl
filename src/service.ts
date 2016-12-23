@@ -1,7 +1,7 @@
 /** Server communication protocols and routines */
 
 // import { utils } from './Utils';
-import { application } from "./Application";
+import { application } from './Application';
 
 export interface IResponse {
     data: any;
@@ -42,8 +42,8 @@ export class Ajax {
                 callback(Ajax.parseJSON(x.responseText));
             }
         };
-        if (method === "POST") {
-            x.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        if (method === 'POST') {
+            x.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
         }
         x.send(data);
     }
@@ -52,22 +52,22 @@ export class Ajax {
         let query = [];
         for (let key in data) {
             if (data.hasOwnProperty(key))
-                query.push(encodeURIComponent(key) + "=" + encodeURIComponent(data[key]));
+                query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
         }
-        Ajax.send(url + (query.length ? "?" + query.join("&") : ""), callback, "GET", null, async);
+        Ajax.send(url + (query.length ? '?' + query.join('&') : ''), callback, 'GET', null, async);
     }
 
     public static post(url: string, data, callback: IOnData, async = true) {
         let query = [];
         for (let key in data) {
             if (data.hasOwnProperty(key))
-                query.push(encodeURIComponent(key) + "=" + encodeURIComponent(data[key]));
+                query.push(encodeURIComponent(key) + '=' + encodeURIComponent(data[key]));
         }
-        Ajax.send(url, callback, "POST", query.join("&"), async);
+        Ajax.send(url, callback, 'POST', query.join('&'), async);
     }
 
     protected static getXHR() {
-        if (typeof XMLHttpRequest !== "undefined") {
+        if (typeof XMLHttpRequest !== 'undefined') {
             return new XMLHttpRequest();
         }
     }
@@ -85,16 +85,16 @@ export class Service implements IService {
     public login(username?: string, password?: string): Promise<any> {
         if (username)
             this.username = username;
-        return this.execute("Application", "login", { username, password });
+        return this.execute('Application', 'login', { username, password });
     };
 
     public logout(): Promise<any> {
         this._authenticated = false;
-        return this.execute("Application", "logout");
+        return this.execute('Application', 'logout');
     };
 
     public execute(adapter: string, method: string, params?: any): Promise<IResponse> {
-        if (typeof params === "object")
+        if (typeof params === 'object')
             params = JSON.stringify(params);
         let data = {
             adapter,
@@ -104,24 +104,24 @@ export class Service implements IService {
         let promise = new Promise((resolve, reject) => {
             Ajax.post(this.url, data, (result) => {
                 // cutting php raw output
-                let raw = "";
-                if (typeof result === "string") {
+                let raw = '';
+                if (typeof result === 'string') {
                     if (result.indexOf('{"data":') >= 0) {
                         raw = result.substr(0, result.indexOf('{"data":'));
                         let s = result.substr(result.indexOf('{"data":'));
                         let res = Ajax.parseJSON(s);
                         result = {
                             data: res.data ? res.data : res,
-                            error: res.error ? res.error : "" /*raw*/,
-                            errorCallstack: res.errorCallstack ? res.errorCallstack : ""
+                            error: res.error ? res.error : '' /*raw*/,
+                            errorCallstack: res.errorCallstack ? res.errorCallstack : ''
                         };
                     }
                     else {
                         raw = result;
                         result = {
-                            data: "",
-                            error: "Service error",
-                            errorCallstack: ""
+                            data: '',
+                            error: 'Service error',
+                            errorCallstack: ''
                         };
                     }
                 }
@@ -130,10 +130,10 @@ export class Service implements IService {
                 if ((result && result.error) || raw) {
                     let msg = result.error;
                     if (application.config.debug && result.errorCallstack) {
-                        msg += '<div style="font-weight: normal; font-size: 12px; color: rgba(0,0,0,0.8);">' + result.errorCallstack + "</div>";
+                        msg += '<div style="font-weight: normal; font-size: 12px; color: rgba(0,0,0,0.8);">' + result.errorCallstack + '</div>';
                     }
                     if (application.config.showServiceRawOutput && raw)
-                        msg += '<div style="margin-top: 10px"><div style="margin-bottom: -10px; font-size: 16px">PHP:</div>' + raw + "</div>";
+                        msg += '<div style="margin-top: 10px"><div style="margin-bottom: -10px; font-size: 16px">PHP:</div>' + raw + '</div>';
                     application.showMessage(msg);
                     if (result && !result.error)
                         resolve(result);
@@ -148,7 +148,7 @@ export class Service implements IService {
     };
 
     public getSessionInfo() {
-        return this.execute("UserSession", "getSessionInfo")
+        return this.execute('UserSession', 'getSessionInfo')
             .then((data) => {
                 // this.login(); 
             });
