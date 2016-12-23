@@ -1,5 +1,5 @@
-import { BaseDataLink, IRecordSource, IRecordSetSource, DataEventType, RecordState } from "./data";
-import { BaseAction } from "./actions";
+import { BaseDataLink, IRecordSource, IRecordSetSource, DataEventType, RecordState } from './data';
+import { BaseAction } from './actions';
 
 export class RecordSourceAction extends BaseAction {
     protected link: BaseDataLink<IRecordSource>;
@@ -62,7 +62,7 @@ export class RecordSetSourceAction extends BaseAction {
 
 export class EditAction extends RecordSourceAction {
     public setDefaults() {
-        this._caption = "Edit";
+        this._caption = 'Edit';
     }
     public updateAction() {
         this.enabled = this.link.dataSource && (this.link.dataSource.getState() === RecordState.Browse);
@@ -75,7 +75,7 @@ export class EditAction extends RecordSourceAction {
 
 export class PostAction extends RecordSourceAction {
     public setDefaults() {
-        this._caption = "Post";
+        this._caption = 'Post';
     }
     public updateAction() {
         this.enabled = this.link.dataSource && (this.link.dataSource.getState() === RecordState.Edit || this.link.dataSource.getState() === RecordState.Insert);
@@ -88,7 +88,7 @@ export class PostAction extends RecordSourceAction {
 
 export class CancelAction extends RecordSourceAction {
     public setDefaults() {
-        this._caption = "Cancel";
+        this._caption = 'Cancel';
     }
     public updateAction() {
         this.enabled = this.link.dataSource && (this.link.dataSource.getState() === RecordState.Edit || this.link.dataSource.getState() === RecordState.Insert);
@@ -101,7 +101,7 @@ export class CancelAction extends RecordSourceAction {
 
 export class DeleteAction extends RecordSetSourceAction {
     public setDefaults() {
-        this._caption = "Delete";
+        this._caption = 'Delete';
     }
     public updateAction() {
         this.enabled = this.dataSource && (this.dataSource.current != null);
@@ -114,7 +114,7 @@ export class DeleteAction extends RecordSetSourceAction {
 
 export class InsertAction extends RecordSetSourceAction {
     public setDefaults() {
-        this._caption = "Insert";
+        this._caption = 'Insert';
     }
     public updateAction() {
         this.enabled = this.dataSource != null;

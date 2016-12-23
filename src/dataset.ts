@@ -1,9 +1,9 @@
 // import { utils } from './utils';
-import { InstanceFactory } from "./component";
-import { IRecord, IField, RecordState, DataEventType, RecordSetSource } from "./data";
-import { application } from "./application";
-import { IService, IResponse } from "./service";
-import { utils } from "./utils";
+import { InstanceFactory } from './component';
+import { IRecord, IField, RecordState, DataEventType, RecordSetSource } from './data';
+import { application } from './application';
+import { IService, IResponse } from './service';
+import { utils } from './utils';
 
 // Interfaces
 
@@ -322,9 +322,9 @@ export class DataTableAdapter implements IDataTableAdapter {
     }
 
     public fill(table: IDataTable): Promise<void> {
-        return this.execute("fill").then((data) => {
+        return this.execute('fill').then((data) => {
             if (!data || !data.records)
-                throw "Service did not returned any data";
+                throw 'Service did not returned any data';
             table.fillRecords(data);
         });
     }
@@ -333,7 +333,7 @@ export class DataTableAdapter implements IDataTableAdapter {
         let params = table.recordsUpdates.getUpdateParams();
         if (!params)
             return;
-        return this.execute("applyUpdates", params).then(() => {
+        return this.execute('applyUpdates', params).then(() => {
             table.recordsUpdates.clear();
         });
     }
@@ -412,7 +412,7 @@ export class DataTableSet implements IDataTableSet {
     public adapter: IDataTableSetAdapter;
 
     constructor(adapter: IDataTableSetAdapter | string) {
-        if (typeof adapter === "object")
+        if (typeof adapter === 'object')
             this.adapter = adapter;
         else {
             // let p = Object.getPrototypeOf(this);
@@ -466,10 +466,10 @@ export class DataTableSetAdapter implements IDataTableSetAdapter {
     }
 
     public fill(tableSet: IDataTableSet): Promise<void> {
-        return this.execute("fill").then((data) => {
+        return this.execute('fill').then((data) => {
             let dataTable;
             for (let table in data) {
-                if (data.hasOwnProperty(table) && data[table].hasOwnProperty("records") && (dataTable === tableSet.tableByName(table))) {
+                if (data.hasOwnProperty(table) && data[table].hasOwnProperty('records') && (dataTable === tableSet.tableByName(table))) {
                     dataTable.fillRecords(data[table]);
                 }
             }
@@ -483,7 +483,7 @@ export class DataTableSetAdapter implements IDataTableSetAdapter {
             if (tableSet.tables[i].recordsUpdates.updates.length > 0)
                 params[tableSet.tables[i].tableName] = tableSet.tables[i].recordsUpdates.getUpdateParams();
         }
-        return this.execute("applyUpdates", params).then(() => {
+        return this.execute('applyUpdates', params).then(() => {
             for (let i = 0; i < tableSet.tables.length; i++) {
                 tableSet.tables[i].recordsUpdates.clear();
             }

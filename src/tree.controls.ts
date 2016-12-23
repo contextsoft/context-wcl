@@ -1,13 +1,13 @@
 /**
  * Controls displaying tree
  */
-import { utils } from "./utils";
-import { resources } from "./resources";
-import { View } from "./view";
+import { utils } from './utils';
+import { resources } from './resources';
+import { View } from './view';
 
-resources.register("context-wcl",
+resources.register('context-wcl',
     [
-        "../css/tree.controls.css"
+        '../css/tree.controls.css'
     ]
 );
 
@@ -152,25 +152,25 @@ export class TreeView extends Nodes {
         nodeElement = nodeElement.parentElement;
         if (!nodeElement)
             return null;
-        let id = nodeElement.getAttribute("ctx_node_id");
+        let id = nodeElement.getAttribute('ctx_node_id');
         return { node: this.getNodeById(id), element: nodeElement };
     }
 
     protected getNodeHtml(node: INode) {
-        let nodeAttr = node.attr || "";
-        let text = node.text || "";
-        let innerHtml = "";
-        let attr = "";
+        let nodeAttr = node.attr || '';
+        let text = node.text || '';
+        let innerHtml = '';
+        let attr = '';
 
-        if (typeof this.onGetNodeText === "function")
+        if (typeof this.onGetNodeText === 'function')
             text = this.onGetNodeText(node);
-        text = View.getTag("div", 'class="ctx_node_text"', text);
+        text = View.getTag('div', 'class="ctx_node_text"', text);
 
         if (node.canExpand)
             if (node.expanded)
-                innerHtml = View.getTag("span", 'class="ctx_collapse_node"', "");
+                innerHtml = View.getTag('span', 'class="ctx_collapse_node"', '');
             else
-                innerHtml = View.getTag("span", 'class="ctx_expand_node"', "");
+                innerHtml = View.getTag('span', 'class="ctx_expand_node"', '');
 
         if (node.isLast)
             attr += 'class="ctx_node ctx_last_node" ';
@@ -178,16 +178,16 @@ export class TreeView extends Nodes {
             attr += 'class="ctx_node" ';
 
         if (node.icon)
-            innerHtml += View.getTag("img", utils.formatStr('class="ctx_icon" src="{0}"', [node.icon]), "");
+            innerHtml += View.getTag('img', utils.formatStr('class="ctx_icon" src="{0}"', [node.icon]), '');
 
         // if(this.activeNode == node)
         //    attr += 'active ';
 
-        return View.getTag("li", attr + nodeAttr + utils.formatStr('ctx_node_id="{0}"', [node.id]), innerHtml + text) + "\n";
+        return View.getTag('li', attr + nodeAttr + utils.formatStr('ctx_node_id="{0}"', [node.id]), innerHtml + text) + '\n';
     }
 
     protected internalRenderNode(html: { html }, node: INode) {
-        let style = "";
+        let style = '';
         html.html += this.getNodeHtml(node);
         if (!node.nodes)
             return;
@@ -197,36 +197,36 @@ export class TreeView extends Nodes {
                     style = 'style="display: block"';
                 else
                     style = 'style="display: none"';
-                html.html += '<ul class="ctx_tree" ' + style + ">\n";
+                html.html += '<ul class="ctx_tree" ' + style + '>\n';
             }
             this.internalRenderNode(html, node.nodes[i]);
             if (i === node.nodes.length - 1)
-                html.html += "</ul>\n";
+                html.html += '</ul>\n';
         }
     }
 
     protected internalRenderNodes() {
-        let html = { html: "", level: 0 };
+        let html = { html: '', level: 0 };
         for (let i = 0; i < this.nodes.length; i++)
             this.internalRenderNode(html, this.nodes[i]);
-        html.html = View.getTag("ul", 'class="ctx_tree ctx_root"', html.html);
+        html.html = View.getTag('ul', 'class="ctx_tree ctx_root"', html.html);
         return html.html;
     }
 
     protected afterUpdateView() {
         super.afterUpdateView();
         if (this.element && this.visible) {
-            this.handleEvent("onclick", this.handleClick);
-            this.handleEvent("ondblclick", this.handleDblClick);
+            this.handleEvent('onclick', this.handleClick);
+            this.handleEvent('ondblclick', this.handleDblClick);
             // this.handleEvent('onkeydown', this.handleKeyDown);
         }
     }
 
     protected setActiveNodeElement(node: INode, element: HTMLElement) {
         if (this.activeNodeElement)
-            this.activeNodeElement.removeAttribute("active");
+            this.activeNodeElement.removeAttribute('active');
         this.activeNodeElement = element;
-        this.activeNodeElement.setAttribute("active", "");
+        this.activeNodeElement.setAttribute('active', '');
         this.activeNode = node;
     }
 
@@ -235,8 +235,8 @@ export class TreeView extends Nodes {
         if (!n.node)
             return;
 
-        let cl = (event.toElement || event.target).getAttribute("class");
-        if (cl === "ctx_collapse_node" || cl === "ctx_expand_node") {
+        let cl = (event.toElement || event.target).getAttribute('class');
+        if (cl === 'ctx_collapse_node' || cl === 'ctx_expand_node') {
             this.expandNode(n.node, !n.node.expanded);
             this.updateView();
             return;

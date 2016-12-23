@@ -1,10 +1,10 @@
 {
     "extends": "tslint:recommended",
     "rules": {
-        /*"no-unused-variable": [
+        "no-unused-variable": [
             true,
             "react"
-        ],*/
+        ],
         "object-literal-sort-keys": false,
         "ordered-imports": [
             false
@@ -48,8 +48,8 @@
             false
         ],
         "quotemark": [
-            false,
-            "double",
+            true,
+            "single",
             "avoid-escape"
         ],
         "comment-format": [

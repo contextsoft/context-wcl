@@ -2,13 +2,13 @@
  * Controls that layouts its content 
  */
 
-import { utils } from "./utils";
-import { View } from "./view";
-import { resources } from "./resources";
+import { utils } from './utils';
+import { View } from './view';
+import { resources } from './resources';
 
-resources.register("context-wcl",
+resources.register('context-wcl',
     [
-        "../css/layout.controls.css"
+        '../css/layout.controls.css'
     ]
 );
 
@@ -29,7 +29,7 @@ export class GridLayout extends View {
     public rows = [];
 
     public render() {
-        let bodyOfTable = "";
+        let bodyOfTable = '';
 
         for (let r = 0; r < this.rows.length; r++) {
             bodyOfTable += utils.formatStr('<div class="ctx_row" row="{0}">', [r]);
@@ -38,18 +38,18 @@ export class GridLayout extends View {
             for (let c = 0; c < cols.length; c++) {
                 let cell = cols[c];
                 let controls = null;
-                let cellAttr = "";
-                let cellHtml = "";
+                let cellAttr = '';
+                let cellHtml = '';
 
-                if (typeof cell === "string")
+                if (typeof cell === 'string')
                     cell = this[cell];
 
-                if (cell && typeof cell === "object") {
+                if (cell && typeof cell === 'object') {
                     if (cell.views)
                         controls = cell.views;
                     else
                         controls = cell;
-                    if (typeof cell.style === "string")
+                    if (typeof cell.style === 'string')
                         cellAttr = utils.formatStr('style="{0}" ', [cell.style]);
                     cellAttr += utils.attributesToString(cell.cellAttributes);
                 }
@@ -61,16 +61,16 @@ export class GridLayout extends View {
                         cellHtml += controls[i].internalRender();
                 }
 
-                if (cellHtml === "")
+                if (cellHtml === '')
                     cellHtml = '<div class="ctx_transparent">null</div>';
 
                 bodyOfTable += utils.formatStr('<div class="ctx_cell" ctx_row="{0}" ctx_cell="{1}"{2}>{3}</div>', [r, c, cellAttr, cellHtml]);
             }
 
             if (cols.length === 0)
-                bodyOfTable += "<div><div class=ctx_null></div></div>";
+                bodyOfTable += '<div><div class=ctx_null></div></div>';
 
-            bodyOfTable += "</div>";
+            bodyOfTable += '</div>';
         }
 
         return this.renderTag(bodyOfTable);

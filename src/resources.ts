@@ -1,8 +1,8 @@
 /**
  * Resources & resource loader classes
  */
-// import { utils } from "./utils";
-import { IVoidEvent } from "./component";
+// import { utils } from './utils';
+import { IVoidEvent } from './component';
 
 interface ILibraryResource {
     library: string;
@@ -42,7 +42,7 @@ export class Resources {
         if (this.resources) {
             for (let i = 0; i < this.resources.length; i++) {
                 let res = this.resources[i];
-                let path = this.libraries[res.library] || "";
+                let path = this.libraries[res.library] || '';
                 r.push({
                     path,
                     baseUrl,
@@ -82,8 +82,8 @@ export class ResourseLoader {
 
         for (let i = 0; i < res.length; i++) {
             let r = res[i].resources;
-            let url = res[i].path || "";
-            if (url.search("http:") < 0 && url.search("https:") < 0 && res[i].baseUrl)
+            let url = res[i].path || '';
+            if (url.search('http:') < 0 && url.search('https:') < 0 && res[i].baseUrl)
                 url = res[i].baseUrl + url;
             for (let j = 0; j < r.length; j++) {
                 let resType = this.getResourceType(r[j]);
@@ -110,8 +110,8 @@ export class ResourseLoader {
     }
 
     protected baseUri(baseUri: string, uri: string) {
-        uri = uri || ""; // make sure to avoid null here
-        if (uri === "")
+        uri = uri || ''; // make sure to avoid null here
+        if (uri === '')
             return uri;
         if (baseUri && baseUri.length > 0 && uri.indexOf(baseUri) === 0)
             uri = uri.substr(baseUri.length);
@@ -119,11 +119,11 @@ export class ResourseLoader {
     }
 
     protected getResourceType(resource) {
-        let ext = resource.substring(resource.lastIndexOf(".") + 1).toLowerCase();
-        if (ext === "js" || ext === "css")
+        let ext = resource.substring(resource.lastIndexOf('.') + 1).toLowerCase();
+        if (ext === 'js' || ext === 'css')
             return ext;
         else
-            return "img";
+            return 'img';
     }
 
     protected checkAllLoaded() {
@@ -137,7 +137,7 @@ export class ResourseLoader {
     protected loadResource(url, resourceType) {
         url = url.toLowerCase();
         let i, fileref = null;
-        if (resourceType === "js") {
+        if (resourceType === 'js') {
             // before loading, try to locate it among loaded scripts
             for (i = 0; i < document.scripts.length; i++)
                 if (this.baseUri(document.baseURI, document.scripts[i].baseURI) === url) {
@@ -149,16 +149,16 @@ export class ResourseLoader {
                 }
 
             // if resourceType is a JavaScript file
-            fileref = document.createElement("script");
-            fileref.type = "text/javascript";
+            fileref = document.createElement('script');
+            fileref.type = 'text/javascript';
             fileref.onload = fileref.onerror = () => { this.loadCallback(fileref); };
 
             // fix for IE
             fileref.onreadystatechange = function () {
-                if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete") {
+                if (!this.readyState || this.readyState === 'loaded' || this.readyState === 'complete') {
                     this.loadCallback.call(this);
                     // Handle memory leak in IE
-                    let head = document.getElementsByTagName("head")[0] || document.documentElement;
+                    let head = document.getElementsByTagName('head')[0] || document.documentElement;
                     fileref.onload = fileref.onreadystatechange = null;
                     if (head && fileref.parentNode) {
                         head.removeChild(fileref);
@@ -168,7 +168,7 @@ export class ResourseLoader {
 
             fileref.src = url;
         }
-        else if (resourceType === "css") {
+        else if (resourceType === 'css') {
             for (i = 0; i < document.styleSheets.length; i++)
                 if (this.baseUri(document.baseURI, document.styleSheets[i].href) === url) {
                     this.loadCallback(
@@ -179,21 +179,21 @@ export class ResourseLoader {
                 }
 
             // if filename is a CSS file
-            fileref = document.createElement("link");
-            fileref.setAttribute("rel", "stylesheet");
-            fileref.type = "text/css";
+            fileref = document.createElement('link');
+            fileref.setAttribute('rel', 'stylesheet');
+            fileref.type = 'text/css';
             fileref.href = url;
             this.loadCallback({ target: fileref });
 
         }
-        else if (resourceType === "img") {
+        else if (resourceType === 'img') {
             // if filename is an image file
             let image = new Image();
             image.onload = image.onerror = () => { this.loadCallback(image); };
             image.src = url;
         }
         if (fileref)
-            document.getElementsByTagName("head")[0].appendChild(fileref);
+            document.getElementsByTagName('head')[0].appendChild(fileref);
     }
 
     protected loadCallback(event) {

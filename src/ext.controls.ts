@@ -1,13 +1,13 @@
-import { resources } from "./resources";
+import { resources } from './resources';
 // import { utils } from './utils';
-import { View } from "./view";
-import { ListView } from "./list.controls";
-import { ButtonView, ContainerView, PanelView, TextView } from "./std.controls";
-import { LookupDataLink, RecordSource, RecordSetSource, DataEventType } from "./data";
+import { View } from './view';
+import { ListView } from './list.controls';
+import { ButtonView, ContainerView, PanelView, TextView } from './std.controls';
+import { LookupDataLink, RecordSource, RecordSetSource, DataEventType } from './data';
 
-resources.register("context-wcl",
+resources.register('context-wcl',
     [
-        "../css/ext.controls.css"
+        '../css/ext.controls.css'
     ]
 );
 
@@ -16,7 +16,7 @@ resources.register("context-wcl",
  */
 export class TabsView extends ListView {
     public static themes = {
-        flat: "flat"
+        flat: 'flat'
     };
 
     protected static _listIdCounter = 0;
@@ -39,10 +39,10 @@ export class TabsView extends ListView {
 
         let valueSource = new RecordSource();
         valueSource.current = {
-            value: ""
+            value: ''
         };
         this.data.dataSource = valueSource;
-        this.data.dataField = "value";
+        this.data.dataField = 'value';
         if (this.data.dataSource.current)
             this.value = 0;
     }
@@ -64,10 +64,10 @@ export class TabsView extends ListView {
             else
                 this.updateView();
         });
-        this.listData.displayField = "text";
-        this.listData.keyField = "value";
+        this.listData.displayField = 'text';
+        this.listData.keyField = 'value';
 
-        this.dropDownButton = new ButtonView(this, "dropDownButton");
+        this.dropDownButton = new ButtonView(this, 'dropDownButton');
         this.dropDownButton.theme = ButtonView.themes.toggle;
         this.dropDownButton.events.onclick = function () {
             <TabsView>(this.parent).dropDownButtonClick();
@@ -93,11 +93,11 @@ export class TabsView extends ListView {
     }
 
     public render() {
-        this.listId = "ctxTabsView" + TabsView._listIdCounter++;
-        let html = View.getTag("div", 'class="tabs ' + (this.droppedDown ? "droppedDown" : "") + '" id="' + this.listId + '"', this.renderItems());
+        this.listId = 'ctxTabsView' + TabsView._listIdCounter++;
+        let html = View.getTag('div', 'class="tabs ' + (this.droppedDown ? 'droppedDown' : '') + '" id="' + this.listId + '"', this.renderItems());
         let currRec = this.listData.dataSource.current;
         if (currRec)
-            html += View.getTag("div", 'class="caption" ', this.listData.getDisplayValue(currRec));
+            html += View.getTag('div', 'class="caption" ', this.listData.getDisplayValue(currRec));
         html = this.renderTag(html + this.dropDownButton.render());
         return html;
     }
@@ -125,10 +125,10 @@ export class PageView extends View {
 
         let valueSource = new RecordSource();
         valueSource.current = {
-            value: ""
+            value: ''
         };
         this.pagesSwitcher.data.dataSource = valueSource;
-        this.pagesSwitcher.data.dataField = "value";
+        this.pagesSwitcher.data.dataField = 'value';
         if (this.pagesSwitcher.listData.dataSource.current) {
             let page: any = this.pagesSwitcher.listData.dataSource.current;
             this.pagesSwitcher.value = page.view;
@@ -143,15 +143,15 @@ export class PageView extends View {
         this.renderClientArea = true;
 
         // Tabs switcher
-        this.pagesSwitcher = new TabsView(this, "pagesSwitcher");
-        this.pagesSwitcher.listData.displayField = "text";
-        this.pagesSwitcher.listData.keyField = "view";
+        this.pagesSwitcher = new TabsView(this, 'pagesSwitcher');
+        this.pagesSwitcher.listData.displayField = 'text';
+        this.pagesSwitcher.listData.keyField = 'view';
         this.pagesSwitcher.onChange = (page) => {
             this.pagesContainer.showView(this.pagesSwitcher.getValue(), ContainerView.directionForward);
         };
 
         // Container for pages
-        this.pagesContainer = new ContainerView(this, "pagesContainer");
+        this.pagesContainer = new ContainerView(this, 'pagesContainer');
         this.pagesContainer.animation = null;
     }
 
@@ -171,7 +171,7 @@ export class PageView extends View {
     }
 
     protected renderChildren(nonClientArea = false): string {
-        let contentHtml = "";
+        let contentHtml = '';
         for (let i = 0; i < this.children.length; i++)
             if (nonClientArea === this.children[i].renderInNonClientArea)
                 if (this.children[i] === this.pagesSwitcher || this.children[i] === this.pagesContainer)
@@ -191,7 +191,7 @@ export class ModalView extends View {
         super(parent, name);
         this._visible = false;
         this.renderClientArea = false;
-        this.modalContainer = new PanelView(this, "cxtModalContainer");
+        this.modalContainer = new PanelView(this, 'cxtModalContainer');
     }
 }
 
@@ -208,16 +208,16 @@ interface IDialogButton {
 export class Dialog extends ModalView {
     public static buttonOk(): IDialogButton {
         return {
-            id: "ctxOkButton",
-            text: "OK",
+            id: 'ctxOkButton',
+            text: 'OK',
             buttonTheme: ButtonView.themes.primary,
             onClick: null
         };
     }
     public static buttonCancel(): IDialogButton {
         return {
-            id: "ctxCancelButton",
-            text: "Cancel",
+            id: 'ctxCancelButton',
+            text: 'Cancel',
             buttonTheme: ButtonView.themes.default,
             onClick: null
         };
@@ -227,12 +227,12 @@ export class Dialog extends ModalView {
         let dlg = new Dialog();
         let btn, buttons = [];
         dlg.captionView.text = caption;
-        if (typeof onCancelClick === "function") {
+        if (typeof onCancelClick === 'function') {
             btn = Dialog.buttonCancel();
             btn.onClick = onCancelClick;
             buttons.push(btn);
         }
-        if (typeof onOkClick === "function") {
+        if (typeof onOkClick === 'function') {
             btn = Dialog.buttonOk();
             btn.onClick = onOkClick;
             buttons.push(btn);
@@ -283,9 +283,9 @@ export class Dialog extends ModalView {
 
     constructor(name?: string) {
         super(null, name);
-        this.captionView = new TextView(this.modalContainer, "ctxCaption");
+        this.captionView = new TextView(this.modalContainer, 'ctxCaption');
         this.captionView.doNotEscapeHtml = true;
-        this.buttonsContainer = new PanelView(this.modalContainer, "ctxButtonsContainer");
+        this.buttonsContainer = new PanelView(this.modalContainer, 'ctxButtonsContainer');
         this.buttons = [Dialog.buttonOk()];
     }
 
@@ -304,7 +304,7 @@ interface IMenuItem {
  *  e.g. popupMenu.popup(someButton) 
  */
 export class PopupMenu extends ListView {
-    public static separator = "-";
+    public static separator = '-';
     protected target: View;
     protected fakeEdit: View;
 
@@ -316,8 +316,8 @@ export class PopupMenu extends ListView {
         let menuSource = new RecordSetSource();
         menuSource.records = items;
         this.listData.dataSource = menuSource;
-        this.listData.displayField = "text";
-        this.listData.keyField = "text";
+        this.listData.displayField = 'text';
+        this.listData.keyField = 'text';
     }
 
     constructor(name?: string) {
@@ -335,9 +335,9 @@ export class PopupMenu extends ListView {
         super.afterUpdateView();
         if (!this.element || !this.target || !this.target.element)
             return;
-        this.element.style.top = (this.target.element.offsetTop + this.target.element.offsetHeight) + "px";
-        this.element.style.left = this.target.element.offsetLeft.toString() + "px";
-        this.element.addEventListener("focusout", (event) => { this.onFocusOut(); });
+        this.element.style.top = (this.target.element.offsetTop + this.target.element.offsetHeight) + 'px';
+        this.element.style.left = this.target.element.offsetLeft.toString() + 'px';
+        this.element.addEventListener('focusout', (event) => { this.onFocusOut(); });
 
         this.element.focus();
     }
@@ -357,22 +357,22 @@ export class PopupMenu extends ListView {
     }
 
     protected getRecordCSSClass(record) {
-        let val = "";
+        let val = '';
         if (this.listData.keyField && record[this.listData.keyField])
             val = record[this.listData.keyField].toString();
         if (val === PopupMenu.separator)
-            return "ctx_separator";
+            return 'ctx_separator';
         else if (<IMenuItem>record.disabled)
-            return "ctx_disabled";
+            return 'ctx_disabled';
         else
-            return "";
+            return '';
 
     }
 
     protected getRecordDisplayText(record) {
         let t = this.listData.getDisplayValue(record);
         if (t === PopupMenu.separator)
-            t = "";
+            t = '';
         return t;
     }
 }

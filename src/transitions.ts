@@ -56,7 +56,7 @@ export class CSSTransition {
         // set up properties
         let properties = (params.properties) ? params.properties : CSSTransition.DEFAULTS.properties;
         // set up durations
-        let duration = ((params.duration !== undefined) ? params.duration : CSSTransition.DEFAULTS.duration) + "s";
+        let duration = ((params.duration !== undefined) ? params.duration : CSSTransition.DEFAULTS.duration) + 's';
         let durations = [];
         for (let i = 0; i < properties.length; i++) {
             durations.push(duration);
@@ -64,26 +64,26 @@ export class CSSTransition {
         // from/to animation
         if (params.from) {
             this.addInstantOperation(() => {
-                style.webkitTransitionProperty = "none";
+                style.webkitTransitionProperty = 'none';
                 for (let i = 0; i < properties.length; i++) {
-                    style.setProperty(properties[i], params.from[i], "");
+                    style.setProperty(properties[i], params.from[i], '');
                 }
             });
             this.addDeferredOperation(() => {
-                style.webkitTransitionProperty = properties.join(", ");
-                style.webkitTransitionDuration = durations.join(", ");
+                style.webkitTransitionProperty = properties.join(', ');
+                style.webkitTransitionDuration = durations.join(', ');
                 for (let i = 0; i < properties.length; i++) {
-                    style.setProperty(properties[i], params.to[i], "");
+                    style.setProperty(properties[i], params.to[i], '');
                 }
             });
         }
         // to-only animation
         else {
             this.addDeferredOperation(() => {
-                style.webkitTransitionProperty = properties.join(", ");
-                style.webkitTransitionDuration = durations.join(", ");
+                style.webkitTransitionProperty = properties.join(', ');
+                style.webkitTransitionDuration = durations.join(', ');
                 for (let i = 0; i < properties.length; i++) {
-                    style.setProperty(properties[i], params.to[i], "");
+                    style.setProperty(properties[i], params.to[i], '');
                 }
             });
         }

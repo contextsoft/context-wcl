@@ -1,5 +1,5 @@
-import { utils } from "./utils";
-import { IFuture } from "./component";
+import { utils } from './utils';
+import { IFuture } from './component';
 
 /** Enumeration of possible data types for fields */
 export enum DataType {
@@ -196,8 +196,8 @@ export class FieldDataLink extends BaseDataLink<IRecordSource> {
     }
     public get value(): any {
         let res = null;
-        if (this._dataSource && this._dataSource.current && this._dataField !== "") {
-            if (this._dataField === "*")
+        if (this._dataSource && this._dataSource.current && this._dataField !== '') {
+            if (this._dataField === '*')
                 res = utils.extend(this._dataSource.current, {});
             else
                 res = this._dataSource.current[this._dataField];
@@ -207,12 +207,12 @@ export class FieldDataLink extends BaseDataLink<IRecordSource> {
         return res;
     }
     public set value(val: any) {
-        if (this._dataSource && this._dataSource.current && this._dataField !== "") {
+        if (this._dataSource && this._dataSource.current && this._dataField !== '') {
             if (this._dataSource.getState() === RecordState.Browse)
                 this._dataSource.edit();
             if (this.converter)
                 val = this.converter.decode(this, val);
-            if (this._dataField === "*")
+            if (this._dataField === '*')
                 utils.assign(val, this._dataSource.current);
             else
                 this._dataSource.current[this.dataField] = val;
@@ -314,7 +314,7 @@ export class RecordSource extends BaseSource implements IRecordSource {
 
     public checkCurrent() {
         if (!this._current)
-            utils.RaiseError("Record does not exist");
+            utils.RaiseError('Record does not exist');
     }
 
     public get current(): IRecord { return this._current; }
@@ -458,13 +458,13 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
 
     public checkList(): void {
         if (!this._records)
-            utils.RaiseError("List is not assigned");
+            utils.RaiseError('List is not assigned');
     }
 
     public checkCurrent(): void {
         this.checkList();
         if (!this.current)
-            utils.RaiseError("Record does not exist");
+            utils.RaiseError('Record does not exist');
     }
 
     // IEditable methods

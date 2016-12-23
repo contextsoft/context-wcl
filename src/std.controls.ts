@@ -1,15 +1,15 @@
 /** 
  * Standart Controls 
  */
-import { utils } from "./utils";
-import { resources } from "./resources";
-import { Align, IAlign, View, ValueView } from "./view";
-import { CSSTransition } from "./transitions";
+import { utils } from './utils';
+import { resources } from './resources';
+import { Align, IAlign, View, ValueView } from './view';
+import { CSSTransition } from './transitions';
 // import { FieldDataLink, EventType } from './data';
 
-resources.register("context-wcl",
+resources.register('context-wcl',
     [
-        "../css/std.controls.css"
+        '../css/std.controls.css'
     ]
 );
 
@@ -40,13 +40,13 @@ export class TextView extends View {
  */
 export class HeaderView extends View {
     public static themes = {
-        fixed: "fixed"
+        fixed: 'fixed'
     };
 
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.renderClientArea = false;
-        this.tag = "header";
+        this.tag = 'header';
         this.theme = HeaderView.themes.fixed;
     }
 }
@@ -56,13 +56,13 @@ export class HeaderView extends View {
  */
 export class FooterView extends View {
     public static themes = {
-        fixed: "fixed"
+        fixed: 'fixed'
     };
 
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.renderClientArea = false;
-        this.tag = "footer";
+        this.tag = 'footer';
         this.theme = FooterView.themes.fixed;
     }
 }
@@ -81,7 +81,7 @@ export class PanelView extends View {
  */
 export class GroupBoxView extends View {
     public static themes = {
-        drawBorder: "border"
+        drawBorder: 'border'
     };
 
     constructor(parent: View, name?: string) {
@@ -101,9 +101,9 @@ export class GroupBoxView extends View {
     public render() {
         let html = this.renderChildren();
         if (this.renderClientArea) {
-            html = View.getTag("div", this.getClientAreaTagAttr(), html);
+            html = View.getTag('div', this.getClientAreaTagAttr(), html);
             // render non-client area: text before and children after
-            html = (this._text ? View.getTag("div", "class=header", this.renderSelf()) : this.renderSelf())
+            html = (this._text ? View.getTag('div', 'class=header', this.renderSelf()) : this.renderSelf())
                 + html + this.renderChildren(true);
         }
         return View.getTag(this.tag, this.internalGetTagAttr(), html);
@@ -115,22 +115,22 @@ export class GroupBoxView extends View {
  */
 export class ButtonView extends View {
     public static themes = {
-        default: "default",
-        primary: "primary",
-        success: "success",
-        info: "info",
-        warning: "warning",
-        danger: "danger",
+        default: 'default',
+        primary: 'primary',
+        success: 'success',
+        info: 'info',
+        warning: 'warning',
+        danger: 'danger',
         // TODO: does these types needed here?
-        toggle: "toggle",
-        chevronLeft: "chevronLeft",
-        chevronRight: "chevronRight"
+        toggle: 'toggle',
+        chevronLeft: 'chevronLeft',
+        chevronRight: 'chevronRight'
     };
 
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.renderClientArea = true;
-        this.tag = "button";
+        this.tag = 'button';
     }
 
     public getTagAttr() {
@@ -154,7 +154,7 @@ export class ButtonView extends View {
 export class FormView extends View {
     constructor(parent: View, name?: string) {
         super(parent, name);
-        this.tag = "form";
+        this.tag = 'form';
         this.renderClientArea = false;
     }
 }
@@ -171,7 +171,7 @@ export class InputView extends ValueView {
 
     constructor(parent: View, name?: string) {
         super(parent, name);
-        this.tag = "input";
+        this.tag = 'input';
         this.renderClientArea = false;
     }
 
@@ -182,8 +182,8 @@ export class InputView extends ValueView {
 
     protected afterUpdateView() {
         super.afterUpdateView();
-        this.handleEvent("onchange", this.handleChange);
-        this.handleEvent("onkeydown", this.handleKeyDown);
+        this.handleEvent('onchange', this.handleChange);
+        this.handleEvent('onkeydown', this.handleKeyDown);
     }
 
     protected handleKeyDown(event: Event) {
@@ -204,7 +204,7 @@ export class InputView extends ValueView {
         // update data link
         this.data.value = this._value;
         // invoke event if assigned
-        if (typeof this.onChange === "function")
+        if (typeof this.onChange === 'function')
             this.onChange(this._value);
     }
 }
@@ -217,21 +217,21 @@ export class TextAreaView extends InputView {
 
     constructor(parent: View, name?: string) {
         super(parent, name);
-        this.tag = "textarea";
+        this.tag = 'textarea';
         this.renderClientArea = false;
     }
 
     public getValue(): string {
-        let r = super.getValue() || "";
-        r = r.replace(/\n/g, "\r\n");
+        let r = super.getValue() || '';
+        r = r.replace(/\n/g, '\r\n');
         return r;
     }
 
     public render(): string {
-        let t = this.value || "";
+        let t = this.value || '';
         t = utils.escapeHTML(t);
-        t = t.replace(/\r/g, "");
-        return "<textarea " + this.internalGetTagAttr() + " >" + t + "</textarea>";
+        t = t.replace(/\r/g, '');
+        return '<textarea ' + this.internalGetTagAttr() + ' >' + t + '</textarea>';
     }
 
     // doesn't work
@@ -271,7 +271,7 @@ export class ContainerView extends View {
     public static animSlideHorizontal(): ICSSTransitionType {
         return {
             transition: ContainerView.cssSlideHorizontal,
-            properties: ["opacity", "-webkit-transform"],
+            properties: ['opacity', '-webkit-transform'],
             duration: 0.5
             // we may additionally specify To transition
             // transitionTo: transitionSlideHorizontal,
@@ -281,46 +281,46 @@ export class ContainerView extends View {
     public static animSlideVertical(): ICSSTransitionType {
         return {
             transition: ContainerView.cssSlideVertical,
-            properties: ["opacity", "-webkit-transform"],
+            properties: ['opacity', '-webkit-transform'],
             duration: 0.5
         };
     }
     public static animFadeInOut(): ICSSTransitionType {
         return {
             transition: ContainerView.cssFadeInOut,
-            properties: ["opacity"],
+            properties: ['opacity'],
             duration: 0.5
         };
     }
     public static animRotateY(): ICSSTransitionType {
         return {
             transition: ContainerView.cssRotateY,
-            properties: ["opacity", "-webkit-transform"],
+            properties: ['opacity', '-webkit-transform'],
             duration: 0.5
         };
     }
     public static animRotateX(): ICSSTransitionType {
         return {
             transition: ContainerView.cssRotateX,
-            properties: ["opacity", "-webkit-transform"],
+            properties: ['opacity', '-webkit-transform'],
             duration: 0.5
         };
     }
 
     protected static cssSlideHorizontal(direction) {
-        return (direction === 0) ? ["1", "translate3d(0,0,0)"] : ["0", "translate3d(" + (direction * 100) + "%,0,0)"];
+        return (direction === 0) ? ['1', 'translate3d(0,0,0)'] : ['0', 'translate3d(' + (direction * 100) + '%,0,0)'];
     }
     protected static cssSlideVertical(direction) {
-        return (direction === 0) ? ["1", "translate3d(0,0,0)"] : ["0", "translate3d(0, " + (direction * 100) + "%,0)"];
+        return (direction === 0) ? ['1', 'translate3d(0,0,0)'] : ['0', 'translate3d(0, ' + (direction * 100) + '%,0)'];
     }
     protected static cssRotateX(direction) {
-        return (direction === 0) ? ["1", "rotateX(0deg)"] : ["0", "rotateX(" + (direction * 180) + "deg)"];
+        return (direction === 0) ? ['1', 'rotateX(0deg)'] : ['0', 'rotateX(' + (direction * 180) + 'deg)'];
     }
     protected static cssRotateY(direction) {
-        return (direction === 0) ? ["1", "rotateY(0deg)"] : ["0", "rotateY(" + (direction * 180) + "deg)"];
+        return (direction === 0) ? ['1', 'rotateY(0deg)'] : ['0', 'rotateY(' + (direction * 180) + 'deg)'];
     }
     protected static cssFadeInOut(direction) {
-        return (direction === 0) ? ["1"] : ["0"];
+        return (direction === 0) ? ['1'] : ['0'];
     }
 
     public animation: ICSSTransitionType;
@@ -348,14 +348,14 @@ export class ContainerView extends View {
          */
 
         if (view === this.currentView) {
-            view.setElementAttribute("currentPage", "true");
-            if (typeof this.afterShowView === "function")
+            view.setElementAttribute('currentPage', 'true');
+            if (typeof this.afterShowView === 'function')
                 this.afterShowView(view, direction);
         } else {
-            view.setElementAttribute("currentPage", "false");
+            view.setElementAttribute('currentPage', 'false');
             // Hide object. It will be updated when we show it next time anyway.
             view.setVisible(false);
-            if (typeof this.afterHideView === "function")
+            if (typeof this.afterHideView === 'function')
                 this.afterHideView(view, direction);
         }
     };
@@ -364,7 +364,7 @@ export class ContainerView extends View {
         // append child div to self
         if (this._element && this.visible) {
             child._element = null;
-            let childElement = document.createElement("div");
+            let childElement = document.createElement('div');
             // append child to client area
             this._element.children[0].appendChild(childElement);
             childElement.outerHTML = child.internalRender();
@@ -381,12 +381,12 @@ export class ContainerView extends View {
 
         // Invoke before show and before hide view events
         // Do not proceed if they return false
-        if (typeof this.beforeHideView === "function" && this.currentView) {
+        if (typeof this.beforeHideView === 'function' && this.currentView) {
             if (this.beforeHideView(this.currentView, direction) === false)
                 return;
         }
 
-        if (typeof this.beforeShowView === "function" && nextView) {
+        if (typeof this.beforeShowView === 'function' && nextView) {
             if (this.beforeShowView(nextView, direction) === false)
                 return;
         }
@@ -411,7 +411,7 @@ export class ContainerView extends View {
         }
 
         // if I'm not rendered or we don't need animation then just assign it and that's it
-        if (!this.element || !this.visible || !this.animation || !this.element.style.hasOwnProperty("webkitTransform")) // true)
+        if (!this.element || !this.visible || !this.animation || !this.element.style.hasOwnProperty('webkitTransform')) // true)
         {
             this.updateView(cur, direction);
             this.updateView(nextView, direction);
@@ -435,8 +435,8 @@ export class ContainerView extends View {
         // add transition effect for the next view
         if (nextView) {
             // nextView.element.opacity = 0; // now it's transparent
-            nextView.element.style.opacity = "0";
-            nextView.setElementAttribute("currentPage", "true"); // but is actually visible
+            nextView.element.style.opacity = '0';
+            nextView.setElementAttribute('currentPage', 'true'); // but is actually visible
             transitions.add({
                 element: nextView.element,
                 properties: (this.animation.propertiesTo) ? this.animation.propertiesTo : this.animation.properties,
@@ -491,9 +491,9 @@ export class Splitter extends View {
             this.lastWidth = undefined;
             this.lastHeight = undefined;
             if (this.vertical)
-                this.lastWidth = parseInt(this.control.element.style["width"]);
+                this.lastWidth = parseInt(this.control.element.style['width']);
             else
-                this.lastHeight = parseInt(this.control.element.style["height"]);
+                this.lastHeight = parseInt(this.control.element.style['height']);
             this.setControlSize(0);
         }
         else {
@@ -505,7 +505,7 @@ export class Splitter extends View {
         this.vertical = vertical;
         this.attributes.vertical = vertical;
         if (this._element)
-            this._element.setAttribute("vertical", vertical);
+            this._element.setAttribute('vertical', vertical);
     }
 
     protected afterUpdateView() {
@@ -523,15 +523,15 @@ export class Splitter extends View {
         }
 
         if (this._element && this.visible) {
-            this.handleEvent("onmousedown", this.handleMouseDown);
-            this.handleEvent("ontouchstart", this.handleMouseDown);
-            document.addEventListener("mouseup", (event) => {
+            this.handleEvent('onmousedown', this.handleMouseDown);
+            this.handleEvent('ontouchstart', this.handleMouseDown);
+            document.addEventListener('mouseup', (event) => {
                 this.handleMouseUp(event);
             });
-            document.addEventListener("touchend", (event) => {
+            document.addEventListener('touchend', (event) => {
                 this.handleMouseUp(event);
             });
-            document.addEventListener("mousemove", (event) => {
+            document.addEventListener('mousemove', (event) => {
                 this.handleMouseMove(event);
             });
         }
@@ -544,14 +544,14 @@ export class Splitter extends View {
             return;
         this.moving = true;
         if (this.vertical)
-            document.body.style.cursor = "ew-resize";
+            document.body.style.cursor = 'ew-resize';
         else
-            document.body.style.cursor = "ns-resize";
+            document.body.style.cursor = 'ns-resize';
     }
 
     protected handleMouseUp(event) {
         this.moving = false;
-        document.body.style.cursor = "auto";
+        document.body.style.cursor = 'auto';
     }
 
     protected handleMouseMove(event) {
@@ -563,17 +563,17 @@ export class Splitter extends View {
 
         if (this.vertical) {
             if (this.align === Align.right)
-                el.style["width"] = this.parent.element.offsetWidth + prect["left"] - event.clientX + "px";
+                el.style['width'] = this.parent.element.offsetWidth + prect['left'] - event.clientX + 'px';
             else
-                el.style["width"] = event.clientX - prect["left"] + "px";
+                el.style['width'] = event.clientX - prect['left'] + 'px';
             this.lastWidth = event.clientX;
         }
         else {
             if (this.align === Align.bottom)
-                el.style["height"] = this.parent.element.offsetHeight + prect["top"] - event.clientY + "px";
+                el.style['height'] = this.parent.element.offsetHeight + prect['top'] - event.clientY + 'px';
             else
-                el.style["height"] = event.clientY - prect["top"] + "px";
-            this.lastHeight = parseInt(el.style["height"]);
+                el.style['height'] = event.clientY - prect['top'] + 'px';
+            this.lastHeight = parseInt(el.style['height']);
         }
         this.parent.realignChildren();
 
@@ -582,14 +582,14 @@ export class Splitter extends View {
     }
 
     protected setControlSize(size) {
-        size += "";
-        if (size.indexOf("px") < 0)
-            size += "px";
+        size += '';
+        if (size.indexOf('px') < 0)
+            size += 'px';
         let el = this.control.element;
         if (this.vertical)
-            el.style["width"] = size;
+            el.style['width'] = size;
         else
-            el.style["height"] = size;
+            el.style['height'] = size;
         this.parent.realignChildren();
     }
 
@@ -603,26 +603,26 @@ export class CheckView extends ValueView {
     }
 
     public renderSelf() {
-        let checked = "";
+        let checked = '';
         if (this.value)
-            checked = View.getTag("span", 'class="ctx_cb_checked_icon"', "");
-        let html = View.getTag("div", 'class="ctx_cb_icon"', checked);
-        html += View.getTag("div", 'class="ctx_cb_text"', super.renderSelf());
+            checked = View.getTag('span', 'class="ctx_cb_checked_icon"', '');
+        let html = View.getTag('div', 'class="ctx_cb_icon"', checked);
+        html += View.getTag('div', 'class="ctx_cb_text"', super.renderSelf());
         return html;
     }
 
     protected getCSSClass(): string {
         let cl = super.getCSSClass();
         if (this.value)
-            cl += " ctx_cb_checked";
+            cl += ' ctx_cb_checked';
         return cl;
     }
 
     protected afterUpdateView() {
         super.afterUpdateView();
-        let cb = this.element.getElementsByClassName("ctx_cb_icon");
+        let cb = this.element.getElementsByClassName('ctx_cb_icon');
         if (cb.length > 0)
-            cb[0].addEventListener("click", (event) => { this.onCheckBoxClick(event); });
+            cb[0].addEventListener('click', (event) => { this.onCheckBoxClick(event); });
     }
 
     protected onCheckBoxClick(event: Event) {
