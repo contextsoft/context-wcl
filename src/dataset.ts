@@ -339,7 +339,7 @@ export class DataTableAdapter implements IDataTableAdapter {
     }
 
     protected getService(): IService {
-        return this.service || application.service;
+        return this.service || application.obj.service;
     }
 }
 
@@ -491,7 +491,7 @@ export class DataTableSetAdapter implements IDataTableSetAdapter {
     }
 
     protected getService(): IService {
-        return this.service || application.service;
+        return this.service || application.obj.service;
     }
 }
 

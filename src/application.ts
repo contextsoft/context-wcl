@@ -7,9 +7,6 @@ import { IVoidEvent, IDOMEvent } from './component';
 import { IService, Service } from './service';
 import { Dialog } from './ext.controls';
 
-/** Global Application instance */
-export let application: Application = null;
-
 export interface IAppConfig {
     /** Application root URL */
     //appUrl?: string;
@@ -21,6 +18,13 @@ export interface IAppConfig {
     showServiceRawOutput?: boolean;
     libraries?: any;
 }
+
+class AppInstance {
+    public obj: Application;
+}
+
+/** Global Application instance */
+export let application = new AppInstance();
 
 /** Application control and config */
 export class Application {
@@ -120,7 +124,7 @@ export class Application {
         this.createService();
         this.initService();
 
-        application = this;
+        application.obj = this;
         this.init();
     }
 
