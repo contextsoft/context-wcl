@@ -14,7 +14,7 @@ class Auth extends Adapter
     ];
 
     /** Generates password */
-    public static function generateSecret($word_length = 10, $allowed_chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890')
+    public static function generateCode($word_length = 6, $allowed_chars = '1234567890')
     {
         $str = array();
         for ($i = 0; $i < $word_length; $i++) {
@@ -28,7 +28,7 @@ class Auth extends Adapter
     public function getAuthProviders()
     {
         if (!class_exists('AuthConfig')) {
-            Application::raise('Auth not configured.');
+            Application::raise('Auth not configured');
         }
         $providers_enabled = [];
         foreach (AuthConfig::$hybridAuthConfig['providers'] as $provider => $provider_options) {
@@ -45,7 +45,7 @@ class Auth extends Adapter
     public function login($params)
     {
         if (empty($params['email']) || empty($params['password'])) {
-            Application::raise('Please enter email and password.');
+            Application::raise('Please enter email and password');
         }
             
         $user = DbObject::fetchSQL(
@@ -54,13 +54,13 @@ class Auth extends Adapter
             [$params['email'], $params['password']]);
 
         if (!count($user)) {
-            Application::raise('email or password is incorrect. Please try again');
+            Application::raise('Email or password is incorrect. Please try again');
         }
 
         $user = $user[0];
 
         if ($user['email_confirmed'] != 'T') {
-            Application::raise('Registration is not completed. Please check your inbox for confirmation email.');
+            Application::raise('Registration is not completed. Please check your inbox for confirmation email');
         }
 
         $this->setUser($user['id'], $user['first_name'], $user['last_name'], $user['display_name'], $user['photo_url']);
@@ -121,7 +121,7 @@ class Auth extends Adapter
                 [$userProfile->email]);
 
             if (!count($user))
-                Application::raise('User registration failed.');
+                Application::raise('User registration failed');
             $user = $user[0];
 
             DbObject::execSql(
@@ -140,7 +140,7 @@ class Auth extends Adapter
                 [$user[0]->id]);
 
             if (!count($user))
-                Application::raise('Login via social network failed.');
+                Application::raise('Login via social network failed');
             $user = $user[0];
         }
 
@@ -153,7 +153,7 @@ class Auth extends Adapter
     public function confirmRegistrationCode($params)
     {
         if (empty($params['email']) || empty($params['code'])) {
-            Application::raise('Please enter email and confirmation code.');
+            Application::raise('Please enter email and confirmation code');
         }
         
         $user = DbObject::fetchSql(
@@ -161,7 +161,7 @@ class Auth extends Adapter
             [params['email'], params['code']]);
 
         if (!count($user)) {
-            Application::raise('Confirmation code is invalid.');
+            Application::raise('Confirmation code is invalid');
         }
 
         $user = $user[0];
@@ -184,7 +184,7 @@ class Auth extends Adapter
             [$params['email']]);
 
         if (!count($user)) {
-            Application::raise('User not found. Please correct and try again.');
+            Application::raise('User not found. Please correct and try again');
         }
 
         $user = $user[0];
@@ -194,7 +194,7 @@ class Auth extends Adapter
         if(empty($display_name)) {
             $display_name = $user['first_name'] . ' ' . $user['last_name']; 
         }
-        $email_confirmation_key = Auth::generateSecret(5);
+        $email_confirmation_key = Auth::generateCode();
 
         DbObject::execSql(
             "UPDATE user SET email_confirmed = :email_confirmed, email_confirmation_key = :email_confirmation_key WHERE id = :id",
@@ -211,7 +211,7 @@ class Auth extends Adapter
     public function sendPasswordResetCode($params)
     {
         if (empty($params['email'])) {
-            Application::raise('Please enter email.');
+            Application::raise('Please enter email');
         }
         $email = strtolower($params['email']);
 
@@ -224,11 +224,11 @@ class Auth extends Adapter
         }
 
         $user = $user[0];
-        $Password_Reset_Key = Auth::generateSecret();
+        $password_reset_key = Auth::generateCode();
 
         DbObject::execSql(
-            "UPDATE user SET Password_Reset_Key = :Password_Reset_Key WHERE id = :id)",
-            ['id' => $user['id'], 'Password_Reset_Key' => $Password_Reset_Key]);
+            "UPDATE user SET password_reset_key = :password_reset_key WHERE id = :id)",
+            ['id' => $user['id'], 'password_reset_key' => $password_reset_key]);
 
         Mailer::sendMail($email, $user['display_name'], 'password reset request',
             "To reset your password please use the code: ".md5($email . '-' . $user['id'] . '-' . $Password_Reset_Key));
@@ -240,7 +240,7 @@ class Auth extends Adapter
     public function confirmPasswordReset($params)
     {
         if (empty($params['password1']) || empty($_POST['password2'])) {
-            Application::raise('password can not be empty.');
+            Application::raise('Password can not be empty');
         }
         if ($params['password1'] != $params['password2']) {
             Application::raise('Passwords do not match.');
@@ -253,17 +253,17 @@ class Auth extends Adapter
         $user = DbObject::fetchSql(
             "SELECT u.id, u.photo_url, u.display_name, u.first_name, u.last_name 
                FROM user u 
-              WHERE MD5(CONCAT(LOWER(u.email), '-', u.id, '-', u.Password_Reset_Key)) = ?",
+              WHERE MD5(CONCAT(LOWER(u.email), '-', u.id, '-', u.password_reset_key)) = ?",
             [params['code']]);
 
         if (!count($user)) {
-            Application::raise('Code is incorrect. Please request password change again.');
+            Application::raise('Code is incorrect. Please request password change again');
         }
 
         $user = $user[0];
 
         DbObject::execSql(
-            "UPDATE user u SET password = md5(:password), Password_Reset_Key = null WHERE id = :id",
+            "UPDATE user u SET password = md5(:password), password_reset_key = null WHERE id = :id",
             ['password' => $newPwd, 'id' => $user['id']]);
 
         $this->setUser($user['id'], $user['first_name'], $user['last_name'], $user['display_name'], $user['photo_url']);
@@ -276,32 +276,32 @@ class Auth extends Adapter
     public function register($params)
     {
         if (empty($params['email'])) {
-            Application::raise('Please enter email.');
+            Application::raise('Please enter email');
         }
         if (!Mailer::validateEmail($params['email'])) {
-            Application::raise('Email is invalid.');
+            Application::raise('Email is invalid');
         }
         if (empty($params['first_name']) || empty($params['last_name'])) {
-            Application::raise('Please enter your name.');
+            Application::raise('Please enter your name');
         }
         if (empty($params['password1']) || empty($params['password2'])) {
-            Application::raise('Please enter password.');
+            Application::raise('Please enter password');
         }
         if ($params['password1'] != $params['password2']) {
-            Application::raise('Passwords do not match.');
+            Application::raise('Passwords do not match');
         }
         if (!empty($validate = Auth::validatePassword($params['password1']))) {
             Application::raise($validate);
         }
         if (empty($params['captcha']) || md5(strtoupper($params['captcha'])) != UserSession::GetValue('captcha_register')) {
-            Application::raise('Please enter the captcha more careful.');
+            Application::raise('Please enter the captcha more careful');
         }
 
         $exists = DbObject::fetchSql(
             "SELECT COUNT(*) as cnt FROM user WHERE UPPER(TRIM(email)) = UPPER(TRIM(?))",
             [$params['email']]);
         if (count($exists) && $exists[0]['cnt']) {
-            Application::raise("Such user already registered.");
+            Application::raise("Such user already registered");
         }
 
         DbObject::execSql(
@@ -339,7 +339,7 @@ class Auth extends Adapter
     public function saveUserProfile($params)
     {
         if (empty($params['first_name']) || empty($params['last_name'])) {
-            Application::raise('Please enter your name.');
+            Application::raise('Please enter your name');
         }
 
         $user = DbObject::fetchSql(
@@ -347,11 +347,11 @@ class Auth extends Adapter
             [UserSession::GetValue("userId")]);
         
         if (empty($params['password1']) || empty($params['password2']) || empty($params['Password3'])) {
-            Application::raise('Please enter old and new Passwords.');
+            Application::raise('Please enter old and new Passwords');
         }
 
         if (md5($params['password1']) != $user[0]['password'] || $params['password2'] != $params['Password3']) {
-            Application::raise('Passwords do not match.');
+            Application::raise('Passwords do not match');
         }
 
         $validate = Auth::validatePassword($password2);
@@ -394,7 +394,7 @@ class Auth extends Adapter
         $font_name = Utils::scriptDir() . '/fonts/times.ttf';
         $garbage_lines_count = 5;
 
-        $text = Auth::generateSecret($text_length, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
+        $text = Auth::generateCode($text_length, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ');
         $captchaName = 'captcha';
         if (!empty($params['captchaName'])) {
             $captchaName .= '_' . $params['captchaName'];
