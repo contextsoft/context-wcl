@@ -274,7 +274,7 @@ export class ContainerView extends View {
             properties: ['opacity', '-webkit-transform'],
             duration: 0.5
             // we may additionally specify To transition
-            // transitionTo: transitionSlideHorizontal,
+            // transitionTo: ContainerView.cssSlideHorizontal
             // propertiesTo: ['opacity', '-webkit-transform'],
         };
     }
@@ -411,8 +411,7 @@ export class ContainerView extends View {
         }
 
         // if I'm not rendered or we don't need animation then just assign it and that's it
-        if (!this.element || !this.visible || !this.animation || !this.element.style.hasOwnProperty('webkitTransform')) // true)
-        {
+        if (!this.element || !this.visible || !this.animation || !this.element.style.hasOwnProperty('webkitTransform')) {
             this.updateView(cur, direction);
             this.updateView(nextView, direction);
             return;
@@ -447,12 +446,13 @@ export class ContainerView extends View {
         }
 
         // perform animated transition
-        let animateDurationTo = (this.animation.durationTo) ? this.animation.durationTo : this.animation.duration;
-        setTimeout(() => {
-            this.updateView(cur, direction);
-            this.updateView(nextView, direction);
-        }, animateDurationTo * 1000);
-
+        // let animateDurationTo = (this.animation.durationTo) ? this.animation.durationTo : this.animation.duration;
+        // setTimeout(() => {
+        //     this.updateView(cur, direction);
+        //     this.updateView(nextView, direction);
+        // }, animateDurationTo * 1000);
+        this.updateView(cur, direction);
+        this.updateView(nextView, direction);
         transitions.apply();
     };
 

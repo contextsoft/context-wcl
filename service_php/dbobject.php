@@ -3,7 +3,7 @@
 /**
  * Basic database object
  */
-class DbObject extends Adapter
+class DbObject
 {
     protected static function getConnection()
     {
@@ -31,20 +31,14 @@ class DbObject extends Adapter
 }
 
 /**
-* Adapter with access to DbObject's execSQL and fetchSQL
-* Warning: potential sequrity vulnerability
-*/
-//class DataQuery extends DbObject
-//{
-//    public static $allowedMethods = ['execSQL', 'fetchSQL'];
-//}
-
-/**
  * Database table crud interface
  */
-class DataTable extends DbObject
+class DataTable extends DbObject implements IAdapter
 {
-    public static $allowedMethods = ['fill', 'applyUpdates'];
+    public static function getAllowedMethods()
+    {
+        return ['fill', 'applyUpdates'];
+    }
     
     public $tableName;
     public $idField = 'id';
@@ -147,9 +141,12 @@ class DataTable extends DbObject
 /**
  * Database table set crud interface
  */
-class DataTableSet extends Adapter
+class DataTableSet implements IAdapter
 {
-    public static $allowedMethods = ['fill', 'applyUpdates'];
+    public static function getAllowedMethods()
+    {
+        return ['fill', 'applyUpdates'];
+    }
 
     public $tables = [];
     

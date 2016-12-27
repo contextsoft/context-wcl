@@ -130,7 +130,7 @@ export class Service implements IService {
                 if ((result && result.error) || raw) {
                     let msg = result.error;
                     if (application.obj.config.debug && result.errorCallstack) {
-                        msg += '<div style="font-weight: normal; font-size: 12px; color: rgba(0,0,0,0.8);">' + result.errorCallstack + '</div>';
+                        msg += '<div style="font-weight: normal; font-size: 12px; /*color: rgba(0,0,0,0.8);*/">' + result.errorCallstack + '</div>';
                     }
                     if (application.obj.config.showServiceRawOutput && raw)
                         msg += '<div style="margin-top: 10px"><div style="margin-bottom: -10px; font-size: 16px">PHP:</div>' + raw + '</div>';

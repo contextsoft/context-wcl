@@ -1,17 +1,19 @@
 <?php
 
-class Auth extends Adapter
+class Auth implements IAdapter
 {
-    public static $allowedMethods = [
-        'getAuthProviders',
-        'login', 'loginSocial',
-        'generateRegisterCaptcha', 'register',
-        'sendRegistrationConfirmationCode', 'confirmRegistrationCode',
-        'sendPasswordResetCode', 'confirmPasswordReset',
-        'getUserProfile', 'saveUserProfile',
-        'getUser',
-        'generateCaptcha'
-    ];
+    public static function getAllowedMethods() { 
+        return [
+            'getAuthProviders',
+            'login', 'loginSocial',
+            'generateRegisterCaptcha', 'register',
+            'sendRegistrationConfirmationCode', 'confirmRegistrationCode',
+            'sendPasswordResetCode', 'confirmPasswordReset',
+            'getUserProfile', 'saveUserProfile',
+            'getUser',
+            'generateCaptcha'
+        ];
+    }
 
     /** Generates password */
     public static function generateCode($word_length = 6, $allowed_chars = '1234567890')
@@ -106,9 +108,10 @@ class Auth extends Adapter
         // we create a new entry on database.users for him
         if (!count(user))  {
             DbObject::execSql(
-                "INSERT INTO user(email, first_name, last_name, display_name, Photo_Url, email_confirmed)
-                    VALUES(:email, :first_name, :last_name, :Photo_Url, 'T')",
+                "INSERT INTO user(id, email, first_name, last_name, display_name, Photo_Url, email_confirmed)
+                    VALUES(:id, :email, :first_name, :last_name, :Photo_Url, 'T')",
                 [
+                    'id' => $this->generateUserId(),
                     'email' => $userProfile->email,
                     'first_name' => $userProfile->first_name,
                     'last_name' => $userProfile->last_name,
@@ -125,9 +128,10 @@ class Auth extends Adapter
             $user = $user[0];
 
             DbObject::execSql(
-                "INSERT INTO user_provider(id_user, provider, provider_userid)
-                    VALUES(:id_user, :provider, :provider_userid)",
+                "INSERT INTO user_provider(id, id_user, provider, provider_userid)
+                    VALUES(:id, :id_user, :provider, :provider_userid)",
                 [
+                    'id' => $this->generateUserProviderId(),
                     'id_user' => $user->id,
                     'provider' => $providerName,
                     'provider_userid' => $user_profile->identifier
@@ -200,9 +204,7 @@ class Auth extends Adapter
             "UPDATE user SET email_confirmed = :email_confirmed, email_confirmation_key = :email_confirmation_key WHERE id = :id",
             ['id' => $id, 'email_confirmed' => 'F', 'email_confirmation_key' => $email_confirmation_key]);
 
-        Mailer::sendMail($params['email'], $display_name, 'Registration Confirmation',
-            "Thank you for register'.\n".
-            "email confirmation key is $email_confirmation_key. Please use it for confirm.");
+        Mailer::sendMail($params['email'], $display_name, 'Registration Confirmation', $this->getRegistrationCodeEmailContent($email_confirmation_key));
     }
 
     /** Sends password reset email.
@@ -305,9 +307,10 @@ class Auth extends Adapter
         }
 
         DbObject::execSql(
-            "INSERT INTO user(email, first_name, last_name, display_name, photo_url, password, email_confirmed)
-                 VALUES(TRIM(LOWER(:email)), TRIM(:first_name), TRIM(:last_name), TRIM(:display_name), TRIM(:photo_url), md5(TRIM(:password)), 'F')",
+            "INSERT INTO user(id, email, first_name, last_name, display_name, photo_url, password, email_confirmed)
+                 VALUES(:id, TRIM(LOWER(:email)), TRIM(:first_name), TRIM(:last_name), TRIM(:display_name), TRIM(:photo_url), md5(TRIM(:password)), 'F')",
             [
+                'id' => $this->generateUserId(),
                 'email' => $params['email'],
                 'first_name' => $params['first_name'],
                 'last_name' => $params['last_name'],
@@ -386,7 +389,7 @@ class Auth extends Adapter
      */
     public function generateCaptcha($params)
     {
-        $text_length = 7;
+        $text_length = 6;
         $font_size = 22;
         $text_x_shift = 2;
         $text_angle_shift = 15;
@@ -499,5 +502,22 @@ class Auth extends Adapter
         if (strlen($password) < 6) {
             return 'password lenght must be equal or greater than 6 characters.';
         }
+    }
+
+    protected function generateUserId() {
+        return null;
+    }
+
+    protected function generateUserProviderId() {
+        return null;
+    }
+
+    protected function getRegistrationCodeEmailContent($email_confirmation_key) {
+        return
+            "<html>".
+            "Thank you for register.<br><br>\n".
+            "Your confirmation code is <b>$email_confirmation_key</b><br>\n".
+            "Please use it confirm your registration on login page.".
+            "</html>";
     }
 }

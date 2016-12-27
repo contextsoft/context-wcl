@@ -155,11 +155,17 @@ export class Application {
             this.settings = this.defaultSettings;
     }
 
-    /** Shows localized alert */
-    public showMessage(msg: string) {
-        if (msg && msg !== '')
-            // alert(this.L(msg));
-            Dialog.showDialog(msg);
+    /** Shows message using Dialog control */
+    public showMessage(msg: string, onClose?: IVoidEvent) {
+        if (!msg || msg === '')
+            return;
+        let buttons = [Dialog.buttonOk()];
+        buttons[0].onClick = function () {
+            if (onClose)
+                onClose();
+            this.parentDialog.hide();
+        };
+        Dialog.showDialog(msg, buttons);
     }
 
     /** Throws localized exception */

@@ -12,11 +12,11 @@ class Response
     public $errorCallstack;
 }
 
-/** Parent for all adapters (objects directly called by a client) */
-class Adapter
+/** Interface for all classes that can be called by a client directly */
+interface IAdapter
 {
-    /** List of methods that can be called */
-    public static $allowedMethods = [];
+    /** Returns string array of methods that can be called */
+    public static function getAllowedMethods();
 }
 
 /**
@@ -53,19 +53,26 @@ class Application
                     }
                 }
             }
+            // creating adapter class and calling its method
             if (isset($adapter) && isset($method)) {
                 // checking is class exists
                 if (class_exists($adapter)) {
-                    $obj = new $adapter();
                     // checking is it an Adapter
-                    if (!is_subclass_of($obj, 'Adapter')) {
+                    $interfaces = class_implements($adapter);
+                    if (!isset($interfaces['IAdapter'])) {
                         throw new Exception("$adapter is not an adapter.");
                     }
+                    
                     // checking if method is allowed
-                    if (array_search($method, $adapter::$allowedMethods) === false) {
+                    if (array_search($method, $adapter::getAllowedMethods()) === false) {
                         throw new Exception("$adapter.$method is not allowed call.");
                     }
+                    
+                    // starting session
                     UserSession::startSession();
+
+                    // creating object and calling its method
+                    $obj = new $adapter();
                     $response->data = $obj->$method($params);
                 } else {
                     throw new Exception("Adapter $adapter does not exists.");
@@ -122,16 +129,18 @@ class Application
 /**
  * Provides utils for _SESSION access
  */
-class UserSession extends Adapter
+class UserSession implements IAdapter
 {
-    //public static $allowedMethods = ['getSession'];
+    public static function getAllowedMethods()
+    {
+        return [/*'getSession'*/];
+    }
     
     public static function startSession()
     {
         session_start();
         if (!isset($_SESSION['time'])) {
             session_regenerate_id(true);
-            //$_SESSION['sessionId'] = session_id();
             $_SESSION['time'] = time();
         }
     }
@@ -150,8 +159,8 @@ class UserSession extends Adapter
         return isset($_SESSION[$name]) ? $_SESSION[$name] : null;
     }
 
-    // public static function getSession()
-    // {
-    //     return $_SESSION;
-    // }
+    public static function getSession()
+    {
+        return $_SESSION;
+    }
 }
