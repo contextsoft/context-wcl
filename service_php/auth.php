@@ -62,7 +62,7 @@ class Auth implements IAdapter
         $user = $user[0];
 
         if ($user['email_confirmed'] != 'T') {
-            Application::raise('Registration is not completed. Please check your inbox for confirmation email');
+            Application::raise('Registration is not completed. Please check your inbox for confirmation email', 1100);
         }
 
         $this->setUser($user['id'], $user['first_name'], $user['last_name'], $user['display_name'], $user['photo_url']);
@@ -75,7 +75,7 @@ class Auth implements IAdapter
     public function loginSocial($params)
     {
         if (!class_exists('Libs')) {
-            throw new Exception('External libs not configured.');
+            throw new Exception('External libs not configured.', 1004);
         }
         
         // the selected provider
@@ -162,7 +162,7 @@ class Auth implements IAdapter
         
         $user = DbObject::fetchSql(
             "SELECT id, photo_url, display_name, first_name, last_name FROM user u WHERE UPPER(TRIM(u.email)) = UPPER(TRIM(?)) AND u.email_confirmation_key = ?",
-            [params['email'], params['code']]);
+            [$params['email'], $params['code']]);
 
         if (!count($user)) {
             Application::raise('Confirmation code is invalid');
@@ -170,7 +170,7 @@ class Auth implements IAdapter
 
         $user = $user[0];
 
-        DbObject.execSql(
+        DbObject::execSql(
             "UPDATE user SET email_confirmed = 'T', email_confirmation_key = NULL WHERE id = ?",
             [$user['id']]);
 

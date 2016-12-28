@@ -5,7 +5,9 @@ import { application } from './Application';
 
 export interface IResponse {
     data: any;
+    raw?: string;
     error?: string;
+    errorCode?: number;
     errorCallstack?: string;
 }
 
@@ -19,7 +21,8 @@ export interface IService {
     username: string;
     login(username?: string, password?: string): Promise<any>;
     logout();
-    execute(className: string, methodName: string, params?: any): Promise<IResponse>;
+    execute(className: string, methodName: string, params?: any, showError?: boolean): Promise<IResponse>;
+    showError(response: IResponse);
 }
 
 export class Ajax {
@@ -85,15 +88,18 @@ export class Service implements IService {
     public login(username?: string, password?: string): Promise<any> {
         if (username)
             this.username = username;
-        return this.execute('Application', 'login', { username, password });
+        return this.execute('Auth', 'login', { username, password }).then(
+            (response) => {
+                this._authenticated = true;
+            });
     };
 
     public logout(): Promise<any> {
         this._authenticated = false;
-        return this.execute('Application', 'logout');
+        return this.execute('Auth', 'logout');
     };
 
-    public execute(adapter: string, method: string, params?: any): Promise<IResponse> {
+    public execute(adapter: string, method: string, params?: any, showError = true): Promise<IResponse> {
         if (typeof params === 'object')
             params = JSON.stringify(params);
         let data = {
@@ -103,54 +109,56 @@ export class Service implements IService {
         };
         let promise = new Promise((resolve, reject) => {
             Ajax.post(this.url, data, (result) => {
+                let response: IResponse;
+
                 // cutting php raw output
-                let raw = '';
                 if (typeof result === 'string') {
                     if (result.indexOf('{"data":') >= 0) {
-                        raw = result.substr(0, result.indexOf('{"data":'));
+                        let raw = result.substr(0, result.indexOf('{"data":'));
                         let s = result.substr(result.indexOf('{"data":'));
                         let res = Ajax.parseJSON(s);
-                        result = {
+                        response = {
                             data: res.data ? res.data : res,
-                            error: res.error ? res.error : '' /*raw*/,
+                            raw,
+                            error: res.error ? res.error : '',
+                            errorCode: res.errorCode ? res.errorCode : '',
                             errorCallstack: res.errorCallstack ? res.errorCallstack : ''
                         };
                     }
                     else {
-                        raw = result;
-                        result = {
+                        response = {
                             data: '',
+                            raw: result,
                             error: 'Service error',
                             errorCallstack: ''
                         };
                     }
                 }
+                else
+                    response = result;
+
+                // showing error
+                if ((showError && response.error) || response.raw)
+                    this.showError(response);
 
                 // handling response
-                if ((result && result.error) || raw) {
-                    let msg = result.error;
-                    if (application.obj.config.debug && result.errorCallstack) {
-                        msg += '<div style="font-weight: normal; font-size: 12px; /*color: rgba(0,0,0,0.8);*/">' + result.errorCallstack + '</div>';
-                    }
-                    if (application.obj.config.showServiceRawOutput && raw)
-                        msg += '<div style="margin-top: 10px"><div style="margin-bottom: -10px; font-size: 16px">PHP:</div>' + raw + '</div>';
-                    application.obj.showMessage(msg);
-                    if (result && !result.error)
-                        resolve(result);
-                    else
-                        reject(result);
-                }
+                if (!response.error)
+                    resolve(response);
                 else
-                    resolve(result);
+                    reject(response);
             });
         });
         return promise;
     };
 
-    public getSessionInfo() {
-        return this.execute('UserSession', 'getSessionInfo')
-            .then((data) => {
-                // this.login(); 
-            });
+    public showError(response: IResponse) {
+        let msg = response.error;
+        if (application.obj.config.debug && response.errorCallstack) {
+            msg += '<div class="callstack" style="font-weight: normal; font-size: 12px;">' + response.errorCallstack + '</div>';
+        }
+        if (application.obj.config.showServiceRawOutput && response.raw)
+            //msg += '<div class="raw" style="margin-top: 10px"><div style="margin-bottom: -10px; font-size: 16px">PHP:</div>' + response.raw + '</div>';
+            msg += '<div class="raw">' + response.raw + '</div>';
+        application.obj.showMessage(msg);
     }
 }

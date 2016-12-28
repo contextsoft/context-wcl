@@ -8,6 +8,7 @@ require_once('auth.php');
 class Response
 {
     public $data;
+    public $errorCode;
     public $error;
     public $errorCallstack;
 }
@@ -60,12 +61,12 @@ class Application
                     // checking is it an Adapter
                     $interfaces = class_implements($adapter);
                     if (!isset($interfaces['IAdapter'])) {
-                        throw new Exception("$adapter is not an adapter.");
+                        throw new Exception("$adapter is not an adapter.", 1001);
                     }
                     
                     // checking if method is allowed
                     if (array_search($method, $adapter::getAllowedMethods()) === false) {
-                        throw new Exception("$adapter.$method is not allowed call.");
+                        throw new Exception("$adapter.$method is not allowed call.", 1002);
                     }
                     
                     // starting session
@@ -75,10 +76,10 @@ class Application
                     $obj = new $adapter();
                     $response->data = $obj->$method($params);
                 } else {
-                    throw new Exception("Adapter $adapter does not exists.");
+                    throw new Exception("Adapter $adapter does not exists.", 1003);
                 }
             } else {
-                throw new Exception("Adapter or method not provided.");
+                throw new Exception("Adapter or method not provided.", 1000);
             }
         } catch (Exception $e) {
             Application::handleException($e, $response);
@@ -102,16 +103,16 @@ class Application
     }
 
     /** Raises localized exception */
-    public static function raise($error)
+    public static function raise($error, $code = null)
     {
-        throw new Exception(Application::L($error));
+        throw new Exception(Application::L($error), $code);
     }
 
     /** Connects to DB */
     protected static function connectToDb()
     {
         if (!class_exists('DatabaseConfig')) {
-            throw new Exception('Database not configured.');
+            throw new Exception('Database not configured.', 1004);
         }
         Application::$connection = new PDO(DatabaseConfig::$dsn, DatabaseConfig::$username, DatabaseConfig::$password);
         Application::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -121,6 +122,7 @@ class Application
     /** Appends error to the response */
     protected static function handleException($e, $response)
     {
+        $response->errorCode = $e->getCode();
         $response->error = $e->getMessage();
         $response->errorCallstack = nl2br('<br><b>Service Call Stack:</b><br>'.$e->getTraceAsString());
     }
