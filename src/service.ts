@@ -181,7 +181,7 @@ export class Service implements IService {
         if (application.obj.config.debug && response.errorCallstack) {
             msg += '<div class="callstack" style="font-weight: normal; font-size: 12px;">' + response.errorCallstack + '</div>';
         }
-        if (application.obj.config.showServiceRawOutput && response.raw)
+        if (application.obj.config.debug && application.obj.config.showServiceRawOutput && response.raw)
             //msg += '<div class="raw" style="margin-top: 10px"><div style="margin-bottom: -10px; font-size: 16px">PHP:</div>' + response.raw + '</div>';
             msg += '<div class="raw">' + response.raw + '</div>';
         application.obj.showMessage(msg);
