@@ -6,7 +6,7 @@ class Auth implements IAdapter
         return [
             'getAuthProviders',
             'login', 'loginSocial',
-            'generateRegisterCaptcha', 'register',
+            'generateRegistrationCaptcha', 'register',
             'sendRegistrationConfirmationCode', 'confirmRegistrationCode',
             'sendPasswordResetCode', 'confirmPasswordReset',
             'getUserProfile', 'saveUserProfile',
@@ -51,7 +51,7 @@ class Auth implements IAdapter
         }
             
         $user = DbObject::fetchSQL(
-            "SELECT id, Photo_Url, display_name, first_name, last_name, email_confirmed FROM user u 
+            "SELECT id, photo_url, display_name, first_name, last_name, email_confirmed FROM user u 
               WHERE UPPER(TRIM(u.email)) = UPPER(TRIM(?)) AND u.password = MD5(?)",
             [$params['email'], $params['password']]);
 
@@ -108,14 +108,14 @@ class Auth implements IAdapter
         // we create a new entry on database.users for him
         if (!count(user))  {
             DbObject::execSql(
-                "INSERT INTO user(id, email, first_name, last_name, display_name, Photo_Url, email_confirmed)
-                    VALUES(:id, :email, :first_name, :last_name, :Photo_Url, 'T')",
+                "INSERT INTO user(id, email, first_name, last_name, display_name, photo_url, email_confirmed)
+                    VALUES(:id, :email, :first_name, :last_name, :photo_url, 'T')",
                 [
                     'id' => $this->generateUserId(),
                     'email' => $userProfile->email,
                     'first_name' => $userProfile->first_name,
                     'last_name' => $userProfile->last_name,
-                    'Photo_Url' =>$userProfile->photo_url
+                    'photo_url' =>$userProfile->photo_url
                 ]);
 
             $user = DbObject::fetchSQL(
@@ -472,7 +472,7 @@ class Auth implements IAdapter
     }
 
     /** Generates register captcha image */
-    public function generateRegisterCaptcha()
+    public function generateRegistrationCaptcha()
     {
         return $this->generateCaptcha(['captchaName' => 'register']);
     }
@@ -515,8 +515,8 @@ class Auth implements IAdapter
     protected function getRegistrationCodeEmailContent($email_confirmation_key) {
         return
             "<html>".
-            "Thank you for register.<br><br>\n".
-            "Your confirmation code is <b>$email_confirmation_key</b><br>\n".
+            "Thank you for registration.<br><br>".
+            "Your confirmation code is <b>$email_confirmation_key</b><br>".
             "Please use it confirm your registration on login page.".
             "</html>";
     }

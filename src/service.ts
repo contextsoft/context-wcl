@@ -79,25 +79,50 @@ export class Ajax {
 export class Service implements IService {
     public username: string;
     public url: string;
+    public authAdapter = 'Auth';
 
     get authenticated(): boolean {
         return this._authenticated;
     };
     protected _authenticated;
 
-    public login(username?: string, password?: string): Promise<any> {
-        if (username)
-            this.username = username;
-        return this.execute('Auth', 'login', { username, password }).then(
+    public login(email?: string, password?: string): Promise<IResponse> {
+        return this.execute(this.authAdapter, 'login', { email, password }, false).then(
             (response) => {
                 this._authenticated = true;
+                this.username = response.data.display_name;
+                return response;
             });
     };
 
-    public logout(): Promise<any> {
+    public logout(): Promise<IResponse> {
         this._authenticated = false;
-        return this.execute('Auth', 'logout');
+        return this.execute(this.authAdapter, 'logout');
     };
+
+    public register(email, firstName, lastName, password1, password2, captcha): Promise<IResponse> {
+        let params = {
+            email,
+            first_name: firstName,
+            last_name: lastName,
+            password1,
+            password2,
+            captcha
+        };
+        return this.execute(this.authAdapter, 'register', params);
+    };
+
+    public sendRegistrationConfirmationCode(email): Promise<IResponse> {
+        return this.execute(this.authAdapter, 'sendRegistrationConfirmationCode', { email });
+    }
+
+    public confirmRegistrationCode(email, code): Promise<IResponse> {
+        return this.execute(this.authAdapter, 'confirmRegistrationCode', { email, code });
+    }
+
+    public generateRegistrationCaptcha(): Promise<IResponse> {
+        return this.execute(this.authAdapter, 'generateRegistrationCaptcha');
+    }
 
     public execute(adapter: string, method: string, params?: any, showError = true): Promise<IResponse> {
         if (typeof params === 'object')
