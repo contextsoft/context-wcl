@@ -6,9 +6,9 @@ import { application } from './Application';
 export interface IResponse {
     data: any;
     raw?: string;
-    error?: string;
-    errorCode?: number;
-    errorCallstack?: string;
+    code?: number;
+    message?: string;
+    stack?: string;
 }
 
 interface IOnData {
@@ -17,8 +17,8 @@ interface IOnData {
 
 export interface IService {
     url: string;
+    user: User;
     authenticated: boolean;
-    username: string;
     login(username?: string, password?: string): Promise<any>;
     logout();
     execute(className: string, methodName: string, params?: any, showError?: boolean): Promise<IResponse>;
@@ -76,8 +76,18 @@ export class Ajax {
     }
 }
 
+class User {
+    public id: string;
+    public photoUrl: string;
+    public name: string;
+}
+
 export class Service implements IService {
-    public username: string;
+    protected _user = new User();
+
+    public get user() {
+        return this._user;
+    }
     public url: string;
     public authAdapter = 'Auth';
 
@@ -86,17 +96,24 @@ export class Service implements IService {
     };
     protected _authenticated;
 
+    protected loginFromResponse(response: IResponse) {
+        this._authenticated = true;
+        this._user.id = response.data.user_id;
+        this._user.name = response.data.user_display_name;
+        this._user.photoUrl = response.data.user_photo_url;
+    }
+
     public login(email?: string, password?: string): Promise<IResponse> {
         return this.execute(this.authAdapter, 'login', { email, password }, false).then(
             (response) => {
-                this._authenticated = true;
-                this.username = response.data.display_name;
+                this.loginFromResponse(response);
                 return response;
             });
     };
 
     public logout(): Promise<IResponse> {
         this._authenticated = false;
+        this._user = new User();
         return this.execute(this.authAdapter, 'logout');
     };
 
@@ -124,6 +141,22 @@ export class Service implements IService {
         return this.execute(this.authAdapter, 'generateRegistrationCaptcha');
     }
 
+    public sendPasswordResetCode(email): Promise<IResponse> {
+        return this.execute(this.authAdapter, 'sendPasswordResetCode', { email });
+    }
+
+    public resetPassword(password1, password2, code): Promise<IResponse> {
+        return this.execute(this.authAdapter, 'resetPassword', { password1, password2, code }).then(
+            (response) => {
+                this.loginFromResponse(response);
+                return response;
+            });
+    }
+
+    public isPasswordResetCodeSent(email): Promise<IResponse> {
+        return this.execute(this.authAdapter, 'isPasswordResetCodeSent', { email });
+    }
+
     public execute(adapter: string, method: string, params?: any, showError = true): Promise<IResponse> {
         if (typeof params === 'object')
             params = JSON.stringify(params);
@@ -145,17 +178,18 @@ export class Service implements IService {
                         response = {
                             data: res.data ? res.data : res,
                             raw,
-                            error: res.error ? res.error : '',
-                            errorCode: res.errorCode ? res.errorCode : '',
-                            errorCallstack: res.errorCallstack ? res.errorCallstack : ''
+                            message: res.message ? res.message : '',
+                            code: res.code ? res.code : 0,
+                            stack: res.stack ? res.stack : ''
                         };
                     }
                     else {
                         response = {
                             data: '',
                             raw: result,
-                            error: 'Service error',
-                            errorCallstack: ''
+                            code: 0,
+                            message: 'Service error',
+                            stack: ''
                         };
                     }
                 }
@@ -163,11 +197,11 @@ export class Service implements IService {
                     response = result;
 
                 // showing error
-                if ((showError && response.error) || response.raw)
+                if ((showError && response.message) || response.raw)
                     this.showError(response);
 
                 // handling response
-                if (!response.error)
+                if (!response.message)
                     resolve(response);
                 else
                     reject(response);
@@ -177,9 +211,9 @@ export class Service implements IService {
     };
 
     public showError(response: IResponse) {
-        let msg = response.error;
-        if (application.obj.config.debug && response.errorCallstack) {
-            msg += '<div class="callstack" style="font-weight: normal; font-size: 12px;">' + response.errorCallstack + '</div>';
+        let msg = response.message;
+        if (application.obj.config.debug && response.stack) {
+            msg += '<div class="stack" style="font-weight: normal; font-size: 12px; margin-top: 10px; margin-bottom: 10px">' + response.stack + '</div>';
         }
         if (application.obj.config.debug && application.obj.config.showServiceRawOutput && response.raw)
             //msg += '<div class="raw" style="margin-top: 10px"><div style="margin-bottom: -10px; font-size: 16px">PHP:</div>' + response.raw + '</div>';

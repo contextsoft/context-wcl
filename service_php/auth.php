@@ -8,7 +8,7 @@ class Auth implements IAdapter
             'login', 'loginSocial',
             'generateRegistrationCaptcha', 'register',
             'sendRegistrationConfirmationCode', 'confirmRegistrationCode',
-            'sendPasswordResetCode', 'confirmPasswordReset',
+            'sendPasswordResetCode', 'isPasswordResetCodeSent', 'resetPassword',
             'getUserProfile', 'saveUserProfile',
             'getUser',
             'generateCaptcha'
@@ -149,6 +149,7 @@ class Auth implements IAdapter
         }
 
         $this->setUser($user['id'], $user['first_name'], $user['last_name'], $user['display_name'], $user['photo_url']);
+        return $this->getUser();
     }
 
     /** Confirms user registration
@@ -229,34 +230,58 @@ class Auth implements IAdapter
         $password_reset_key = Auth::generateCode();
 
         DbObject::execSql(
-            "UPDATE user SET password_reset_key = :password_reset_key WHERE id = :id)",
+            "UPDATE user SET password_reset_key = :password_reset_key WHERE id = :id",
             ['id' => $user['id'], 'password_reset_key' => $password_reset_key]);
 
-        Mailer::sendMail($email, $user['display_name'], 'password reset request',
-            "To reset your password please use the code: ".md5($email . '-' . $user['id'] . '-' . $Password_Reset_Key));
+        Mailer::sendMail($email, $user['display_name'], 'Password Reset Request', $this->getPasswordResetEmailContent(md5($email . '-' . $user['id'] . '-' . $password_reset_key)));
+    }
+
+    /** Returns true if password reset code sent to user
+     * params: [email]
+     */
+    public function isPasswordResetCodeSent($params)
+    {
+        if (empty($params['email'])) {
+            Application::raise('Please enter email');
+        }
+        $user = DbObject::fetchSql(
+            "SELECT password_reset_key 
+               FROM user 
+              WHERE email = ?",
+            [$params['email']]);
+        if(!count($user))
+            return ['sent' => false];
+        else 
+            return ['sent' => !empty($user[0]['password_reset_key'])];
     }
 
     /** Changes password and logins user.
-     * params: [password1 - old, password2 - new, code - from confirmation email]
+     * params: [password1 - new password, password2 - new password confirm, code - from confirmation email]
      */
-    public function confirmPasswordReset($params)
+    public function resetPassword($params)
     {
-        if (empty($params['password1']) || empty($_POST['password2'])) {
-            Application::raise('Password can not be empty');
+        if (empty($params['code'])) {
+            Application::raise('Please enter code sent to you by email');
         }
+
+        if (empty($params['password1']) || empty($params['password2'])) {
+            Application::raise('Please new enter password');
+        }
+
         if ($params['password1'] != $params['password2']) {
-            Application::raise('Passwords do not match.');
+            Application::raise('Passwords do not match');
         }
-        $newPwd = $params['password2'];
+        
+        $newPwd = $params['password1'];
         if (!empty($validate = Auth::validatePassword($newPwd))) {
             Application::raise($validate);
         }
 
         $user = DbObject::fetchSql(
-            "SELECT u.id, u.photo_url, u.display_name, u.first_name, u.last_name 
+            "SELECT id, photo_url, display_name, first_name, last_name
                FROM user u 
               WHERE MD5(CONCAT(LOWER(u.email), '-', u.id, '-', u.password_reset_key)) = ?",
-            [params['code']]);
+            [$params['code']]);
 
         if (!count($user)) {
             Application::raise('Code is incorrect. Please request password change again');
@@ -482,13 +507,13 @@ class Auth implements IAdapter
         UserSession::SetValue("user_id", $id);
         if(empty($display_name))
             $display_name = "$first_name $last_name";
-        UserSession::SetValue("user_display_mame", $display_name);
+        UserSession::SetValue("user_display_name", $display_name);
         UserSession::SetValue("user_photo_url", $photo_url);
     }
 
     public static function getUser()
     {
-        if (!empty(UserSession::GetValue("userId"))) {
+        if (!empty(UserSession::GetValue("user_id"))) {
             return [
                 'user_id' => UserSession::GetValue("user_id"),
                 'user_display_name' => UserSession::GetValue("user_display_name"),
@@ -512,12 +537,22 @@ class Auth implements IAdapter
         return null;
     }
 
-    protected function getRegistrationCodeEmailContent($email_confirmation_key) {
+    protected function getRegistrationCodeEmailContent($code) {
         return
             "<html>".
             "Thank you for registration.<br><br>".
-            "Your confirmation code is <b>$email_confirmation_key</b><br>".
+            "Your confirmation code is <b>$code</b><br>".
             "Please use it confirm your registration on login page.".
             "</html>";
+    }
+
+    protected function getPasswordResetEmailContent($code) {
+        return
+            "<html>".
+            "You requested password reset code.<br><br>".
+            "Your code is <b>$code</b><br>".
+            "Please use it to confirm your new password on password reset page.".
+            "</html>";
+        
     }
 }

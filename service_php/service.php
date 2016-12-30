@@ -8,9 +8,9 @@ require_once('auth.php');
 class Response
 {
     public $data;
-    public $errorCode;
-    public $error;
-    public $errorCallstack;
+    public $code;
+    public $message;
+    public $stack;
 }
 
 /** Interface for all classes that can be called by a client directly */
@@ -122,9 +122,9 @@ class Application
     /** Appends error to the response */
     protected static function handleException($e, $response)
     {
-        $response->errorCode = $e->getCode();
-        $response->error = $e->getMessage();
-        $response->errorCallstack = nl2br('<br><b>Service Call Stack:</b><br>'.$e->getTraceAsString());
+        $response->code = $e->getCode();
+        $response->message = $e->getMessage();
+        $response->stack = nl2br('<b>Service Trace:</b><br>'.$e->getTraceAsString());
     }
 }
 
