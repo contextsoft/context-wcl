@@ -17,6 +17,7 @@ interface IOnData {
 
 export interface IService {
     url: string;
+    hybridAuthUrl: string;
     user: User;
     authenticated: boolean;
     login(username?: string, password?: string): Promise<any>;
@@ -89,6 +90,7 @@ export class Service implements IService {
         return this._user;
     }
     public url: string;
+    public hybridAuthUrl: string;
     public authAdapter = 'Auth';
 
     get authenticated(): boolean {
@@ -103,13 +105,31 @@ export class Service implements IService {
         this._user.photoUrl = response.data.user_photo_url;
     }
 
-    public login(email?: string, password?: string): Promise<IResponse> {
+    public login(email: string, password: string): Promise<IResponse> {
         return this.execute(this.authAdapter, 'login', { email, password }, false).then(
             (response) => {
                 this.loginFromResponse(response);
                 return response;
             });
     };
+
+    public loginSocial(provider: string): Promise<any> {
+        let popupWindow = window.open(
+            this.hybridAuthUrl + '?provider=' + provider,
+            'hybridAuth_Social_Sign_on',
+            'location=0,status=0,scrollbars=0,width=768,height=500'
+        );
+        return new Promise((resolve, reject) => {
+            let winTimer = setTimeout(() => {
+                if (popupWindow.closed) {
+                    clearInterval(winTimer);
+                    resolve();
+                }
+                else
+                    reject();
+            }, 1000);
+        });
+    }
 
     public logout(): Promise<IResponse> {
         this._authenticated = false;
@@ -212,7 +232,7 @@ export class Service implements IService {
 
     public showError(response: IResponse) {
         let msg = response.message;
-        if (application.obj.config.debug && response.stack) {
+        if (application.obj.config.debug && response.stack && !response.code) {
             msg += '<div class="stack" style="font-weight: normal; font-size: 12px; margin-top: 10px; margin-bottom: 10px">' + response.stack + '</div>';
         }
         if (application.obj.config.debug && application.obj.config.showServiceRawOutput && response.raw)

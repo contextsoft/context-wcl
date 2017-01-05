@@ -10,6 +10,11 @@ class Libs
             throw new Exception("'$path' does not exists.");
         }
     }
+    static function requireLib($path)
+    {
+        Libs::checkPath($path);
+        require_once($path);
+    }
 }
 
 class DatabaseConfig

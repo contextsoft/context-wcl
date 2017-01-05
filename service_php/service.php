@@ -103,7 +103,7 @@ class Application
     }
 
     /** Raises localized exception */
-    public static function raise($error, $code = null)
+    public static function raise($error, $code = 1)
     {
         throw new Exception(Application::L($error), $code);
     }

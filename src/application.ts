@@ -12,6 +12,8 @@ export interface IAppConfig {
     //appUrl?: string;
     /** Service URL e.g. PHP handler (url is relative to application root) */
     serviceUrl?: string;
+    /** HybridAuth handler URL (url is relative to application root) */
+    hybridAuthUrl?: string;
     /** Debug mode e.g. will display service callstack on errors */
     debug?: boolean;
     /** Show or not service raw output on error dialog e.g. for PHP its an errors, warnings etc. */
@@ -85,6 +87,7 @@ export class Application {
     /** Inits remote service */
     protected initService() {
         this.service.url = this.url + this.config.serviceUrl;
+        this.service.hybridAuthUrl = this.url + this.config.hybridAuthUrl;
     }
 
     /** Default settings */

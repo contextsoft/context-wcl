@@ -30,7 +30,7 @@ class Auth implements IAdapter
     public function getAuthProviders()
     {
         if (!class_exists('AuthConfig')) {
-            Application::raise('Auth not configured');
+            Application::raise('Auth not configured', 0);
         }
         $providers_enabled = [];
         foreach (AuthConfig::$hybridAuthConfig['providers'] as $provider => $provider_options) {
@@ -62,7 +62,7 @@ class Auth implements IAdapter
         $user = $user[0];
 
         if ($user['email_confirmed'] != 'T') {
-            Application::raise('Registration is not completed. Please check your inbox for confirmation email', 1100);
+            Application::raise('Registration is not completed. Please check your inbox for confirmation email', 2);
         }
 
         $this->setUser($user['id'], $user['first_name'], $user['last_name'], $user['display_name'], $user['photo_url']);
@@ -75,15 +75,17 @@ class Auth implements IAdapter
     public function loginSocial($params)
     {
         if (!class_exists('Libs')) {
-            throw new Exception('External libs not configured.', 1004);
+            throw new Exception('External libs not configured.');
         }
         
         // the selected provider
         $providerName = $params["provider"];
         try {
             // inlcude HybridAuth library
-            Libs::checkPath(Libs::$hybridAuth);
-            require_once(Libs::$hybridAuth.'/Auth.php') ;
+            Libs::requireLib(Libs::$hybridAuth . '/Auth.php');
+            
+            if ($providerName === 'Facebook')
+                Libs::requireLib(Libs::$hybridAuth . '/thirdparty/Facebook/autoload.php');
     
             // initialize Hybrid_Auth class with the config file
             $hybridauth = new Hybrid_Auth(AuthConfig::$hybridAuthConfig);
