@@ -1,5 +1,6 @@
 import { resources } from './resources';
 // import { utils } from './utils';
+import { IVoidEvent } from './component';
 import { View } from './view';
 import { ListView } from './list.controls';
 import { ButtonView, ContainerView, PanelView, TextView } from './std.controls';
@@ -187,26 +188,61 @@ export class PageView extends View {
 export class ModalView extends View {
     public modalContainer: PanelView;
 
-    constructor(parent: View, name?: string) {
-        super(parent, name);
-        this._visible = false;
+    constructor(name?: string, initComponents = true) {
+        super(null, name, false);
+        this.visible = false;
         this.renderClientArea = false;
         this.modalContainer = new PanelView(this, 'cxtModalContainer');
+        if (initComponents)
+            this.initComponents();
     }
 }
 
-interface IDialogButton {
+/** View at top of all controls that has caption and close button */
+export class DialogView extends ModalView {
+    /** Sets/Gets dialog caption */
+    public get caption() {
+        return this._caption.text;
+    }
+    public set caption(caption: string) {
+        this._caption.text = caption;
+    }
+    /** Fires when user closes dialog */
+    public onClose: IVoidEvent;
+
+    protected _caption: TextView;
+
+    constructor(name?: string, caption?: string) {
+        super(name, false);
+        let captionContainer = new PanelView(this.modalContainer, 'captionContainer');
+        this._caption = new TextView(captionContainer, 'ctxCaption');
+        this._caption.text = caption;
+
+        let closeBtn = new TextView(captionContainer, 'ctxClose');
+        closeBtn.events.onclick = () => {
+            this.hide();
+            if (this.onClose)
+                this.onClose();
+        };
+
+        this.initComponents();
+    }
+}
+
+// MessageBox control
+
+interface IMessageBoxButton {
     id?: string;
     text: string;
     buttonTheme?: string;
-    onClick?: (dialog: Dialog) => void;
+    onClick?: (dialog: MessageBox) => void;
 }
 
 /**
- * Dialog control
+ * MessageBox control
  */
-export class Dialog extends ModalView {
-    public static buttonOk(): IDialogButton {
+export class MessageBox extends ModalView {
+    public static buttonOk(): IMessageBoxButton {
         return {
             id: 'ctxOkButton',
             text: 'OK',
@@ -214,7 +250,7 @@ export class Dialog extends ModalView {
             onClick: null
         };
     }
-    public static buttonCancel(): IDialogButton {
+    public static buttonCancel(): IMessageBoxButton {
         return {
             id: 'ctxCancelButton',
             text: 'Cancel',
@@ -223,17 +259,17 @@ export class Dialog extends ModalView {
         };
     }
 
-    public static showOkCancelDialog(caption: string, onOkClick: (dialog: Dialog) => void, onCancelClick?: (dialog: Dialog) => void) {
-        let dlg = new Dialog();
+    public static showOkCancelMessage(caption: string, onOkClick: (dialog: MessageBox) => void, onCancelClick?: (dialog: MessageBox) => void) {
+        let dlg = new MessageBox();
         let btn, buttons = [];
         dlg.captionView.text = caption;
         if (typeof onCancelClick === 'function') {
-            btn = Dialog.buttonCancel();
+            btn = MessageBox.buttonCancel();
             btn.onClick = onCancelClick;
             buttons.push(btn);
         }
         if (typeof onOkClick === 'function') {
-            btn = Dialog.buttonOk();
+            btn = MessageBox.buttonOk();
             btn.onClick = onOkClick;
             buttons.push(btn);
         }
@@ -241,20 +277,20 @@ export class Dialog extends ModalView {
         dlg.show();
     }
 
-    public static showDialog(caption: string, buttons?: IDialogButton[]) {
-        let dlg = new Dialog();
+    public static showMessage(caption: string, buttons?: IMessageBoxButton[]) {
+        let dlg = new MessageBox();
         if (!buttons || buttons.length === 0)
-            buttons = [Dialog.buttonOk()];
+            buttons = [MessageBox.buttonOk()];
         dlg.buttons = buttons;
         dlg.captionView.text = caption;
         dlg.show();
     }
 
     /** Set/gets dialog's buttons set */
-    public get buttons(): IDialogButton[] {
+    public get buttons(): IMessageBoxButton[] {
         return this._buttons;
     }
-    public set buttons(buttons: IDialogButton[]) {
+    public set buttons(buttons: IMessageBoxButton[]) {
         if (buttons)
             this._buttons = buttons;
 
@@ -279,14 +315,15 @@ export class Dialog extends ModalView {
 
     protected captionView: TextView;
     protected buttonsContainer: PanelView;
-    protected _buttons: IDialogButton[] = [];
+    protected _buttons: IMessageBoxButton[] = [];
 
     constructor(name?: string) {
-        super(null, name);
+        super(name);
+        this.visible = false;
         this.captionView = new TextView(this.modalContainer, 'ctxCaption');
         this.captionView.doNotEscapeHtml = true;
         this.buttonsContainer = new PanelView(this.modalContainer, 'ctxButtonsContainer');
-        this.buttons = [Dialog.buttonOk()];
+        this.buttons = [MessageBox.buttonOk()];
     }
 
 }
@@ -305,7 +342,16 @@ interface IMenuItem {
  */
 export class PopupMenu extends ListView {
     public static separator = '-';
+    public static get targetHorPositionType() {
+        return { left: 'left', right: 'right' };
+    };
+    public static get targetVerPositionType() {
+        return { under: 'under', above: 'above' };
+    };
+
     protected target: View;
+    protected targetHorPosition: string;
+    protected targetVerPosition: string;
     protected fakeEdit: View;
 
     /** Sets menu 
@@ -326,8 +372,11 @@ export class PopupMenu extends ListView {
         this.attributes.tabindex = 0;
     }
 
-    public popup(target: View) {
+    /** Popups menu under/above target control */
+    public popup(target: View, targetHorPosition = PopupMenu.targetHorPositionType.left, targetVerPosition = PopupMenu.targetVerPositionType.under) {
         this.target = target;
+        this.targetHorPosition = targetHorPosition;
+        this.targetVerPosition = targetVerPosition;
         this.visible = !this.visible;
     }
 
@@ -335,10 +384,18 @@ export class PopupMenu extends ListView {
         super.afterUpdateView();
         if (!this.element || !this.target || !this.target.element)
             return;
-        this.element.style.top = (this.target.element.offsetTop + this.target.element.offsetHeight) + 'px';
-        this.element.style.left = this.target.element.offsetLeft.toString() + 'px';
-        this.element.addEventListener('focusout', (event) => { this.onFocusOut(); });
 
+        if (this.targetVerPosition === PopupMenu.targetVerPositionType.under)
+            this.element.style.top = (this.target.element.offsetTop + this.target.element.offsetHeight) + 'px';
+        else
+            this.element.style.top = (this.target.element.offsetTop - this.element.offsetHeight) + 'px';
+
+        if (this.targetHorPosition === PopupMenu.targetHorPositionType.left)
+            this.element.style.left = this.target.element.offsetLeft + 'px';
+        else
+            this.element.style.left = this.target.element.offsetLeft + this.target.element.offsetWidth - this.element.offsetWidth + 'px';
+
+        this.element.addEventListener('focusout', (event) => { this.onFocusOut(); });
         this.element.focus();
     }
 

@@ -122,13 +122,14 @@ export abstract class View extends Component {
     protected _text: any;
     protected _classPath: string;
 
-    constructor(parent: View, name?: string) {
+    constructor(parent: View, name?: string, initComponents = true) {
         super(name);
         this._id = 'w' + (View.nextViewId++);
         this._parent = parent;
         if (parent)
             parent.addView(this);
-        this.initComponents();
+        if (initComponents)
+            this.initComponents();
     }
 
     /** Control's parent control */
@@ -272,7 +273,7 @@ export abstract class View extends Component {
 
     /** Moves control to the new parent */
     public setParent(value) {
-        if (value !== this.parent) {
+        if (value !== this.parent || (value == undefined && this.parent == undefined)) {
             if (this.parent) {
                 this.parent.removeView(this);
 

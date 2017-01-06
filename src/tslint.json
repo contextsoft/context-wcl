@@ -54,6 +54,9 @@
         ],
         "comment-format": [
             false
+        ],
+        "triple-equals": [
+            false
         ]
     }
 }

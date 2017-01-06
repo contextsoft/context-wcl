@@ -121,7 +121,6 @@ export class ButtonView extends View {
         info: 'info',
         warning: 'warning',
         danger: 'danger',
-        // TODO: does these types needed here?
         toggle: 'toggle',
         chevronLeft: 'chevronLeft',
         chevronRight: 'chevronRight'

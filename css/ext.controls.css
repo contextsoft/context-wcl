@@ -253,25 +253,45 @@
     }
 }
 
-/* Dialog */
+/* DialogView */
 
-.CtxDialog {
-    background-color: rgba(0, 0, 0, 0.2);
+.CtxDialogView .cxtModalContainer .ctxCaption {
+    font-size: 18px;
+    font-weight: bolder;
+    margin-bottom: 20px;
+    text-align: left;
+    color: #333;
+    float: left;
 }
 
-/*
-.CtxDialog .cxtModalContainer {
+.CtxDialogView .cxtModalContainer .ctxClose {
+    background-image: url(../images/cross.png);
+    background-repeat: no-repeat;
+    float: right;
+    width: 12px;
+    height: 12px;
+    background-size: 12px;  
+    cursor: pointer;
+    margin-top: 4px;
 }
-*/
 
-.CtxDialog .cxtModalContainer .ctxCaption {
+.CtxDialogView .cxtModalContainer .ctxClose:hover {
+    background-image: url(../images/cross-red.png);
+}
+
+
+
+/* MessageBox */
+
+
+.CtxMessageBox .cxtModalContainer .ctxCaption {
     font-size: 18px;
     font-weight: bolder;
     margin-bottom: 20px;
     text-align: left;
 }
 
-.CtxDialog .cxtModalContainer .ctxButtonsContainer {
+.CtxMessageBox .cxtModalContainer .ctxButtonsContainer {
     /*position: absolute;
     text-align: right;
     bottom: 0;

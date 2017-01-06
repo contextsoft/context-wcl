@@ -61,12 +61,12 @@ class Application
                     // checking is it an Adapter
                     $interfaces = class_implements($adapter);
                     if (!isset($interfaces['IAdapter'])) {
-                        throw new Exception("$adapter is not an adapter.", 1001);
+                        throw new Exception("$adapter is not an adapter");
                     }
                     
                     // checking if method is allowed
                     if (array_search($method, $adapter::getAllowedMethods()) === false) {
-                        throw new Exception("$adapter.$method is not allowed call.", 1002);
+                        throw new Exception("$adapter.$method is not allowed call");
                     }
                     
                     // starting session
@@ -76,10 +76,10 @@ class Application
                     $obj = new $adapter();
                     $response->data = $obj->$method($params);
                 } else {
-                    throw new Exception("Adapter $adapter does not exists.", 1003);
+                    throw new Exception("Adapter $adapter does not exists");
                 }
             } else {
-                throw new Exception("Adapter or method not provided.", 1000);
+                throw new Exception("Adapter or method not provided");
             }
         } catch (Exception $e) {
             Application::handleException($e, $response);
@@ -112,7 +112,7 @@ class Application
     protected static function connectToDb()
     {
         if (!class_exists('DatabaseConfig')) {
-            throw new Exception('Database not configured.', 1004);
+            throw new Exception('Database not configured');
         }
         Application::$connection = new PDO(DatabaseConfig::$dsn, DatabaseConfig::$username, DatabaseConfig::$password);
         Application::$connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

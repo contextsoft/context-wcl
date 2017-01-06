@@ -80,7 +80,10 @@ export class Ajax {
 class User {
     public id: string;
     public photoUrl: string;
-    public name: string;
+    public firstName: string;
+    public lastName: string;
+    public displayName: string;
+    public socialUsed: boolean;
 }
 
 export class Service implements IService {
@@ -95,14 +98,20 @@ export class Service implements IService {
 
     get authenticated(): boolean {
         return this._authenticated;
-    };
+    }
     protected _authenticated;
 
     protected loginFromResponse(response: IResponse) {
-        this._authenticated = true;
+        this._user = new User();
+        this._authenticated = response.data ? true : false;
+        if (!this._authenticated)
+            return;
         this._user.id = response.data.user_id;
-        this._user.name = response.data.user_display_name;
+        this._user.firstName = response.data.user_first_name;
+        this._user.lastName = response.data.user_last_name;
+        this._user.displayName = response.data.user_display_name;
         this._user.photoUrl = response.data.user_photo_url;
+        this._user.socialUsed = response.data.user_social;
     }
 
     public login(email: string, password: string): Promise<IResponse> {
@@ -111,7 +120,7 @@ export class Service implements IService {
                 this.loginFromResponse(response);
                 return response;
             });
-    };
+    }
 
     public loginSocial(provider: string): Promise<any> {
         let popupWindow = window.open(
@@ -135,7 +144,7 @@ export class Service implements IService {
         this._authenticated = false;
         this._user = new User();
         return this.execute(this.authAdapter, 'logout');
-    };
+    }
 
     public register(email, firstName, lastName, password1, password2, captcha): Promise<IResponse> {
         let params = {
@@ -147,7 +156,7 @@ export class Service implements IService {
             captcha
         };
         return this.execute(this.authAdapter, 'register', params);
-    };
+    }
 
     public sendRegistrationConfirmationCode(email): Promise<IResponse> {
         return this.execute(this.authAdapter, 'sendRegistrationConfirmationCode', { email });
@@ -165,8 +174,8 @@ export class Service implements IService {
         return this.execute(this.authAdapter, 'sendPasswordResetCode', { email });
     }
 
-    public resetPassword(password1, password2, code): Promise<IResponse> {
-        return this.execute(this.authAdapter, 'resetPassword', { password1, password2, code }).then(
+    public resetPassword(email, password1, password2, code): Promise<IResponse> {
+        return this.execute(this.authAdapter, 'resetPassword', { email, password1, password2, code }).then(
             (response) => {
                 this.loginFromResponse(response);
                 return response;
@@ -175,6 +184,15 @@ export class Service implements IService {
 
     public isPasswordResetCodeSent(email): Promise<IResponse> {
         return this.execute(this.authAdapter, 'isPasswordResetCodeSent', { email });
+    }
+
+    public getSessionUser(): Promise<IResponse> {
+        return this.execute(this.authAdapter, 'getUser').then(
+            (response: IResponse) => {
+                this.loginFromResponse(response);
+                return response;
+            }
+        );
     }
 
     public execute(adapter: string, method: string, params?: any, showError = true): Promise<IResponse> {

@@ -5,7 +5,7 @@ import { utils } from './utils';
 import { resources } from './resources';
 import { IVoidEvent, IDOMEvent } from './component';
 import { IService, Service } from './service';
-import { Dialog } from './ext.controls';
+import { MessageBox } from './ext.controls';
 
 export interface IAppConfig {
     /** Application root URL */
@@ -162,13 +162,13 @@ export class Application {
     public showMessage(msg: string, onClose?: IVoidEvent) {
         if (!msg || msg === '')
             return;
-        let buttons = [Dialog.buttonOk()];
+        let buttons = [MessageBox.buttonOk()];
         buttons[0].onClick = function () {
             if (onClose)
                 onClose();
             this.parentDialog.hide();
         };
-        Dialog.showDialog(msg, buttons);
+        MessageBox.showMessage(msg, buttons);
     }
 
     /** Throws localized exception */
