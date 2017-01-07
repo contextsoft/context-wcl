@@ -272,7 +272,7 @@ class Auth implements IAdapter
     }
 
     /** Changes password and logins user.
-     * params: [email, password1 - new password, password2 - new password confirm, code - from confirmation email]
+     * params: [email, password - new password, password_confirm - new password confirm, code - from confirmation email]
      */
     public function resetPassword($params)
     {
@@ -284,15 +284,15 @@ class Auth implements IAdapter
             Application::raise('Please enter code sent to you by email');
         }
 
-        if (empty($params['password1']) || empty($params['password2'])) {
-            Application::raise('Please new enter password');
+        if (empty($params['password']) || empty($params['password_confirm'])) {
+            Application::raise('Please enter new password');
         }
 
-        if ($params['password1'] != $params['password2']) {
+        if ($params['password'] != $params['password_confirm']) {
             Application::raise('Passwords do not match');
         }
         
-        $newPwd = $params['password1'];
+        $newPwd = $params['password'];
         if (!empty($validate = Auth::validatePassword($newPwd))) {
             Application::raise($validate);
         }
@@ -326,7 +326,7 @@ class Auth implements IAdapter
     }
 
     /** Registers user
-     * params: [email, first_name, last_name, display_name, photo_url, password1, password2, captcha]
+     * params: [email, first_name, last_name, display_name, photo_url, password, password_confirm, captcha]
      */
     public function register($params)
     {
@@ -339,13 +339,13 @@ class Auth implements IAdapter
         if (empty($params['first_name']) || empty($params['last_name'])) {
             Application::raise('Please enter your name');
         }
-        if (empty($params['password1']) || empty($params['password2'])) {
+        if (empty($params['password']) || empty($params['password_confirm'])) {
             Application::raise('Please enter password');
         }
-        if ($params['password1'] != $params['password2']) {
+        if ($params['password'] != $params['password_confirm']) {
             Application::raise('Passwords do not match');
         }
-        if (!empty($validate = Auth::validatePassword($params['password1']))) {
+        if (!empty($validate = Auth::validatePassword($params['password']))) {
             Application::raise($validate);
         }
         if (empty($params['captcha']) || md5(strtoupper($params['captcha'])) != UserSession::GetValue('captcha_register')) {
@@ -369,7 +369,7 @@ class Auth implements IAdapter
                 'last_name' => $params['last_name'],
                 'display_name' => isset($params['display_name']) ? $params['display_name'] : '',
                 'photo_url' => isset($params['photo_url']) ? $params['photo_url'] : '',
-                'password' => $params['password1']
+                'password' => $params['password']
             ]);
     }
 
@@ -378,10 +378,11 @@ class Auth implements IAdapter
     {
         $user = DbObject::fetchSql(
             "SELECT * FROM user WHERE id=?",
-            [UserSession::getValue("userId")]);
+            [UserSession::getValue("user_id")]);
         $user = $user[0];
 
         return [
+            'email' => $user['email'],
             'first_name' => $user['first_name'],
             'last_name' => $user['last_name'],
             'display_name' => $user['display_name'],
@@ -390,7 +391,7 @@ class Auth implements IAdapter
     }
 
     /** Saves user profile
-     * params: [first_name, last_name, display_name, photo_url, password1 - old, password2 - new, Password3 - new confirm]
+     * params: [first_name, last_name, display_name, photo_url, old_password, new_password, password_confirm]
      */
     public function saveUserProfile($params)
     {
@@ -399,42 +400,46 @@ class Auth implements IAdapter
         }
 
         $user = DbObject::fetchSql(
-            "SELECT password FROM users WHERE id = ?",
-            [UserSession::GetValue("userId")]);
+            "SELECT password FROM user WHERE id = ?",
+            [UserSession::GetValue("user_id")]);
         
-        if (empty($params['password1']) || empty($params['password2']) || empty($params['Password3'])) {
-            Application::raise('Please enter old and new Passwords');
+
+        if (!empty($params['old_password']) || !empty($params['new_password']) || !empty($params['password_confirm'])) {
+            if (md5($params['old_password']) != $user[0]['password'] || $params['new_password'] != $params['password_confirm']) {
+                Application::raise('Passwords do not match');
+            } else {
+                $newPwd = $params['new_password'];
+            }
         }
 
-        if (md5($params['password1']) != $user[0]['password'] || $params['password2'] != $params['Password3']) {
-            Application::raise('Passwords do not match');
+        if(isset($newPwd)) {
+            $validate = Auth::validatePassword($newPwd);
+            if (!empty($validate)) {
+                Application::raise($validate);
+            }
         }
 
-        $validate = Auth::validatePassword($password2);
-        if (!empty($validate)) {
-            Application::raise($validate);
-        }
-
-        DbObject::exesSql(
+        DbObject::execSql(
             "UPDATE user SET photo_url = :photo_url, display_name = :display_name, first_name = :first_name, last_name = :last_name WHERE id = :id",
             [
                 'photo_url' => $params['photo_url'],
                 'display_name' => $params['display_name'],
                 'first_name' => $params['first_name'],
                 'last_name' => $params['last_name'],
-                'id' => UserSession::getValue("userId")
+                'id' => UserSession::getValue("user_id")
             ]
         );
 
-        if (!empty($params['password2'])) {
-            DbObject::exesSql(
+        if (isset($newPwd)) {
+            DbObject::execSql(
                 "UPDATE user SET password = md5(:password) WHERE id = :id",
                 [
-                    'id' => UserSession::getValue("userId"),
-                    'password' => $params['password2'],
-                    
+                    'id' => UserSession::getValue("user_id"),
+                    'password' => $newPwd,
                 ]);
         }
+
+         $this->setUser(UserSession::GetValue("user_id"), $params['first_name'], $params['last_name'], $params['display_name'], $params['photo_url']);
     }
 
     /** Generates captcha image
@@ -559,7 +564,7 @@ class Auth implements IAdapter
     public static function validatePassword($password)
     {
         if (strlen($password) < 6) {
-            return 'password lenght must be equal or greater than 6 characters.';
+            return 'Password lenght must be equal or greater than 6 characters.';
         }
     }
 

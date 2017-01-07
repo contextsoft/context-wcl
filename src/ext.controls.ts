@@ -198,7 +198,9 @@ export class ModalView extends View {
     }
 }
 
-/** View at top of all controls that has caption and close button */
+/** 
+ * View displayed at top of all controls that has caption and close button 
+ */
 export class DialogView extends ModalView {
     /** Sets/Gets dialog caption */
     public get caption() {
@@ -214,18 +216,22 @@ export class DialogView extends ModalView {
 
     constructor(name?: string, caption?: string) {
         super(name, false);
-        let captionContainer = new PanelView(this.modalContainer, 'captionContainer');
+        let captionContainer = new PanelView(this.modalContainer, 'ctxCaptionContainer');
         this._caption = new TextView(captionContainer, 'ctxCaption');
         this._caption.text = caption;
 
         let closeBtn = new TextView(captionContainer, 'ctxClose');
         closeBtn.events.onclick = () => {
-            this.hide();
-            if (this.onClose)
-                this.onClose();
+            this.close();
         };
 
         this.initComponents();
+    }
+
+    public close() {
+        this.hide();
+        if (this.onClose)
+            this.onClose();
     }
 }
 
@@ -242,6 +248,8 @@ interface IMessageBoxButton {
  * MessageBox control
  */
 export class MessageBox extends ModalView {
+    protected destroyOnHide = false;
+
     public static buttonOk(): IMessageBoxButton {
         return {
             id: 'ctxOkButton',
@@ -306,9 +314,9 @@ export class MessageBox extends ModalView {
             (<any>btn).parentDialog = this;
             btn.events.onclick = function (event) {
                 if (this.onClick)
-                    this.onClick(this.parentDialog);
-                else
-                    this.parentDialog.hide();
+                    this.onClick(this);
+                if (this.parentDialog.destroyOnHide)
+                    this.parentDialog.destroy();
             };
         }
     }
@@ -317,9 +325,10 @@ export class MessageBox extends ModalView {
     protected buttonsContainer: PanelView;
     protected _buttons: IMessageBoxButton[] = [];
 
-    constructor(name?: string) {
+    constructor(name?: string, destroyOnHide = true) {
         super(name);
         this.visible = false;
+        this.destroyOnHide = destroyOnHide;
         this.captionView = new TextView(this.modalContainer, 'ctxCaption');
         this.captionView.doNotEscapeHtml = true;
         this.buttonsContainer = new PanelView(this.modalContainer, 'ctxButtonsContainer');
@@ -328,7 +337,7 @@ export class MessageBox extends ModalView {
 
 }
 
-// MenuView
+// PopupMenu
 
 interface IMenuItem {
     icon?: string;
@@ -433,3 +442,4 @@ export class PopupMenu extends ListView {
         return t;
     }
 }
+

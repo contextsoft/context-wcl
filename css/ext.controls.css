@@ -1,3 +1,15 @@
+/* Animations */
+
+@keyframes slideDown {
+    0%   { transform: translateY(-100%); }
+    100% { transform: translateY(0);     }
+}
+
+@keyframes popUp {
+    0%   { transform: scale(0); }
+    100% { transform: scale(100%);     }
+}
+
 /* CtxTabsView */
 
 /* Common */
@@ -243,7 +255,7 @@
     height: auto;
     max-height: 90%;
     margin: 30px auto;
-    padding: 15px;
+    padding: 30px;
     overflow: auto;
 }
 
@@ -255,10 +267,23 @@
 
 /* DialogView */
 
+.CtxModalView .cxtModalContainer {
+  animation-name: popUp;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-out;
+  animation-duration: 0.2s;
+}
+
+.CtxDialogView .cxtModalContainer .ctxCaptionContainer {
+    margin-left: -15px;
+    margin-top: -15px;
+    margin-right: -15px    
+}
+
 .CtxDialogView .cxtModalContainer .ctxCaption {
     font-size: 18px;
     font-weight: bolder;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     text-align: left;
     color: #333;
     float: left;
@@ -283,6 +308,12 @@
 
 /* MessageBox */
 
+.CtxMessageBox .cxtModalContainer {
+  animation-name: popUp;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-out;
+  animation-duration: 0.2s;
+}
 
 .CtxMessageBox .cxtModalContainer .ctxCaption {
     font-size: 18px;
@@ -291,16 +322,14 @@
     text-align: left;
 }
 
-.CtxMessageBox .cxtModalContainer .ctxButtonsContainer {
-    /*position: absolute;
-    text-align: right;
-    bottom: 0;
-    padding-right: 30px;
-    margin-bottom: 10px;
-    width: 100%;*/        
-}
-
 /* PopupMenu */
+
+.CtxPopupMenu {
+  animation-name: slideDown;
+  animation-iteration-count: 1;
+  animation-timing-function: ease-out;
+  animation-duration: 0.1s;
+}
 
 .CtxPopupMenu, .CtxPopupMenu:focus {
     position: absolute;

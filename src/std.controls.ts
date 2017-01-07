@@ -25,6 +25,24 @@ export class ScreenView extends View {
     }
 }
 
+/** Full-screen control that covers/disables all controls and changes mouse cursor. Used for Ajax requests */
+export class WaitScreen extends ScreenView {
+    protected static instance: WaitScreen;
+
+    public static start() {
+        if (!WaitScreen.instance)
+            WaitScreen.instance = new WaitScreen();
+        WaitScreen.instance.show();
+    }
+
+    public static stop() {
+        if (!WaitScreen.instance)
+            return;
+        WaitScreen.instance.hide();
+    }
+}
+
+
 /** 
  * <div> wrapper 
  */
@@ -271,7 +289,7 @@ export class ContainerView extends View {
         return {
             transition: ContainerView.cssSlideHorizontal,
             properties: ['opacity', '-webkit-transform'],
-            duration: 0.5
+            duration: 0.25
             // we may additionally specify To transition
             // transitionTo: ContainerView.cssSlideHorizontal
             // propertiesTo: ['opacity', '-webkit-transform'],
@@ -281,28 +299,28 @@ export class ContainerView extends View {
         return {
             transition: ContainerView.cssSlideVertical,
             properties: ['opacity', '-webkit-transform'],
-            duration: 0.5
+            duration: 0.25
         };
     }
     public static animFadeInOut(): ICSSTransitionType {
         return {
             transition: ContainerView.cssFadeInOut,
             properties: ['opacity'],
-            duration: 0.5
+            duration: 0.25
         };
     }
     public static animRotateY(): ICSSTransitionType {
         return {
             transition: ContainerView.cssRotateY,
             properties: ['opacity', '-webkit-transform'],
-            duration: 0.5
+            duration: 0.25
         };
     }
     public static animRotateX(): ICSSTransitionType {
         return {
             transition: ContainerView.cssRotateX,
             properties: ['opacity', '-webkit-transform'],
-            duration: 0.5
+            duration: 0.25
         };
     }
 

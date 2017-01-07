@@ -2,6 +2,7 @@
 
 // import { utils } from './Utils';
 import { application } from './Application';
+import { WaitScreen } from './std.controls';
 
 export interface IResponse {
     data: any;
@@ -146,13 +147,13 @@ export class Service implements IService {
         return this.execute(this.authAdapter, 'logout');
     }
 
-    public register(email, firstName, lastName, password1, password2, captcha): Promise<IResponse> {
+    public register(email, firstName, lastName, password, passwordConfirm, captcha): Promise<IResponse> {
         let params = {
             email,
             first_name: firstName,
             last_name: lastName,
-            password1,
-            password2,
+            password,
+            password_confirm: passwordConfirm,
             captcha
         };
         return this.execute(this.authAdapter, 'register', params);
@@ -174,8 +175,8 @@ export class Service implements IService {
         return this.execute(this.authAdapter, 'sendPasswordResetCode', { email });
     }
 
-    public resetPassword(email, password1, password2, code): Promise<IResponse> {
-        return this.execute(this.authAdapter, 'resetPassword', { email, password1, password2, code }).then(
+    public resetPassword(email, password, passwordConfirm, code): Promise<IResponse> {
+        return this.execute(this.authAdapter, 'resetPassword', { email, password, password_confirm: passwordConfirm, code }).then(
             (response) => {
                 this.loginFromResponse(response);
                 return response;
@@ -195,6 +196,24 @@ export class Service implements IService {
         );
     }
 
+    public getUserProfile(): Promise<IResponse> {
+        return this.execute(this.authAdapter, 'getUserProfile');
+    }
+
+    public saveUserProfile(email, firstName, lastName, displayName, photoUrl, oldPassword, newPassword, passwordConfirm): Promise<IResponse> {
+        return this.execute(this.authAdapter, 'saveUserProfile', {
+            email,
+            first_name: firstName,
+            last_name: lastName,
+            display_name: displayName,
+            photo_url: photoUrl,
+            old_password: oldPassword,
+            new_password: newPassword,
+            password_confirm: passwordConfirm
+        });
+    }
+
+
     public execute(adapter: string, method: string, params?: any, showError = true): Promise<IResponse> {
         if (typeof params === 'object')
             params = JSON.stringify(params);
@@ -204,7 +223,11 @@ export class Service implements IService {
             params: params || null
         };
         let promise = new Promise((resolve, reject) => {
+            WaitScreen.start();
             Ajax.post(this.url, data, (result) => {
+
+                WaitScreen.stop();
+
                 let response: IResponse;
 
                 // cutting php raw output
@@ -250,7 +273,7 @@ export class Service implements IService {
 
     public showError(response: IResponse) {
         let msg = response.message;
-        if (application.obj.config.debug && response.stack && !response.code) {
+        if (application.obj.config.debug && response.stack && response.code) {
             msg += '<div class="stack" style="font-weight: normal; font-size: 12px; margin-top: 10px; margin-bottom: 10px">' + response.stack + '</div>';
         }
         if (application.obj.config.debug && application.obj.config.showServiceRawOutput && response.raw)
