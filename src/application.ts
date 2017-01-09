@@ -163,10 +163,9 @@ export class Application {
         if (!msg || msg === '')
             return;
         let buttons = [MessageBox.buttonOk()];
-        buttons[0].onClick = function () {
+        buttons[0].onClick = (dialog) => {
             if (onClose)
                 onClose();
-            this.parentDialog.hide();
         };
         MessageBox.showMessage(msg, buttons);
     }

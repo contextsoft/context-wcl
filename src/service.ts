@@ -123,21 +123,29 @@ export class Service implements IService {
             });
     }
 
-    public loginSocial(provider: string): Promise<any> {
+    public loginSocial(provider: string): Promise<IResponse> {
         let popupWindow = window.open(
             this.hybridAuthUrl + '?provider=' + provider,
             'hybridAuth_Social_Sign_on',
             'location=0,status=0,scrollbars=0,width=768,height=500'
         );
         return new Promise((resolve, reject) => {
-            let winTimer = setTimeout(() => {
+            let timer = setInterval(() => {
                 if (popupWindow.closed) {
-                    clearInterval(winTimer);
-                    resolve();
+                    clearInterval(timer);
+                    this.getSessionUser().then(
+                        (response: IResponse) => {
+                            this.loginFromResponse(response);
+                            if (this.authenticated)
+                                resolve(response);
+                            else
+                                reject();
+                        },
+                        () => {
+                            reject();
+                        });
                 }
-                else
-                    reject();
-            }, 1000);
+            }, 250);
         });
     }
 

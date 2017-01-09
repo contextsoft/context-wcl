@@ -1,15 +1,3 @@
-/* Animations */
-
-@keyframes slideDown {
-    0%   { transform: translateY(-100%); }
-    100% { transform: translateY(0);     }
-}
-
-@keyframes popUp {
-    0%   { transform: scale(0); }
-    100% { transform: scale(100%);     }
-}
-
 /* CtxTabsView */
 
 /* Common */
@@ -268,7 +256,7 @@
 /* DialogView */
 
 .CtxModalView .cxtModalContainer {
-  animation-name: popUp;
+  animation-name: ctxAnimZoomOut;
   animation-iteration-count: 1;
   animation-timing-function: ease-out;
   animation-duration: 0.2s;
@@ -309,7 +297,7 @@
 /* MessageBox */
 
 .CtxMessageBox .cxtModalContainer {
-  animation-name: popUp;
+  animation-name: ctxAnimZoomOut;
   animation-iteration-count: 1;
   animation-timing-function: ease-out;
   animation-duration: 0.2s;
@@ -325,7 +313,7 @@
 /* PopupMenu */
 
 .CtxPopupMenu {
-  animation-name: slideDown;
+  animation-name: ctxAnimSlideDown;
   animation-iteration-count: 1;
   animation-timing-function: ease-out;
   animation-duration: 0.1s;

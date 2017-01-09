@@ -106,21 +106,23 @@ class Auth implements IAdapter
     
         // check if the current user already have authenticated using this provider before
         $user = DbObject::fetchSql(
-            "SELECT id_user FROM user_provider WHERE provider = :provider AND provider_userid = :provider_userid",
-            ['provider' => $providerName, 'provider_userid' => $userProfile->identifier]);
+            "SELECT id_user FROM user_provider WHERE provider = :provider AND provider_user_id = :provider_user_id",
+            ['provider' => $providerName, 'provider_user_id' => $userProfile->identifier]);
 
         // if the used didn't authenticate using the selected provider before
         // we create a new entry on database.users for him
-        if (!count(user))  {
+        if (!count($user))  {
+            $id = $this->generateUserId();
             DbObject::execSql(
                 "INSERT INTO user(id, email, first_name, last_name, display_name, photo_url, email_confirmed)
-                    VALUES(:id, :email, :first_name, :last_name, :photo_url, 'T')",
+                    VALUES(:id, :email, :first_name, :last_name, :display_name, :photo_url, 'T')",
                 [
-                    'id' => $this->generateUserId(),
+                    'id' => $id,
                     'email' => $userProfile->email,
-                    'first_name' => $userProfile->first_name,
-                    'last_name' => $userProfile->last_name,
-                    'photo_url' =>$userProfile->photo_url
+                    'first_name' => $userProfile->firstName,
+                    'last_name' => $userProfile->lastName,
+                    'display_name' => $userProfile->displayName,
+                    'photo_url' =>$userProfile->photoURL
                 ]);
 
             $user = DbObject::fetchSQL(
@@ -132,21 +134,22 @@ class Auth implements IAdapter
                 Application::raise('User registration failed');
             $user = $user[0];
 
+            $id = $this->generateUserProviderId();
             DbObject::execSql(
-                "INSERT INTO user_provider(id, id_user, provider, provider_userid)
-                    VALUES(:id, :id_user, :provider, :provider_userid)",
+                "INSERT INTO user_provider(id, id_user, provider, provider_user_id)
+                    VALUES(:id, :id_user, :provider, :provider_user_id)",
                 [
-                    'id' => $this->generateUserProviderId(),
-                    'id_user' => $user->id,
+                    'id' => $id,
+                    'id_user' => $user['id'],
                     'provider' => $providerName,
-                    'provider_userid' => $user_profile->identifier
+                    'provider_user_id' => $userProfile->identifier
                 ]);                        
         }
         else {
             $user = DbObject::fetchSQL(
                 "SELECT id, photo_url, display_name, first_name, last_name, active FROM user u 
                   WHERE id = ?",
-                [$user[0]->id]);
+                [$user[0]['id_user']]);
 
             if (!count($user))
                 Application::raise('Login via social network failed');

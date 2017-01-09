@@ -552,7 +552,7 @@ export abstract class View extends Component {
                 this.element[eventName] = (event) => {
                     handler.call(this, event);
                     if (this.events[eventName])
-                        this.events[eventName].call(this, event);
+                        this.events[eventName].call(this, event, this);
                 };
         }
     }
@@ -622,7 +622,7 @@ export abstract class View extends Component {
         if (typeof this.events === 'object')
             for (let e in this.events)
                 if (this.events.hasOwnProperty(e))
-                    this.element[e] = (event) => { this.events[e].call(this, event); };
+                    this.element[e] = (event) => { this.events[e].call(this, event, this); };
 
         // handle on click if we have action assigned
         if (this.action)

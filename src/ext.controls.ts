@@ -8,7 +8,8 @@ import { LookupDataLink, RecordSource, RecordSetSource, DataEventType } from './
 
 resources.register('context-wcl',
     [
-        '../css/ext.controls.css'
+        '../css/ext.controls.css',
+        '../css/animations.css'
     ]
 );
 
@@ -70,8 +71,8 @@ export class TabsView extends ListView {
 
         this.dropDownButton = new ButtonView(this, 'dropDownButton');
         this.dropDownButton.theme = ButtonView.themes.toggle;
-        this.dropDownButton.events.onclick = function () {
-            <TabsView>(this.parent).dropDownButtonClick();
+        this.dropDownButton.events.onclick = () => {
+            this.dropDownButtonClick();
         };
     }
 
@@ -268,7 +269,7 @@ export class MessageBox extends ModalView {
     }
 
     public static showOkCancelMessage(caption: string, onOkClick: (dialog: MessageBox) => void, onCancelClick?: (dialog: MessageBox) => void) {
-        let dlg = new MessageBox();
+        let dlg = new MessageBox(null, true);
         let btn, buttons = [];
         dlg.captionView.text = caption;
         if (typeof onCancelClick === 'function') {
@@ -286,7 +287,7 @@ export class MessageBox extends ModalView {
     }
 
     public static showMessage(caption: string, buttons?: IMessageBoxButton[]) {
-        let dlg = new MessageBox();
+        let dlg = new MessageBox(null, true);
         if (!buttons || buttons.length === 0)
             buttons = [MessageBox.buttonOk()];
         dlg.buttons = buttons;
@@ -312,11 +313,11 @@ export class MessageBox extends ModalView {
             btn.theme = this._buttons[i].buttonTheme;
             (<any>btn).onClick = this._buttons[i].onClick;
             (<any>btn).parentDialog = this;
-            btn.events.onclick = function (event) {
-                if (this.onClick)
-                    this.onClick(this);
-                if (this.parentDialog.destroyOnHide)
-                    this.parentDialog.destroy();
+            btn.events.onclick = (event, sender) => {
+                if (sender.onClick)
+                    sender.onClick(this);
+                if (this.destroyOnHide)
+                    this.destroy();
             };
         }
     }
@@ -325,7 +326,7 @@ export class MessageBox extends ModalView {
     protected buttonsContainer: PanelView;
     protected _buttons: IMessageBoxButton[] = [];
 
-    constructor(name?: string, destroyOnHide = true) {
+    constructor(name?: string, destroyOnHide = false) {
         super(name);
         this.visible = false;
         this.destroyOnHide = destroyOnHide;
@@ -442,4 +443,3 @@ export class PopupMenu extends ListView {
         return t;
     }
 }
-

@@ -1,0 +1,11 @@
+/* Animations */
+
+@keyframes ctxAnimSlideDown {
+    0%   { transform: translateY(-100%); }
+    100% { transform: translateY(0);     }
+}
+
+@keyframes ctxAnimZoomOut {
+    0%   { transform: scale(0); }
+    100% { transform: scale(100%);     }
+}
