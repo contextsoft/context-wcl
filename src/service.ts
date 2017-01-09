@@ -1,6 +1,6 @@
 /** Server communication protocols and routines */
 
-// import { utils } from './Utils';
+import { utils } from './Utils';
 import { application } from './Application';
 import { WaitScreen } from './std.controls';
 
@@ -84,7 +84,7 @@ class User {
     public firstName: string;
     public lastName: string;
     public displayName: string;
-    public socialUsed: boolean;
+    public isSocial: boolean;
 }
 
 export class Service implements IService {
@@ -112,7 +112,7 @@ export class Service implements IService {
         this._user.lastName = response.data.user_last_name;
         this._user.displayName = response.data.user_display_name;
         this._user.photoUrl = response.data.user_photo_url;
-        this._user.socialUsed = response.data.user_social;
+        this._user.isSocial = response.data.user_social ? true : false;
     }
 
     public login(email: string, password: string): Promise<IResponse> {
@@ -124,10 +124,13 @@ export class Service implements IService {
     }
 
     public loginSocial(provider: string): Promise<IResponse> {
+        let width = screen.width * (1 / 3), height = screen.height * (1 / 2);
+        let x = screen.width / 2 - width / 2;
+        let y = screen.height / 2 - height / 2;
         let popupWindow = window.open(
             this.hybridAuthUrl + '?provider=' + provider,
-            'hybridAuth_Social_Sign_on',
-            'location=0,status=0,scrollbars=0,width=768,height=500'
+            'HybridAuth_Login',
+            utils.formatStr('width={0}, height={1}, left={2}, top={3}', [width, height, x, y])
         );
         return new Promise((resolve, reject) => {
             let timer = setInterval(() => {
@@ -145,7 +148,7 @@ export class Service implements IService {
                             reject();
                         });
                 }
-            }, 250);
+            }, 100);
         });
     }
 

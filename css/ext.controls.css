@@ -101,30 +101,33 @@
 }
 
 .CtxTabsView.flat .tabs {
-    width: auto;
-    border: none;
+    min-height: 19px;
+    max-height: 19px;
+    margin-bottom: 20px  
 }
 
 .CtxTabsView.flat .tabs > div {
-    padding: 12px 0;
+    padding: 0;
     margin-right: 15px;
     display: block;
-    color: #555555;
+    color: #808080;
     border-radius: 0;
     border: none;
-    font-weight: bolder;
+    /*font-weight: bolder;*/
 }
 
 .CtxTabsView.flat > .tabs > div:hover {
-    color: #3e96ff;
+    color: rgb(50, 50, 50);
     background-color: transparent;
 }
 
 .CtxTabsView.flat .tabs > div.ctx_selected
 {
+    color: rgb(50, 50, 50);
     text-decoration: none;
     background-color: transparent;
-    color: #3e96ff;
+    /*color: #3e96ff;*/
+    border-bottom: 3px solid #3e96ff;
 }
 
 /* Small screens */
@@ -204,7 +207,7 @@
 
 @media (max-width: 767px)
 {
-    .CtxPageView .pagesContainer {
+    .CtxPageView .ctxPagesContainer {
         padding-top: 50px
     }
 }
@@ -233,7 +236,7 @@
     -webkit-background-clip: padding-box;
     background-clip: padding-box;
     border: 1px solid rgba(0, 0, 0, .2);
-    border-radius: 6px;
+    border-radius: 4px;
     outline: 0;
     -webkit-box-shadow: 0 3px 9px rgba(0, 0, 0, .5);
     box-shadow: 0 3px 9px rgba(0, 0, 0, .5);

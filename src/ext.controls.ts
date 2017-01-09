@@ -4,7 +4,7 @@ import { IVoidEvent } from './component';
 import { View } from './view';
 import { ListView } from './list.controls';
 import { ButtonView, ContainerView, PanelView, TextView } from './std.controls';
-import { LookupDataLink, RecordSource, RecordSetSource, DataEventType } from './data';
+import { IRecord, LookupDataLink, RecordSource, RecordSetSource, DataEventType } from './data';
 
 resources.register('context-wcl',
     [
@@ -103,6 +103,12 @@ export class TabsView extends ListView {
         html = this.renderTag(html + this.dropDownButton.render());
         return html;
     }
+
+    protected getRecordHtml(record: IRecord, index: number, selected: boolean) {
+        if (record.hasOwnProperty('visible') && !record['visible'])
+            return '';
+        return super.getRecordHtml(record, index, selected);
+    }
 }
 
 // PageView
@@ -110,15 +116,25 @@ export class TabsView extends ListView {
 interface IPageViewPage {
     text: string;
     view: View;
+    visible?: boolean;
 }
 
 /**
  * Tabs switch with pages inside
  */
 export class PageView extends View {
+    public static themes = {
+        flat: 'flat'
+    };
+
+    public set theme(value) {
+        if (this.pagesSwitcher)
+            this.pagesSwitcher.theme = value;
+    }
+
     /** Sets pages 
      * e.g.
-     * pagesList.pages = [{text: 'Page 1', value: myView1}, {text: 'Page 2', value: myView2}]
+     * pagesList.pages = [{text: 'Page 1', view: myView1}, {text: 'Page 2', view: myView2}]
      */
     public set pages(pages: IPageViewPage[]) {
         let pagesSource = new RecordSetSource();
@@ -145,7 +161,7 @@ export class PageView extends View {
         this.renderClientArea = true;
 
         // Tabs switcher
-        this.pagesSwitcher = new TabsView(this, 'pagesSwitcher');
+        this.pagesSwitcher = new TabsView(this, 'ctxPagesSwitcher');
         this.pagesSwitcher.listData.displayField = 'text';
         this.pagesSwitcher.listData.keyField = 'view';
         this.pagesSwitcher.onChange = (page) => {
@@ -153,7 +169,7 @@ export class PageView extends View {
         };
 
         // Container for pages
-        this.pagesContainer = new ContainerView(this, 'pagesContainer');
+        this.pagesContainer = new ContainerView(this, 'ctxPagesContainer');
         this.pagesContainer.animation = null;
     }
 
