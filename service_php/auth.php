@@ -442,7 +442,7 @@ class Auth implements IAdapter
                 ]);
         }
 
-         $this->setUser(UserSession::GetValue("user_id"), $params['first_name'], $params['last_name'], $params['display_name'], $params['photo_url']);
+         $this->setUser(UserSession::GetValue("user_id"), $params['first_name'], $params['last_name'], $params['display_name'], $params['photo_url'], UserSession::GetValue("user_social"));
     }
 
     /** Generates captcha image
