@@ -237,7 +237,7 @@ class Auth implements IAdapter
         $email = strtolower($params['email']);
 
         $user = DbObject::fetchSql(
-            "SELECT id, display_name FROM user WHERE LOWER(TRIM(email)) = LOWER(TRIM(?))",
+            "SELECT id, display_name FROM user WHERE LOWER(TRIM(email)) = LOWER(TRIM(?)) and password is not null",
             [$email]);
 
         if (!count($user)) {
