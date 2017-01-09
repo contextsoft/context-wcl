@@ -175,7 +175,11 @@ export class Service implements IService {
     }
 
     public confirmRegistrationCode(email, code): Promise<IResponse> {
-        return this.execute(this.authAdapter, 'confirmRegistrationCode', { email, code });
+        return this.execute(this.authAdapter, 'confirmRegistrationCode', { email, code }).then(
+            (response: IResponse) => {
+                this.loginFromResponse(response);
+                return response;
+            });
     }
 
     public generateRegistrationCaptcha(): Promise<IResponse> {
@@ -284,7 +288,7 @@ export class Service implements IService {
 
     public showError(response: IResponse) {
         let msg = response.message;
-        if (application.obj.config.debug && response.stack && response.code) {
+        if (application.obj.config.debug && response.stack && response.code > 0) {
             msg += '<div class="stack" style="font-weight: normal; font-size: 12px; margin-top: 10px; margin-bottom: 10px">' + response.stack + '</div>';
         }
         if (application.obj.config.debug && application.obj.config.showServiceRawOutput && response.raw)

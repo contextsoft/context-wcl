@@ -62,11 +62,11 @@ class Auth implements IAdapter
         $user = $user[0];
 
         if (!$user['active']) {
-            Application::raise('Account is disabled, please contact support for details ', 2);
+            Application::raise('Account is disabled, please contact support for details ', -1);
         }
 
-        if ($user['email_confirmed'] != 'T') {
-            Application::raise('Registration is not completed. Please check your inbox for confirmation email', 2);
+        if (!$user['email_confirmed']) {
+            Application::raise('Registration is not completed. Please check your inbox for confirmation email', -2);
         }
 
         $this->setUser($user['id'], $user['first_name'], $user['last_name'], $user['display_name'], $user['photo_url']);
@@ -115,7 +115,7 @@ class Auth implements IAdapter
             $id = $this->generateUserId();
             DbObject::execSql(
                 "INSERT INTO user(id, email, first_name, last_name, display_name, photo_url, email_confirmed)
-                    VALUES(:id, :email, :first_name, :last_name, :display_name, :photo_url, 'T')",
+                    VALUES(:id, :email, :first_name, :last_name, :display_name, :photo_url, 1)",
                 [
                     'id' => $id,
                     'email' => $userProfile->email,
@@ -190,10 +190,10 @@ class Auth implements IAdapter
         $user = $user[0];
 
         DbObject::execSql(
-            "UPDATE user SET email_confirmed = 'T', email_confirmation_key = NULL WHERE id = ?",
+            "UPDATE user SET email_confirmed = 1, email_confirmation_key = NULL WHERE id = ?",
             [$user['id']]);
 
-        $this->setUser($user['id'], $user['photo_url'], $user['first_name'], $user['last_name'], $user['display_name']);
+        $this->setUser($user['id'],$user['first_name'], $user['last_name'], $user['display_name'], $user['photo_url']);
         return $this->getUser();
     }
 
@@ -221,7 +221,7 @@ class Auth implements IAdapter
 
         DbObject::execSql(
             "UPDATE user SET email_confirmed = :email_confirmed, email_confirmation_key = :email_confirmation_key WHERE id = :id",
-            ['id' => $id, 'email_confirmed' => 'F', 'email_confirmation_key' => $email_confirmation_key]);
+            ['id' => $id, 'email_confirmed' => 0, 'email_confirmation_key' => $email_confirmation_key]);
 
         Mailer::sendMail($params['email'], $display_name, 'Registration Confirmation', $this->getRegistrationCodeEmailContent($email_confirmation_key));
     }
@@ -364,7 +364,7 @@ class Auth implements IAdapter
 
         DbObject::execSql(
             "INSERT INTO user(id, email, first_name, last_name, display_name, photo_url, password, email_confirmed)
-                 VALUES(:id, TRIM(LOWER(:email)), TRIM(:first_name), TRIM(:last_name), TRIM(:display_name), TRIM(:photo_url), md5(TRIM(:password)), 'F')",
+                 VALUES(:id, TRIM(LOWER(:email)), TRIM(:first_name), TRIM(:last_name), TRIM(:display_name), TRIM(:photo_url), md5(TRIM(:password)), 0)",
             [
                 'id' => $this->generateUserId(),
                 'email' => $params['email'],
@@ -394,10 +394,17 @@ class Auth implements IAdapter
     }
 
     /** Saves user profile
-     * params: [first_name, last_name, display_name, photo_url, old_password, new_password, password_confirm]
+     * params: [email, first_name, last_name, display_name, photo_url, old_password, new_password, password_confirm]
      */
     public function saveUserProfile($params)
     {
+        if (empty($params['email'])) {
+            Application::raise('Please enter your email');
+        }
+        if (!Mailer::validateEmail($params['email'])) {
+            Application::raise('Email is invalid');
+        }
+        
         if (empty($params['first_name']) || empty($params['last_name'])) {
             Application::raise('Please enter your name');
         }
@@ -423,8 +430,9 @@ class Auth implements IAdapter
         }
 
         DbObject::execSql(
-            "UPDATE user SET photo_url = :photo_url, display_name = :display_name, first_name = :first_name, last_name = :last_name WHERE id = :id",
+            "UPDATE user SET email = :email, photo_url = :photo_url, display_name = :display_name, first_name = :first_name, last_name = :last_name WHERE id = :id",
             [
+                'email' => $params['email'],
                 'photo_url' => $params['photo_url'],
                 'display_name' => $params['display_name'],
                 'first_name' => $params['first_name'],
