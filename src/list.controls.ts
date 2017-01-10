@@ -82,7 +82,7 @@ export class ListView extends ValueView {
         let html = '', rec: IRecord;
         for (let i = 0; i < this.listData.dataSource.recordCount(); i++) {
             rec = this.listData.dataSource.getRecord(i);
-            html += this.getRecordHtml(rec, i, this.listData.dataSource.currentIndex === i) + '\n';
+            html += this.getRecordHtml(rec, i, this.listData.dataSource.currentIndex == i) + '\n';
         }
         return html;
     }

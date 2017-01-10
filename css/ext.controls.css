@@ -13,13 +13,13 @@
 
 .CtxTabsView .caption {
     display: none;
-    padding-top: 14px;
+    padding-top: 5px;
     padding-right: 10px;
     padding-left: 10px;
-    padding-bottom: 14px;
+    padding-bottom: 15px;
     font-size: 16px;
     font-weight: 200;
-    color: #777777;
+    color: rgb(50, 50, 50);
     float: left;
 }
 
@@ -35,6 +35,7 @@
 .CtxTabsView .tabs {
     min-height: 42px;
     border-radius: 4px 4px 0 0;
+    margin-bottom: 20px;
 }
 
 .CtxTabsView .tabs > div {
@@ -47,7 +48,6 @@
     height: 32px;
     display: none;
     float: right;
-    margin-top: 7px;
     border: 1px solid #ddd;
 }
 
@@ -96,9 +96,6 @@
 
 /* Flat Style */
 
-.CtxTabsView.flat .caption {
-    margin-left: -8px;
-}
 
 .CtxTabsView.flat .tabs {
     min-height: 19px;
@@ -156,8 +153,6 @@
     .CtxTabsView.flat .tabs {
         display: none;
         width: 100%;
-        height: auto;
-        border-radius: 4px;
         position: absolute;
         left: 0;
         z-index: 100;
@@ -165,41 +160,41 @@
         color: #ddd;
     }
 
-    .CtxTabsView .tabs.droppedDown {
+    .CtxTabsView .tabs[dropped_down=true] {
         display: block;
-        margin-top: 50px;
+        margin-top: 35px;
     }
 
     .CtxTabsView .tabs > div,
     .CtxTabsView.flat .tabs > div {
         float: none;
         padding: 20px;
-        color: #c9c4c4;
-        font-weight: normal;
-    }
-
-    .CtxTabsView .tabs > div:hover,
-    .CtxTabsView.flat .tabs > div:hover {
-        background-color: #5f5f5f;
+        background-color: #555;
         color: #eee;
-        border-radius: 4px;
-        padding: 20px;
+        font-weight: normal;
+        width: 100%;
+        text-align: left;
+        border: none;
+        border-radius: 0;
     }
 
     .CtxTabsView .tabs > div.ctx_selected,
     .CtxTabsView.flat .tabs > div.ctx_selected {
-        background-color: #a8a8a8;
-        color: #eee;
-        border-radius: 4px;
-        padding: 20px;
-        border: none;
-    }
-
-    .CtxTabsView.flat > .tabs > div:hover,
-    .CtxTabsView.flat .tabs > div.ctx_selected {
         width: 100%;
+        background-color: #2e6bb3;
+        color: #fff;
+        border: none;
+        border-radius: 0;
+        padding: 20px;
     }
 
+    .CtxTabsView .tabs > div:hover,
+    .CtxTabsView.flat .tabs > div:hover {
+        width: 100%;
+        background-color: #3e96ff;
+        color: #fff;
+        padding: 20px;
+    }    
 }
 
 
@@ -246,7 +241,7 @@
     height: auto;
     max-height: 90%;
     margin: 30px auto;
-    padding: 30px;
+    padding: 20px;
     overflow: auto;
 }
 
@@ -266,9 +261,9 @@
 }
 
 .CtxDialogView .cxtModalContainer .ctxCaptionContainer {
-    margin-left: -15px;
-    margin-top: -15px;
-    margin-right: -15px    
+    margin-left: -5px;
+    margin-top: -5px;
+    margin-right: -5px    
 }
 
 .CtxDialogView .cxtModalContainer .ctxCaption {

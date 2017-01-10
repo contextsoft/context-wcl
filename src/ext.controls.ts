@@ -22,7 +22,9 @@ export class TabsView extends ListView {
     };
 
     protected static _listIdCounter = 0;
+    protected static _captionIdCounter = 0;
     protected listId;
+    protected captionId;
     protected dropDownButton: ButtonView;
     protected droppedDown = false;
 
@@ -82,24 +84,22 @@ export class TabsView extends ListView {
 
     protected showDropDown(show) {
         if (show !== this.droppedDown) {
-            this.droppedDown = show;
-            this.updateView();
+            this.droppedDown = !this.droppedDown;
+            let el = document.getElementById(this.listId);
+            if (this.droppedDown)
+                el.setAttribute('dropped_down', 'true');
+            else
+                el.removeAttribute('dropped_down');
         }
-
-    }
-
-    protected handleClick(event) {
-        super.handleClick(event);
-        if (this.droppedDown)
-            this.showDropDown(false);
     }
 
     public render() {
         this.listId = 'ctxTabsView' + TabsView._listIdCounter++;
-        let html = View.getTag('div', 'class="tabs ' + (this.droppedDown ? 'droppedDown' : '') + '" id="' + this.listId + '"', this.renderItems());
+        this.captionId = 'ctxTabsViewCaption' + TabsView._captionIdCounter++;
+        let html = View.getTag('div', 'class="tabs" ' + (this.droppedDown ? 'dropped_down="true"' : '') + '" id="' + this.listId + '"', this.renderItems());
         let currRec = this.listData.dataSource.current;
         if (currRec)
-            html += View.getTag('div', 'class="caption" ', this.listData.getDisplayValue(currRec));
+            html += View.getTag('div', 'class="caption" id="' + this.captionId + '"', this.listData.getDisplayValue(currRec));
         html = this.renderTag(html + this.dropDownButton.render());
         return html;
     }
@@ -108,6 +108,16 @@ export class TabsView extends ListView {
         if (record.hasOwnProperty('visible') && !record['visible'])
             return '';
         return super.getRecordHtml(record, index, selected);
+    }
+
+    protected afterUpdateView() {
+        super.afterUpdateView();
+        if (this.dropDownButton.element)
+            this.dropDownButton.element.addEventListener('focusout', (event: FocusEvent) => {
+                if (this.droppedDown)
+                    this.showDropDown(false);
+                this.updateView();
+            });
     }
 }
 
