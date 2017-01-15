@@ -203,7 +203,7 @@ export class Service implements IService {
     }
 
     public getSessionUser(): Promise<IResponse> {
-        return this.execute(this.authAdapter, 'getUser').then(
+        return this.execute(this.authAdapter, 'getSessionUser').then(
             (response: IResponse) => {
                 this.loginFromResponse(response);
                 return response;

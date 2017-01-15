@@ -10,7 +10,7 @@ class Auth implements IAdapter
             'sendRegistrationConfirmationCode', 'confirmRegistrationCode',
             'sendPasswordResetCode', 'isPasswordResetCodeSent', 'resetPassword',
             'getUserProfile', 'saveUserProfile',
-            'getUser',
+            'getSessionUser',
             'generateCaptcha'
         ];
     }
@@ -70,7 +70,22 @@ class Auth implements IAdapter
         }
 
         $this->setUser($user['id'], $user['first_name'], $user['last_name'], $user['display_name'], $user['photo_url']);
-        return $this->getUser();
+        return $this->getSessionUser();
+    }
+
+    protected function getUser($email, $id = null) {
+        if(isset($id)) {
+            $user = DbObject::fetchSQL(
+                "SELECT id, photo_url, display_name, first_name, last_name, email_confirmed, active FROM user u 
+                    WHERE id = ?",
+                [$id]);
+        } else {
+            $user = DbObject::fetchSQL(
+                "SELECT id, photo_url, display_name, first_name, last_name, email_confirmed, active FROM user u 
+                    WHERE UPPER(TRIM(u.email)) = UPPER(TRIM(?))",
+                [$email]);
+        }
+        return $user;
     }
 
     /** Logins user via social network
@@ -109,29 +124,27 @@ class Auth implements IAdapter
             "SELECT id_user FROM user_provider WHERE provider = :provider AND provider_user_id = :provider_user_id",
             ['provider' => $providerName, 'provider_user_id' => $userProfile->identifier]);
 
-        // if the used didn't authenticate using the selected provider before
-        // we create a new entry on database.users for him
-        if (!count($user))  {
-            $id = $this->generateUserId();
-            DbObject::execSql(
-                "INSERT INTO user(id, email, first_name, last_name, display_name, photo_url, email_confirmed)
-                    VALUES(:id, :email, :first_name, :last_name, :display_name, :photo_url, 1)",
-                [
-                    'id' => $id,
-                    'email' => $userProfile->email,
-                    'first_name' => $userProfile->firstName,
-                    'last_name' => $userProfile->lastName,
-                    'display_name' => $userProfile->displayName,
-                    'photo_url' =>$userProfile->photoURL
-                ]);
+        // if the used didn't authenticated using the selected provider before
+        // we create a new entry on users for him
+        if (!count($user)) {
+            $user = $this->getUser($userProfile->email);
+            
+            if (!count($user)) {
+                $id = $this->generateUserId();
+                DbObject::execSql(
+                    "INSERT INTO user(id, email, first_name, last_name, display_name, photo_url, email_confirmed)
+                        VALUES(:id, :email, :first_name, :last_name, :display_name, :photo_url, 1)",
+                    [
+                        'id' => $id,
+                        'email' => $userProfile->email,
+                        'first_name' => $userProfile->firstName,
+                        'last_name' => $userProfile->lastName,
+                        'display_name' => $userProfile->displayName,
+                        'photo_url' =>$userProfile->photoURL
+                    ]);
+                $user = $this->getUser($userProfile->email, $id);
+            }
 
-            $user = DbObject::fetchSQL(
-                "SELECT id, photo_url, display_name, first_name, last_name, active FROM user u 
-                  WHERE UPPER(TRIM(u.email)) = UPPER(TRIM(?))",
-                [$userProfile->email]);
-
-            if (!count($user))
-                Application::raise('User registration failed');
             $user = $user[0];
 
             $id = $this->generateUserProviderId();
@@ -146,13 +159,7 @@ class Auth implements IAdapter
                 ]);                        
         }
         else {
-            $user = DbObject::fetchSQL(
-                "SELECT id, photo_url, display_name, first_name, last_name, active FROM user u 
-                  WHERE id = ?",
-                [$user[0]['id_user']]);
-
-            if (!count($user))
-                Application::raise('Login via social network failed');
+            $user = $this->getUser(null, $user[0]['id_user']); 
             $user = $user[0];
         }
 
@@ -161,7 +168,7 @@ class Auth implements IAdapter
         }
 
         $this->setUser($user['id'], $user['first_name'], $user['last_name'], $user['display_name'], $user['photo_url'], 1);
-        return $this->getUser();
+        return $this->getSessionUser();
     }
 
     /** Log out current user */
@@ -194,7 +201,7 @@ class Auth implements IAdapter
             [$user['id']]);
 
         $this->setUser($user['id'],$user['first_name'], $user['last_name'], $user['display_name'], $user['photo_url']);
-        return $this->getUser();
+        return $this->getSessionUser();
     }
 
     /** Sends via email registration confirmation code 
@@ -325,7 +332,7 @@ class Auth implements IAdapter
             ['password' => $newPwd, 'id' => $user['id']]);
 
         $this->setUser($user['id'], $user['first_name'], $user['last_name'], $user['display_name'], $user['photo_url']);
-        return $this->getUser();
+        return $this->getSessionUser();
     }
 
     /** Registers user
@@ -414,9 +421,12 @@ class Auth implements IAdapter
             [UserSession::GetValue("user_id")]);
         
 
-        if (!empty($params['old_password']) || !empty($params['new_password']) || !empty($params['password_confirm'])) {
-            if (md5($params['old_password']) != $user[0]['password'] || $params['new_password'] != $params['password_confirm']) {
+        if (!empty($params['new_password']) || !empty($params['password_confirm'])) {
+            if ($params['new_password'] != $params['password_confirm']) {
                 Application::raise('Passwords do not match');
+            }
+            else if (!empty($user[0]['password']) && md5($params['old_password']) != $user[0]['password']) {
+                Application::raise('Password is incorrect');
             } else {
                 $newPwd = $params['new_password'];
             }
@@ -558,7 +568,7 @@ class Auth implements IAdapter
         UserSession::SetValue("user_social", $social);
     }
 
-    public static function getUser()
+    public static function getSessionUser()
     {
         if (!empty(UserSession::GetValue("user_id"))) {
             return [
