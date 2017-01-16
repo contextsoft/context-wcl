@@ -469,3 +469,11 @@ export class PopupMenu extends ListView {
         return t;
     }
 }
+
+/** Navigation panel */
+export class NavigationPanel extends PanelView {
+    constructor(name?: string) {
+        super(null, name);
+        this.visible = false;
+    }
+}

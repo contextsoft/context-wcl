@@ -354,3 +354,13 @@
 .CtxPopupMenu .ctx_list_item.ctx_disabled {
     color: rgba(0,0,0,0.38);    
 }
+
+/* NavigationPanel */
+
+.CtxNavigationPanel {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 200px;
+    background-color: #2e3c54;
+}
