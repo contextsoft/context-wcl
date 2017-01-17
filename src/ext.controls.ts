@@ -218,7 +218,6 @@ export class ModalView extends View {
     constructor(name?: string, initComponents = true) {
         super(null, name, false);
         this.visible = false;
-        //this.renderClientArea = false;
         this.modalContainer = new PanelView(this, 'cxtModalContainer');
         if (initComponents)
             this.initComponents();
@@ -421,15 +420,17 @@ export class PopupMenu extends ListView {
         if (!this.element || !this.target || !this.target.element)
             return;
 
+        let rec = this.target.element.getBoundingClientRect();
+
         if (this.targetVerPosition === PopupMenu.targetVerPositionType.under)
-            this.element.style.top = (this.target.element.offsetTop + this.target.element.offsetHeight) + 'px';
+            this.element.style.top = rec.top + rec.height + 'px';
         else
-            this.element.style.top = (this.target.element.offsetTop - this.element.offsetHeight) + 'px';
+            this.element.style.top = rec.top - rec.height + 'px';
 
         if (this.targetHorPosition === PopupMenu.targetHorPositionType.left)
-            this.element.style.left = this.target.element.offsetLeft + 'px';
+            this.element.style.left = rec.left + 'px';
         else
-            this.element.style.left = this.target.element.offsetLeft + this.target.element.offsetWidth - this.element.offsetWidth + 'px';
+            this.element.style.left = rec.left + rec.width - this.element.offsetWidth + 'px';
 
         this.element.addEventListener('focusout', (event) => { this.onFocusOut(); });
         this.element.focus();
@@ -472,14 +473,19 @@ export class PopupMenu extends ListView {
 
 /** Navigation panel */
 export class NavigationPanel extends PanelView {
-    /** Gets dialog caption control */
+    /** Caption control */
     public get caption(): TextView {
         return this._caption;
+    }
+    /** Close button */
+    public get closeButton(): TextView {
+        return this._closeButton;
     }
     /** Fires when user closes panel */
     public onClose: IVoidEvent;
 
     protected _caption: TextView;
+    protected _closeButton: TextView;
 
     constructor(parent: View, name?: string, caption?: string) {
         super(parent, name);
@@ -488,8 +494,8 @@ export class NavigationPanel extends PanelView {
         this._caption = new TextView(captionContainer, 'ctxCaption');
         this._caption.text = caption;
 
-        let closeBtn = new TextView(captionContainer, 'ctxClose');
-        closeBtn.events.onclick = () => {
+        this._closeButton = new TextView(captionContainer, 'ctxClose');
+        this._closeButton.events.onclick = () => {
             this.close();
         };
     }

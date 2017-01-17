@@ -23,7 +23,6 @@ export class SelectView extends ValueView {
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.tag = 'select';
-        //this.renderClientArea = false;
         this.lookupData = new LookupDataLink((eventType: DataEventType, data: any): void => {
             this.updateView();
         });

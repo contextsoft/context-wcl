@@ -18,7 +18,6 @@ resources.register('context-wcl',
 export class WorkAreaLayout extends View {
     constructor(parent, name?) {
         super(parent, name);
-        //this.renderClientArea = false;
     }
 }
 
@@ -81,6 +80,5 @@ export class GridLayout extends View {
 export class FlexLayout extends View {
     constructor(parent, name?) {
         super(parent, name);
-        //this.renderClientArea = false;
     }
 }
