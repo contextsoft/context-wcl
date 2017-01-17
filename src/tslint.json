@@ -57,6 +57,7 @@
         ],
         "triple-equals": [
             false
-        ]
+        ],
+        "no-trailing-whitespace": false
     }
 }

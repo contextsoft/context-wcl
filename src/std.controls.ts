@@ -20,7 +20,7 @@ export class ScreenView extends View {
     constructor(name?: string) {
         super(null, name);
         this._visible = false;
-        this.renderClientArea = true;
+        //this.renderClientArea = true;
         // this.isController = true; //TODO: used in serizalization, needs refactoring
     }
 }
@@ -49,7 +49,7 @@ export class WaitScreen extends ScreenView {
 export class TextView extends View {
     constructor(parent: View, name?: string) {
         super(parent, name);
-        this.renderClientArea = false;
+        //this.renderClientArea = false;
     }
 }
 
@@ -63,9 +63,9 @@ export class HeaderView extends View {
 
     constructor(parent: View, name?: string) {
         super(parent, name);
-        this.renderClientArea = false;
+        //this.renderClientArea = false;
         this.tag = 'header';
-        this.theme = HeaderView.themes.fixed;
+        //this.theme = HeaderView.themes.fixed;
     }
 }
 
@@ -79,7 +79,7 @@ export class FooterView extends View {
 
     constructor(parent: View, name?: string) {
         super(parent, name);
-        this.renderClientArea = false;
+        //this.renderClientArea = false;
         this.tag = 'footer';
         this.theme = FooterView.themes.fixed;
     }
@@ -121,7 +121,7 @@ export class GroupBoxView extends View {
         if (this.renderClientArea) {
             html = View.getTag('div', this.getClientAreaTagAttr(), html);
             // render non-client area: text before and children after
-            html = (this._text ? View.getTag('div', 'class=header', this.renderSelf()) : this.renderSelf())
+            html = (this._text ? View.getTag('div', 'class="ctx_header"', this.renderSelf()) : this.renderSelf())
                 + html + this.renderChildren(true);
         }
         return View.getTag(this.tag, this.internalGetTagAttr(), html);
@@ -172,7 +172,7 @@ export class FormView extends View {
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.tag = 'form';
-        this.renderClientArea = false;
+        //this.renderClientArea = false;
     }
 }
 
@@ -189,7 +189,7 @@ export class InputView extends ValueView {
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.tag = 'input';
-        this.renderClientArea = false;
+        //this.renderClientArea = false;
     }
 
     protected beforeUpdateView() {
@@ -235,7 +235,7 @@ export class TextAreaView extends InputView {
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.tag = 'textarea';
-        this.renderClientArea = false;
+        //this.renderClientArea = false;
     }
 
     public getValue(): string {
@@ -383,7 +383,10 @@ export class ContainerView extends View {
             child._element = null;
             let childElement = document.createElement('div');
             // append child to client area
-            this._element.children[0].appendChild(childElement);
+            if (this.renderClientArea)
+                this._element.children[0].appendChild(childElement);
+            else
+                this._element.appendChild(childElement);
             childElement.outerHTML = child.internalRender();
             child._element = childElement;
             child.afterUpdateView();
@@ -491,7 +494,7 @@ export class Splitter extends View {
 
     constructor(parent: View, name?: string) {
         super(parent, name);
-        this.renderClientArea = false;
+        //this.renderClientArea = false;
         this.setVertical(false);
     }
 
@@ -616,7 +619,7 @@ export class Splitter extends View {
 export class CheckView extends ValueView {
     constructor(parent: View, name?: string) {
         super(parent, name);
-        this.renderClientArea = false;
+        //this.renderClientArea = false;
     }
 
     public renderSelf() {

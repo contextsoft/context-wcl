@@ -61,7 +61,7 @@ export abstract class View extends Component {
     /** Render or not view with client area
      *  the reason for this is to be able to layout child views this allows to use padding to create internal margins
      */
-    public renderClientArea = true;
+    public renderClientArea = false;
     /** Control's client area CSS style */
     public clientAreaStyle = '';
     /** Indicates is control rendered in client area of parent control or not */

@@ -68,3 +68,17 @@
     }
 }
 
+/* FlexLayout */
+
+.CtxFlexLayout {
+    height:100%;
+    display:flex;
+    flex-direction: row;
+    align-content: stretch;
+}
+
+.CtxFlexLayout > * {
+    flex: 1 100%;
+}
+
+

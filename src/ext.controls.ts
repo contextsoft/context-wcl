@@ -218,7 +218,7 @@ export class ModalView extends View {
     constructor(name?: string, initComponents = true) {
         super(null, name, false);
         this.visible = false;
-        this.renderClientArea = false;
+        //this.renderClientArea = false;
         this.modalContainer = new PanelView(this, 'cxtModalContainer');
         if (initComponents)
             this.initComponents();
@@ -472,8 +472,31 @@ export class PopupMenu extends ListView {
 
 /** Navigation panel */
 export class NavigationPanel extends PanelView {
-    constructor(name?: string) {
-        super(null, name);
-        this.visible = false;
+    /** Gets dialog caption control */
+    public get caption(): TextView {
+        return this._caption;
+    }
+    /** Fires when user closes panel */
+    public onClose: IVoidEvent;
+
+    protected _caption: TextView;
+
+    constructor(parent: View, name?: string, caption?: string) {
+        super(parent, name);
+        this.renderClientArea = true;
+        let captionContainer = new PanelView(this, 'ctxCaptionContainer');
+        this._caption = new TextView(captionContainer, 'ctxCaption');
+        this._caption.text = caption;
+
+        let closeBtn = new TextView(captionContainer, 'ctxClose');
+        closeBtn.events.onclick = () => {
+            this.close();
+        };
+    }
+
+    public close() {
+        this.hide();
+        if (this.onClose)
+            this.onClose();
     }
 }
