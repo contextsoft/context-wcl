@@ -207,10 +207,11 @@
 .CtxPopupSelectView {
     display: inline-block;
     border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 2px;
+    border-radius: 3px;
     padding: 5px;
     cursor: pointer;
     background-color: rgba(255, 255, 255, 1);
+    height: 30px;
 }
 
 .CtxPopupSelectView[focused] {

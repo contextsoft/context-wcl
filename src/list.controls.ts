@@ -605,11 +605,22 @@ export class PopupSelectView extends ValueView {
                 let clickedRec = <IRecord>items[i].data;
                 if (this.popupData.keyField)
                     this.value = clickedRec[this.popupData.keyField];
-                this.caption.element.innerText = items[i].text;
             };
 
         this.popupMenu.menu = items;
         this.popupMenu.popup(this, PopupMenu.targetHorPositionType.left, PopupMenu.targetVerPositionType.under);
         this.element.setAttribute('focused', '');
+    }
+
+    public setValue(_value) {
+        super.setValue(_value);
+        this.popupData.dataSource.locate(_value);
+        this.updateView();
+    }
+
+    protected afterUpdateView() {
+        super.afterUpdateView();
+        if (this.caption.element && typeof this._value !== 'undefined')
+            this.caption.element.innerText = this.popupData.getDisplayValue(this.popupData.dataSource.current);
     }
 }
