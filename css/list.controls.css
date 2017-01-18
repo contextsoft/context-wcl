@@ -202,5 +202,32 @@
     background-color: #c9e3ff;
 }
 
+/* CtxPopupSelectView */
 
+.CtxPopupSelectView {
+    display: inline-block;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+    padding: 5px;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 1);
+}
 
+.CtxPopupSelectView[focused] {
+    border: 1px solid rgba(0, 0, 0, 0.9);
+}
+
+.CtxPopupSelectView .ctxCaption {
+    display: inline-block;
+}
+
+.CtxPopupSelectView .ctxDropDownBtn {
+    display: inline-block;
+    margin-left: 10px;
+    background-image: url(../images/dropdown.svg);
+    background-size: 10px 10px;
+    background-repeat: no-repeat;
+    width: 10px;
+    height: 10px;
+    margin-top: 2px;
+}

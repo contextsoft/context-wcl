@@ -720,7 +720,7 @@ export abstract class View extends Component {
  * Control with a value 
  */
 export abstract class ValueView extends View {
-    /** Fires on value changed */
+    /** Fires on value change */
     public onChange: (newValue) => void;
 
     /** FieldDataLink used as value store */

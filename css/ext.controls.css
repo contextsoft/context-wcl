@@ -254,7 +254,7 @@
 /* DialogView */
 
 .CtxModalView .cxtModalContainer {
-  animation-name: ctxAnimZoomOut;
+  animation-name: ctxAnimScale;
   animation-iteration-count: 1;
   animation-timing-function: ease-out;
   animation-duration: 0.2s;
@@ -295,7 +295,7 @@
 /* MessageBox */
 
 .CtxMessageBox .cxtModalContainer {
-  animation-name: ctxAnimZoomOut;
+  animation-name: ctxAnimScale;
   animation-iteration-count: 1;
   animation-timing-function: ease-out;
   animation-duration: 0.2s;
@@ -311,7 +311,7 @@
 /* PopupMenu */
 
 .CtxPopupMenu {
-  animation-name: ctxAnimSlideDown;
+  animation-name: ctxAnimScaleY;
   animation-iteration-count: 1;
   animation-timing-function: ease-out;
   animation-duration: 0.1s;

@@ -365,11 +365,12 @@ export class MessageBox extends ModalView {
 
 // PopupMenu
 
-interface IMenuItem {
+export interface IMenuItem {
     icon?: string;
     text: string;
     disabled?: boolean;
     onclick?: (item: IMenuItem) => void;
+    data?: any;
 }
 
 /** Popup Menu showed under selected target control 
@@ -378,11 +379,13 @@ interface IMenuItem {
 export class PopupMenu extends ListView {
     public static separator = '-';
     public static get targetHorPositionType() {
-        return { left: 'left', right: 'right' };
+        return { left: 'left', right: 'right', auto: 'auto' };
     };
     public static get targetVerPositionType() {
-        return { under: 'under', above: 'above' };
+        return { under: 'under', above: 'above', auto: 'auto' };
     };
+    /** Fires when menu closed */
+    public onClose: IVoidEvent;
 
     protected target: View;
     protected targetHorPosition: string;
@@ -412,7 +415,16 @@ export class PopupMenu extends ListView {
         this.target = target;
         this.targetHorPosition = targetHorPosition;
         this.targetVerPosition = targetVerPosition;
-        this.visible = !this.visible;
+        if (!this.visible)
+            this.visible = true;
+        else
+            this.close();
+    }
+
+    public close() {
+        if (this.onClose)
+            this.onClose();
+        this.hide();
     }
 
     protected afterUpdateView() {
@@ -437,7 +449,7 @@ export class PopupMenu extends ListView {
     }
 
     protected onFocusOut() {
-        this.hide();
+        this.close();
     }
 
     protected handleClick(event) {
@@ -447,7 +459,7 @@ export class PopupMenu extends ListView {
         let itm: any = this.listData.dataSource.getRecord(idx);
         if (!itm.disabled && itm.onclick)
             itm.onclick(itm);
-        this.hide();
+        this.close();
     }
 
     protected getRecordCSSClass(record) {

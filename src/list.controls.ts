@@ -4,8 +4,9 @@
 import { utils } from './utils';
 import { resources } from './resources';
 import { View, ValueView } from './view';
-import { InputView, ButtonView } from './std.controls';
+import { InputView, ButtonView, TextView } from './std.controls';
 import { IRecord, IExpression, LookupDataLink, DataEventType } from './data';
+import { PopupMenu, IMenuItem } from './ext.controls';
 
 resources.register('context-wcl',
     [
@@ -554,5 +555,61 @@ export class DatePicker extends LookupView {
         this.value = new Date(el.getAttribute('value'));
         this.showDropdown(false);
         this.updatingValue = false;
+    }
+}
+
+export class PopupSelectView extends ValueView {
+    /** Fires on menu popup, here menu can be modified */
+    public onPopup: (menuItems: IMenuItem[]) => void;
+    /** Source of records displayed inside the menu */
+    public popupData: LookupDataLink;
+
+    protected popupMenu: PopupMenu;
+    protected caption: TextView;
+    protected dropDownBtn: TextView;
+
+    protected initComponents() {
+        this.popupData = new LookupDataLink((eventType: DataEventType, data: any): void => {
+            this.updateView();
+        });
+        this.popupMenu = new PopupMenu('ctxValuePopup');
+        this.popupMenu.onClose = () => {
+            this.element.removeAttribute('focused');
+        };
+
+        this.caption = new TextView(this, 'ctxCaption');
+        this.dropDownBtn = new TextView(this, 'ctxDropDownBtn');
+
+        this.events.onclick = () => {
+            this.popup();
+        };
+
+        super.initComponents();
+    }
+
+    public popup() {
+        let items: IMenuItem[] = [];
+        let rec: IRecord, item: IMenuItem;
+        for (let i = 0; i < this.popupData.dataSource.recordCount(); i++) {
+            rec = this.popupData.dataSource.getRecord(i);
+            item = {
+                text: this.popupData.getDisplayValue(rec),
+                data: rec
+            };
+            items.push(item);
+        }
+        if (this.onPopup)
+            this.onPopup(items);
+        for (let i = 0; i < items.length; i++)
+            items[i].onclick = () => {
+                let clickedRec = <IRecord>items[i].data;
+                if (this.popupData.keyField)
+                    this.value = clickedRec[this.popupData.keyField];
+                this.caption.element.innerText = items[i].text;
+            };
+
+        this.popupMenu.menu = items;
+        this.popupMenu.popup(this, PopupMenu.targetHorPositionType.left, PopupMenu.targetVerPositionType.under);
+        this.element.setAttribute('focused', '');
     }
 }
