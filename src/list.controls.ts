@@ -614,7 +614,7 @@ export class PopupSelectView extends ValueView {
 
     public setValue(_value) {
         super.setValue(_value);
-        this.popupData.dataSource.locate(_value);
+        this.popupData.dataSource.locate({ id: _value });
         this.updateView();
     }
 

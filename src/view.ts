@@ -132,9 +132,12 @@ export abstract class View extends Component {
             this.initComponents();
     }
 
-    /** Control's parent control */
+    /** Gets/Set control's parent control */
     public get parent() {
         return this._parent;
+    }
+    public set parent(parent: View) {
+        this.setParent(parent);
     }
 
     /** Enables or disabled controls */
@@ -267,9 +270,9 @@ export abstract class View extends Component {
     }
 
     /** Returns control's parent' */
-    public getParent() {
-        return this.parent;
-    }
+    // public getParent() {
+    //     return this._parent;
+    // }
 
     /** Moves control to the new parent */
     public setParent(value) {

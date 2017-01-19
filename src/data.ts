@@ -108,6 +108,7 @@ export interface ICursor extends IReference {
     last();
     recordCount(): number;
     getRecord(index: number): IRecord;
+    /** Locates record with values = {field1: value, field2: value} */
     locate(values: any): boolean;
     setFilter(filter: (rec: IRecord) => boolean);
     currentIndex: number;
@@ -231,8 +232,8 @@ export class RecordSetDataLink extends BaseDataLink<IRecordSetSource> {
  * Generic implementation of a data link for lookup controls
  */
 export class LookupDataLink extends RecordSetDataLink {
-    protected _keyField: string;
-    protected _displayField: string;
+    protected _keyField: string = 'id';
+    protected _displayField: string = 'text';
     protected _displayExpression: IExpression;
 
     public get keyField() { return this._keyField; }
@@ -264,8 +265,12 @@ export class LookupDataLink extends RecordSetDataLink {
         if (this._displayExpression)
             return this._displayExpression(record).toString();
         else {
-            let fld = (this._displayField) ? this._displayField : this._keyField;
-            return record[fld];
+            if (this._displayField && record.hasOwnProperty(this._displayField))
+                return record[this._displayField];
+            else if (this._keyField && record.hasOwnProperty(this._keyField))
+                return record[this._keyField];
+            else
+                throw 'Display or Key field is not defined or doesn\'t exists in the record';
         }
     }
 }
@@ -486,6 +491,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
         }
     }
 
+    /** Cancels current record editing and returns initial values */
     public cancel(): void {
         if (this._state && this._state !== RecordState.Browse) {
             this.checkCurrent();

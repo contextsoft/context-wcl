@@ -276,7 +276,7 @@
 }
 
 .CtxDialogView .cxtModalContainer .ctxClose {
-    background-image: url(../images/cross.png);
+    background-image: url(../images/cross.svg);
     background-repeat: no-repeat;
     float: right;
     width: 12px;
@@ -287,7 +287,7 @@
 }
 
 .CtxDialogView .cxtModalContainer .ctxClose:hover {
-    background-image: url(../images/cross-red.png);
+    background-image: url(../images/cross-red.svg);
 }
 
 
@@ -378,7 +378,7 @@
 }
 
 .CtxNavigationPanel .ctxClose {
-    background-image: url(../images/cross.png);
+    background-image: url(../images/cross.svg);
     background-repeat: no-repeat;
     float: right;
     width: 12px;
@@ -389,6 +389,6 @@
 }
 
 .CtxNavigationPanel .ctxClose:hover {
-    background-image: url(../images/cross-red.png);
+    background-image: url(../images/cross-red.svg);
 }
 
