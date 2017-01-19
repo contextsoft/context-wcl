@@ -262,6 +262,8 @@ export class LookupDataLink extends RecordSetDataLink {
     }
     /** Returns value of record calculated depending on displayExpression  */
     public getDisplayValue(record: IRecord): string {
+        if (!record)
+            return '';
         if (this._displayExpression)
             return this._displayExpression(record).toString();
         else {
@@ -565,7 +567,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
     /** Compare 2 objects by their properties */
     public compareRecord(record: IRecord, values: IRecord) {
         for (let id in record) {
-            if (record.hasOwnProperty(id) && values.hasOwnProperty(id) && values[id] !== record[id])
+            if (record.hasOwnProperty(id) && values.hasOwnProperty(id) && values[id] != record[id])
                 return false;
         }
         return true;
