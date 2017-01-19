@@ -560,7 +560,7 @@ export class DatePicker extends LookupView {
 
 export class PopupSelectView extends ValueView {
     /** Fires on menu popup, here menu can be modified */
-    public onPopup: (menuItems: IMenuItem[]) => void;
+    public onPopup: (menuItems: IMenuItem[], target: { target: View }) => void;
     /** Source of records displayed inside the menu */
     public popupData: LookupDataLink;
 
@@ -598,8 +598,9 @@ export class PopupSelectView extends ValueView {
             };
             items.push(item);
         }
+        let target = { target: this };
         if (this.onPopup)
-            this.onPopup(items);
+            this.onPopup(items, target);
         for (let i = 0; i < items.length; i++)
             items[i].onclick = () => {
                 let clickedRec = <IRecord>items[i].data;
@@ -608,7 +609,7 @@ export class PopupSelectView extends ValueView {
             };
 
         this.popupMenu.menu = items;
-        this.popupMenu.popup(this, PopupMenu.targetHorPositionType.left, PopupMenu.targetVerPositionType.under);
+        this.popupMenu.popup(target.target, PopupMenu.targetHorPositionType.left, PopupMenu.targetVerPositionType.under);
         this.element.setAttribute('focused', '');
     }
 
