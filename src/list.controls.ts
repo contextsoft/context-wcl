@@ -64,6 +64,8 @@ export class ListView extends ValueView {
     /** Source of records displayed inside the list */
     public listData: LookupDataLink;
 
+    public renderIconsOnly: boolean;
+
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.listData = new LookupDataLink((eventType: DataEventType, data: any): void => {
@@ -92,6 +94,13 @@ export class ListView extends ValueView {
         if (this.listData.keyField && record[this.listData.keyField])
             val = ' value="' + utils.escapeHTML(record[this.listData.keyField].toString()) + '"';
         let displayText = utils.escapeHTML(this.getRecordDisplayText(record));
+        if (record['icon']) {
+            let ico = utils.formatStr('<img class="ctx_list_icon" src="{0}">', [record['icon']]);
+            if (this.renderIconsOnly)
+                displayText = ico;
+            else
+                displayText = ico + displayText;
+        }
         let attr = utils.formatStr('index="{0}" class="ctx_list_item', [index]);
         if (selected)
             attr += ' ctx_selected';
@@ -117,9 +126,9 @@ export class ListView extends ValueView {
         for (let i = 0; i < children.length; i++) {
             el = children[i];
             idx = el.getAttribute('index');
-            if (typeof idx !== undefined && idx !== selectedIdx)
+            if (typeof idx !== undefined && idx != selectedIdx)
                 el.setAttribute('class', 'ctx_list_item');
-            else if (idx === selectedIdx)
+            else if (idx == selectedIdx)
                 el.setAttribute('class', 'ctx_list_item ctx_selected');
         }
     }
@@ -560,7 +569,7 @@ export class DatePicker extends LookupView {
 
 export class PopupSelectView extends ValueView {
     /** Fires on menu popup, here menu can be modified */
-    public onPopup: (menuItems: IMenuItem[], target: { target: View }) => void;
+    public onPopup: (menuItems: IMenuItem[], target: { target: View, offsetX: number, offsetY: number }) => void;
     /** Source of records displayed inside the menu */
     public popupData: LookupDataLink;
 
@@ -598,7 +607,11 @@ export class PopupSelectView extends ValueView {
             };
             items.push(item);
         }
-        let target = { target: this };
+        let target = {
+            target: this,
+            offsetX: 0,
+            offsetY: 0
+        };
         if (this.onPopup)
             this.onPopup(items, target);
         for (let i = 0; i < items.length; i++)
@@ -609,7 +622,7 @@ export class PopupSelectView extends ValueView {
             };
 
         this.popupMenu.menu = items;
-        this.popupMenu.popup(target.target, PopupMenu.targetHorPositionType.left, PopupMenu.targetVerPositionType.under);
+        this.popupMenu.popup(target.target, PopupMenu.targetHorPositionType.left, PopupMenu.targetVerPositionType.under, target.offsetX, target.offsetY);
         this.element.setAttribute('focused', '');
     }
 

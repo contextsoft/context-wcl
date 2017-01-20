@@ -167,7 +167,7 @@ export class BaseDataLink<T extends IRecordSource | IRecordSetSource> implements
     }
 
     protected setDataSource(value: T) {
-        if (this._dataSource !== value) {
+        if (this._dataSource != value) {
             if (this._dataSource)
                 this._dataSource.removeLink(this);
             this._dataSource = value;
@@ -189,7 +189,7 @@ export class FieldDataLink extends BaseDataLink<IRecordSource> {
     }
     public get dataField() { return this._dataField; }
     public set dataField(value: string) {
-        if (this._dataField !== value) {
+        if (this._dataField != value) {
             this._dataField = value;
             if (this.dataSource)
                 this.onChange(DataEventType.Refreshed);
@@ -197,7 +197,7 @@ export class FieldDataLink extends BaseDataLink<IRecordSource> {
     }
     public get value(): any {
         let res = null;
-        if (this._dataSource && this._dataSource.current && this._dataField !== '') {
+        if (this._dataSource && this._dataSource.current && this._dataField != '') {
             if (this._dataField === '*')
                 res = utils.extend(this._dataSource.current, {});
             else
@@ -208,7 +208,7 @@ export class FieldDataLink extends BaseDataLink<IRecordSource> {
         return res;
     }
     public set value(val: any) {
-        if (this._dataSource && this._dataSource.current && this._dataField !== '') {
+        if (this._dataSource && this._dataSource.current && this._dataField != '') {
             if (this._dataSource.getState() === RecordState.Browse)
                 this._dataSource.edit();
             if (this.converter)
@@ -238,7 +238,7 @@ export class LookupDataLink extends RecordSetDataLink {
 
     public get keyField() { return this._keyField; }
     public set keyField(value: string) {
-        if (this._keyField !== value) {
+        if (this._keyField != value) {
             this._keyField = value;
             if (this.dataSource)
                 this.onChange(DataEventType.Refreshed);
@@ -246,7 +246,7 @@ export class LookupDataLink extends RecordSetDataLink {
     }
     public get displayField() { return this._displayField; }
     public set displayField(value: string) {
-        if (this._displayField !== value) {
+        if (this._displayField != value) {
             this._displayField = value;
             if (this.dataSource)
                 this.onChange(DataEventType.Refreshed);
@@ -254,7 +254,7 @@ export class LookupDataLink extends RecordSetDataLink {
     }
     public get displayExpression() { return this._displayExpression; }
     public set displayExpression(value: IExpression) {
-        if (this._displayExpression !== value) {
+        if (this._displayExpression != value) {
             this._displayExpression = value;
             if (this.dataSource)
                 this.onChange(DataEventType.Refreshed);
@@ -327,7 +327,7 @@ export class RecordSource extends BaseSource implements IRecordSource {
     public get current(): IRecord { return this._current; }
 
     public set current(value: IRecord) {
-        if (value !== this._current) {
+        if (value != this._current) {
             if (this._current)
                 this.cancel();
             this._current = value;
@@ -370,7 +370,7 @@ export class RecordSource extends BaseSource implements IRecordSource {
     }
 
     protected setState(value: RecordState): void {
-        if (this._state !== value) {
+        if (this._state != value) {
             this._state = value;
             this.notifyLinks(DataEventType.StateChanged, value);
         }
@@ -412,7 +412,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
             this.notifyLinks(DataEventType.Refreshed);
     }
 
-    public isUpdating(): boolean { return this._updateCounter !== 0; }
+    public isUpdating(): boolean { return this._updateCounter != 0; }
 
     /** Sets/gets current record by index */
     public get currentIndex(): number {
@@ -423,7 +423,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
         this.checkList();
         if (value >= this._records.length)
             value = this._records.length - 1;
-        if (value !== this._curIndex) {
+        if (value != this._curIndex) {
             this.doAutoPost();
             this._curIndex = value;
             this.notifyLinks(DataEventType.CursorMoved);
@@ -444,7 +444,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
 
     /** Sets object array as DataSource's records */
     public set records(value: IRecord[]) {
-        if (value !== this._records) {
+        if (value != this._records) {
             this.doAutoPost();
             this._records = value;
             this._curIndex = (value && value.length > 0) ? 0 : -1;
@@ -486,7 +486,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
     }
 
     public post(): void {
-        if (this._state && this._state !== RecordState.Browse) {
+        if (this._state && this._state != RecordState.Browse) {
             this.checkCurrent();
             this._oldValue = {};
             this.setState(RecordState.Browse);
@@ -495,7 +495,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
 
     /** Cancels current record editing and returns initial values */
     public cancel(): void {
-        if (this._state && this._state !== RecordState.Browse) {
+        if (this._state && this._state != RecordState.Browse) {
             this.checkCurrent();
             if (this._state === RecordState.Insert)
                 this.delete();
@@ -606,7 +606,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
     // protected methods
 
     protected setState(value: RecordState): void {
-        if (this._state !== value) {
+        if (this._state != value) {
             this._state = value;
             this.notifyLinks(DataEventType.StateChanged, value);
         }

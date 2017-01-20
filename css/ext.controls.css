@@ -330,6 +330,7 @@
     cursor: pointer;
 }
 
+
 .CtxPopupMenu .ctx_list_item:hover,
 .CtxPopupMenu .ctx_list_item.ctx_selected:hover {
     color: #262626;
@@ -355,29 +356,56 @@
     color: rgba(0,0,0,0.38);    
 }
 
-/* NavigationPanel */
-
-.CtxNavigationPanel  {
-    position: static;
+.CtxPopupMenu .ctx_list_item.ctx_caption,
+.CtxPopupMenu .ctx_list_item.ctx_caption:hover
+ {
+    font-weight: bolder;    
+    cursor: default;
+    background-color: inherit;
 }
 
-.CtxNavigationPanel .ctx_view_client_area {
+.CtxPopupMenu .ctx_list_item.ctx_selected {
+    background-color: inherit;
+}
+
+
+/* NavigationPanel */
+
+.CtxNavPanel  {
+    position: static;
+    min-width: 200px;
+    max-width: 200px;
+}
+
+.mainScreen .navPanel[collapsed] {
+    min-width: 41px;
+    max-width: 41px;
+}
+
+.CtxNavPanel .ctx_view_client_area {
     position: absolute;
     top: 0;
     bottom: 0;
     width: auto;
-    /*min-width: 200px;*/
+    min-width: 200px;
+    max-width: 200px;
     background-color: #2e3c54;
     padding: 5px;
 }
 
-.CtxNavigationPanel .ctxCaption {
+.mainScreen .navPanel[collapsed] .ctx_view_client_area {
+    min-width: 41px;
+    max-width: 41px;
+}
+
+
+.CtxNavPanel .ctxCaption {
     text-align: left;
     color: #fff;
     float: left;
 }
 
-.CtxNavigationPanel .ctxClose {
+.CtxNavPanel .ctxClose {
     background-image: url(../images/cross.svg);
     background-repeat: no-repeat;
     float: right;
@@ -388,7 +416,8 @@
     margin-top: 2px;
 }
 
-.CtxNavigationPanel .ctxClose:hover {
+.CtxNavPanel .ctxClose:hover {
     background-image: url(../images/cross-red.svg);
 }
+
 

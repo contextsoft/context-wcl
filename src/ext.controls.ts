@@ -369,6 +369,7 @@ export interface IMenuItem {
     icon?: string;
     text: string;
     disabled?: boolean;
+    caption?: boolean;
     onclick?: (item: IMenuItem) => void;
     data?: any;
 }
@@ -379,10 +380,10 @@ export interface IMenuItem {
 export class PopupMenu extends ListView {
     public static separator = '-';
     public static get targetHorPositionType() {
-        return { left: 'left', right: 'right', auto: 'auto' };
+        return { left: 'left', right: 'right'/*, auto: 'auto'*/ };
     };
     public static get targetVerPositionType() {
-        return { under: 'under', above: 'above', auto: 'auto' };
+        return { under: 'under', above: 'above'/*, auto: 'auto'*/ };
     };
     /** Fires when menu closed */
     public onClose: IVoidEvent;
@@ -391,6 +392,8 @@ export class PopupMenu extends ListView {
     protected targetHorPosition: string;
     protected targetVerPosition: string;
     protected fakeEdit: View;
+    protected offsetX: number;
+    protected offsetY: number;
 
     /** Sets menu 
      * e.g.
@@ -411,10 +414,12 @@ export class PopupMenu extends ListView {
     }
 
     /** Popups menu under/above target control */
-    public popup(target: View, targetHorPosition = PopupMenu.targetHorPositionType.left, targetVerPosition = PopupMenu.targetVerPositionType.under) {
+    public popup(target: View, targetHorPosition = PopupMenu.targetHorPositionType.left, targetVerPosition = PopupMenu.targetVerPositionType.under, offsetX = 0, offsetY = 0) {
         this.target = target;
         this.targetHorPosition = targetHorPosition;
         this.targetVerPosition = targetVerPosition;
+        this.offsetX = offsetX;
+        this.offsetY = offsetY;
         if (!this.visible)
             this.visible = true;
         else
@@ -435,14 +440,14 @@ export class PopupMenu extends ListView {
         let rec = this.target.element.getBoundingClientRect();
 
         if (this.targetVerPosition === PopupMenu.targetVerPositionType.under)
-            this.element.style.top = rec.top + rec.height + 'px';
+            this.element.style.top = rec.top + rec.height + this.offsetY + 'px';
         else
-            this.element.style.top = rec.top - rec.height + 'px';
+            this.element.style.top = rec.top - rec.height + this.offsetY + 'px';
 
         if (this.targetHorPosition === PopupMenu.targetHorPositionType.left)
-            this.element.style.left = rec.left + 'px';
+            this.element.style.left = rec.left + this.offsetX + 'px';
         else
-            this.element.style.left = rec.left + rec.width - this.element.offsetWidth + 'px';
+            this.element.style.left = rec.left + rec.width - this.element.offsetWidth + this.offsetX + 'px';
 
         this.element.addEventListener('focusout', (event) => { this.onFocusOut(); });
         this.element.focus();
@@ -468,6 +473,8 @@ export class PopupMenu extends ListView {
             val = record[this.listData.keyField].toString();
         if (val === PopupMenu.separator)
             return 'ctx_separator';
+        else if (<IMenuItem>record.caption)
+            return 'ctx_caption';
         else if (<IMenuItem>record.disabled)
             return 'ctx_disabled';
         else
@@ -484,7 +491,22 @@ export class PopupMenu extends ListView {
 }
 
 /** Navigation panel */
-export class NavigationPanel extends PanelView {
+export class NavPanel extends PanelView {
+    public static workModes() {
+        return { closable: 'closable', collapsable: 'collapsable' };
+    }
+
+    protected _workMode: string;
+    public get workMode() {
+        return this._workMode;
+    }
+    public set workMode(value) {
+        if (value == this._workMode)
+            return;
+        this._workMode = value;
+        this._closeButton.visible = this._workMode == NavPanel.workModes().closable;
+    }
+
     /** Caption control */
     public get caption(): TextView {
         return this._caption;
@@ -496,12 +518,19 @@ export class NavigationPanel extends PanelView {
     /** Fires when user closes panel */
     public onClose: IVoidEvent;
 
+    public get closed() {
+        return this._closed;
+    }
+
     protected _caption: TextView;
     protected _closeButton: TextView;
+    protected _closed: boolean;
 
-    constructor(parent: View, name?: string, caption?: string) {
+
+    constructor(parent: View, name?: string, caption?: string, workMode?: string) {
         super(parent, name);
         this.renderClientArea = true;
+
         let captionContainer = new PanelView(this, 'ctxCaptionContainer');
         this._caption = new TextView(captionContainer, 'ctxCaption');
         this._caption.text = caption;
@@ -510,11 +539,37 @@ export class NavigationPanel extends PanelView {
         this._closeButton.events.onclick = () => {
             this.close();
         };
+
+        if (workMode)
+            this.workMode = workMode;
+        else
+            this.workMode = NavPanel.workModes().closable;
+    }
+
+    public toggle() {
+        if (this._closed)
+            this.visible = true;
+        else
+            this.close();
     }
 
     public close() {
-        this.hide();
+        this._closed = true;
+        if (this.workMode == NavPanel.workModes().closable)
+            this.hide();
+        else {
+            this.element.setAttribute('collapsed', '');
+        }
         if (this.onClose)
             this.onClose();
     }
+
+    public setVisible(value) {
+        super.setVisible(value);
+        if (this._visible)
+            if (this._closed) {
+                this._closed = false;
+                this.element.removeAttribute('collapsed');
+            }
+    };
 }
