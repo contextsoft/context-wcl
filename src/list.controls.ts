@@ -65,6 +65,7 @@ export class ListView extends ValueView {
     public listData: LookupDataLink;
 
     public renderIconsOnly: boolean;
+    public recordDisplayTextEscapeHtml: boolean = false;
 
     constructor(parent: View, name?: string) {
         super(parent, name);
@@ -93,7 +94,11 @@ export class ListView extends ValueView {
         let val = '';
         if (this.listData.keyField && record[this.listData.keyField])
             val = ' value="' + utils.escapeHTML(record[this.listData.keyField].toString()) + '"';
-        let displayText = utils.escapeHTML(this.getRecordDisplayText(record));
+
+        let displayText = this.getRecordDisplayText(record);
+        if (this.recordDisplayTextEscapeHtml)
+            displayText = utils.escapeHTML(displayText);
+
         if (record['icon']) {
             let ico = utils.formatStr('<img class="ctx_list_icon" src="{0}">', [record['icon']]);
             if (this.renderIconsOnly)
