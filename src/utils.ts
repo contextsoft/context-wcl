@@ -105,7 +105,7 @@ export namespace utils {
         if (!args || args.length === 0)
             throw 'formatStr: invalid arguments';
         return str.replace(/{(\d+)}/g, (match, num) => {
-            return typeof args[num] !== 'undefined' ? args[num] : match;
+            return typeof args[num] !== 'undefined' ? args[num] : ''/*match*/;
         });
     }
 

@@ -20,7 +20,6 @@ export class ScreenView extends View {
     constructor(name?: string) {
         super(null, name);
         this._visible = false;
-        //this.renderClientArea = true;
         // this.isController = true; //TODO: used in serizalization, needs refactoring
     }
 }
@@ -47,9 +46,9 @@ export class WaitScreen extends ScreenView {
  * <div> wrapper 
  */
 export class TextView extends View {
-    constructor(parent: View, name?: string) {
+    constructor(parent: View, name?: string, text?: string) {
         super(parent, name);
-        //this.renderClientArea = false;
+        this.text = text;
     }
 }
 
@@ -63,7 +62,6 @@ export class HeaderView extends View {
 
     constructor(parent: View, name?: string) {
         super(parent, name);
-        //this.renderClientArea = false;
         this.tag = 'header';
         //this.theme = HeaderView.themes.fixed;
     }
@@ -79,7 +77,6 @@ export class FooterView extends View {
 
     constructor(parent: View, name?: string) {
         super(parent, name);
-        //this.renderClientArea = false;
         this.tag = 'footer';
         this.theme = FooterView.themes.fixed;
     }
@@ -144,10 +141,11 @@ export class ButtonView extends View {
         chevronRight: 'chevronRight'
     };
 
-    constructor(parent: View, name?: string) {
+    constructor(parent: View, name?: string, text?: string) {
         super(parent, name);
         this.renderClientArea = true;
         this.tag = 'button';
+        this.text = text;
     }
 
     public getTagAttr() {
@@ -172,7 +170,6 @@ export class FormView extends View {
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.tag = 'form';
-        //this.renderClientArea = false;
     }
 }
 
@@ -189,7 +186,6 @@ export class InputView extends ValueView {
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.tag = 'input';
-        //this.renderClientArea = false;
     }
 
     protected beforeUpdateView() {
@@ -235,7 +231,6 @@ export class TextAreaView extends InputView {
     constructor(parent: View, name?: string) {
         super(parent, name);
         this.tag = 'textarea';
-        //this.renderClientArea = false;
     }
 
     public getValue(): string {
@@ -494,7 +489,6 @@ export class Splitter extends View {
 
     constructor(parent: View, name?: string) {
         super(parent, name);
-        //this.renderClientArea = false;
         this.setVertical(false);
     }
 
@@ -619,7 +613,6 @@ export class Splitter extends View {
 export class CheckView extends ValueView {
     constructor(parent: View, name?: string) {
         super(parent, name);
-        //this.renderClientArea = false;
     }
 
     public renderSelf() {
