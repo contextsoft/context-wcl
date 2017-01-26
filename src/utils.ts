@@ -29,8 +29,8 @@ export namespace utils {
     // String utils
 
     /** Checks if val is undefined or null  */
-    export function isDefined(val) {
-        return !(typeof val === 'undefined' || val === null);
+    export function empty(val) {
+        return typeof val === 'undefined' || val === null || val === '';
     }
 
     export function strOfZero(cnt) {
@@ -105,7 +105,7 @@ export namespace utils {
         if (!args || args.length === 0)
             throw 'formatStr: invalid arguments';
         return str.replace(/{(\d+)}/g, (match, num) => {
-            return typeof args[num] !== 'undefined' ? args[num] : ''/*match*/;
+            return typeof args[num] !== 'undefined' && args[num] !== null ? args[num] : ''/*match*/;
         });
     }
 

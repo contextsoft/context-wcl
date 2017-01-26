@@ -38,7 +38,7 @@ export class TabsView extends ListView {
                 text: tabs[i]
             });
         }
-        tabsSource.records = tabsRecs;
+        tabsSource.setRecords(tabsRecs);
         this.listData.dataSource = tabsSource;
 
         let valueSource = new RecordSource();
@@ -148,7 +148,7 @@ export class PageView extends View {
      */
     public set pages(pages: IPageViewPage[]) {
         let pagesSource = new RecordSetSource();
-        pagesSource.records = pages;
+        pagesSource.setRecords(pages);
         this.pagesSwitcher.listData.dataSource = pagesSource;
 
         let valueSource = new RecordSource();
@@ -284,11 +284,30 @@ export class MessageBox extends ModalView {
             onClick: null
         };
     }
+
+    public static buttonYes(): IMessageBoxButton {
+        return {
+            id: 'ctxYesButton',
+            text: 'Yes',
+            buttonTheme: ButtonView.themes.primary,
+            onClick: null
+        };
+    }
+
     public static buttonCancel(): IMessageBoxButton {
         return {
             id: 'ctxCancelButton',
             text: 'Cancel',
-            buttonTheme: ButtonView.themes.default,
+            buttonTheme: ButtonView.themes.danger,
+            onClick: null
+        };
+    }
+
+    public static buttonNo(): IMessageBoxButton {
+        return {
+            id: 'ctxNoButton',
+            text: 'No',
+            buttonTheme: ButtonView.themes.danger,
             onClick: null
         };
     }
@@ -297,19 +316,20 @@ export class MessageBox extends ModalView {
         let dlg = new MessageBox(null, true);
         let btn, buttons = [];
         dlg.captionView.text = caption;
-        if (typeof onCancelClick === 'function') {
-            btn = MessageBox.buttonCancel();
-            btn.onClick = onCancelClick;
-            buttons.push(btn);
-        }
         if (typeof onOkClick === 'function') {
             btn = MessageBox.buttonOk();
             btn.onClick = onOkClick;
             buttons.push(btn);
         }
+        if (typeof onCancelClick === 'function') {
+            btn = MessageBox.buttonCancel();
+            btn.onClick = onCancelClick;
+            buttons.push(btn);
+        }
         dlg.buttons = buttons;
         dlg.show();
     }
+
 
     public static showMessage(caption: string, buttons?: IMessageBoxButton[]) {
         let dlg = new MessageBox(null, true);
@@ -401,7 +421,7 @@ export class PopupMenu extends ListView {
      */
     public set menu(items: IMenuItem[]) {
         let menuSource = new RecordSetSource();
-        menuSource.records = items;
+        menuSource.setRecords(items);
         this.listData.dataSource = menuSource;
         this.listData.displayField = 'text';
         this.listData.keyField = 'text';

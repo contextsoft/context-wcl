@@ -137,6 +137,7 @@ export interface IRecordSource extends IDataSource, IReference, IEditableRecord 
 
 /** Provides access to a record set */
 export interface IRecordSetSource extends IRecordSource, ICursor, IEditableList {
+    setRecords(value: IRecord[]);
 }
 
 /** Describes a data link located on the control's (data consumer) side */
@@ -443,7 +444,7 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
     }
 
     /** Sets object array as DataSource's records */
-    public set records(value: IRecord[]) {
+    public setRecords(value: IRecord[]) {
         if (value != this._records) {
             this.doAutoPost();
             this._records = value;

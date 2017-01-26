@@ -225,7 +225,7 @@ export class DataTable<R extends Record> implements IDataTable {
     public delete(index: number) {
         let rec = this.records[index];
         this.recordsUpdates.addUpdate(rec, RecordUpdateType.Delete);
-        this.records.splice(index);
+        this.records.splice(index, 1);
         this.notifyLinks(DataSetEventType.Refreshed);
     }
 
@@ -353,7 +353,7 @@ export class TableDataSource<R extends Record> extends RecordSetSource {
         super();
         this._data = new DataSetLink<DataTable<R>>((eventType: DataSetEventType, data: any) => {
             if (eventType === DataSetEventType.Refreshed) {
-                this.records = this.dataTable.records;
+                this.setRecords(this.dataTable.records);
                 if (!this._state)
                     this.setState(RecordState.Browse);
                 this.notifyLinks(DataEventType.Refreshed);

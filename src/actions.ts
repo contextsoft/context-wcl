@@ -5,15 +5,21 @@
  */
 
 export interface IOnActionExecute {
-    (sender: any): void;
+    (sender?: any): void;
+}
+
+export interface ICanActionExecute {
+    (sender?: any): Promise<void>;
 }
 
 export interface IAction {
+    onExecute: IOnActionExecute;
+    onCanExecute: ICanActionExecute;
     enabled: boolean;
     visible: boolean;
     icon: string;
     caption: string;
-    execute(sender: any, event: any): void;
+    execute(sender?: any, event?: any): void;
     addTarget(view: IActionTarget): void;
     removeTarget(link: IActionTarget): void;
     notifyTargets(): void;
@@ -24,13 +30,17 @@ export interface IActionTarget {
 }
 
 export class BaseAction implements IAction {
+    public onExecute: IOnActionExecute;
+    public onCanExecute: ICanActionExecute;
     protected _enabled: boolean = true;
     protected _visible: boolean = true;
     protected _icon: string;
     protected _caption: string;
     protected _targets: IActionTarget[] = [];
 
-    constructor(public onExecute?: IOnActionExecute) { }
+    constructor(onExecute?: IOnActionExecute) {
+        this.onExecute = onExecute;
+    }
 
     get enabled(): boolean { return this._enabled; }
     set enabled(value) {
@@ -61,8 +71,7 @@ export class BaseAction implements IAction {
         }
     }
     public execute(sender: any) {
-        if (this.onExecute)
-            this.onExecute(sender);
+        // implement in descendants
     }
     public addTarget(target: IActionTarget): void {
         this._targets.push(target);

@@ -87,6 +87,7 @@ class DataTable extends DbObject implements IAdapter
     {
         $fields = '';
         $values = '';
+        $paramValues = [];
         if (!isset($params[$this->idField])) {
             $params[$this->idField] = $this->generateId();
         }
@@ -98,10 +99,11 @@ class DataTable extends DbObject implements IAdapter
             if (!empty($values)) {
                 $values = $values . ',';
             }
-            $values = $values . '"' . $value . '"';
+            $values = $values . '?';
+            $paramValues[] = $value;
         }
         $sql = "insert into $this->tableName ($fields) values ($values)";
-        $this->execSql($sql);
+        $this->execSql($sql, $paramValues);
         $result = [];
         $result[$this->idField] = $params[$this->idField];
         return $result;
@@ -110,19 +112,21 @@ class DataTable extends DbObject implements IAdapter
     public function updateRecord($params)
     {
         $sql = '';
+        $updateParams = [];
         foreach ($params as $field => $value) {
             if ($field == $this->idField) {
-                $idValue = $value;
+                $updateParams[$field] = $value;
             } else {
-                $pair = "$field = \"$value\"";
+                $pair = "$field = :$field";
+                $updateParams[$field] = $value;
                 if (!empty($sql)) {
                     $sql = $sql.",\n";
                 }
                 $sql = $sql . $pair;
             }
         }
-        $sql = "update $this->tableName set\n $sql \n where $this->idField = \"$idValue\"";
-        $this->execSql($sql);
+        $sql = "update $this->tableName set\n $sql \n where $this->idField = :$this->idField";
+        $this->execSql($sql, $updateParams);
     }
     
     public function deleteRecord($params)

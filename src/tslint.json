@@ -59,6 +59,9 @@
             false
         ],
         "no-trailing-whitespace": false,
-        "eofline": false
+        "eofline": false,
+        "no-consecutive-blank-lines": [
+            false
+        ]
     }
 }

@@ -127,7 +127,10 @@ export class ListView extends ValueView {
     protected updateSelectedRecord(children?: Element[] | HTMLCollection) {
         let selectedIdx = this.listData.dataSource.currentIndex;
         let el: Element, idx;
-        children = children || this.element.children;
+        if (!children && this.element && this.element.children)
+            children = this.element.children;
+        if (!children)
+            return;
         for (let i = 0; i < children.length; i++) {
             el = children[i];
             idx = el.getAttribute('index');
@@ -591,7 +594,7 @@ export class PopupSelectView extends ValueView {
             this.element.removeAttribute('focused');
         };
 
-        this.caption = new TextView(this, 'ctxCaption');
+        this.caption = new TextView(this, 'ctxPopupSelectViewCaption');
         this.dropDownBtn = new TextView(this, 'ctxDropDownBtn');
 
         this.events.onclick = () => {
@@ -633,7 +636,8 @@ export class PopupSelectView extends ValueView {
 
     public setValue(_value) {
         super.setValue(_value);
-        this.popupData.dataSource.locate({ id: _value });
+        if (this.popupData.dataSource)
+            this.popupData.dataSource.locate({ id: _value });
         this.updateView();
     }
 

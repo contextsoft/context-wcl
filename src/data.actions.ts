@@ -55,7 +55,7 @@ export class RecordSetSourceAction extends BaseAction {
     public updateAction() {
         // implement in descendants
     }
-    public execute(sender: any) {
+    public execute(sender?: any) {
         // implement in descendants
     }
 }
@@ -65,11 +65,14 @@ export class EditAction extends RecordSourceAction {
         this._caption = 'Edit';
     }
     public updateAction() {
-        this.enabled = this.link.dataSource && (this.link.dataSource.getState() === RecordState.Browse);
+        this.enabled = (this.link.dataSource && (this.link.dataSource.getState() === RecordState.Browse) && this.link.dataSource.current) ? true : false;
     }
-    public execute(sender: any) {
-        if (this.enabled && this.link.dataSource)
+    public execute(sender?: any) {
+        if (this.enabled && this.link.dataSource) {
             this.link.dataSource.edit();
+            if (this.onExecute)
+                this.onExecute(sender);
+        }
     }
 }
 
@@ -77,12 +80,23 @@ export class PostAction extends RecordSourceAction {
     public setDefaults() {
         this._caption = 'Post';
     }
+
     public updateAction() {
         this.enabled = this.link.dataSource && (this.link.dataSource.getState() === RecordState.Edit || this.link.dataSource.getState() === RecordState.Insert);
     }
-    public execute(sender: any) {
+
+    public execute(sender?: any) {
         if (this.enabled && this.link.dataSource)
-            this.link.dataSource.post();
+            if (this.onCanExecute)
+                this.onCanExecute(sender).then(() => { this.doExecute(); });
+            else
+                this.doExecute(sender);
+    }
+
+    protected doExecute(sender?: any) {
+        this.link.dataSource.post();
+        if (this.onExecute)
+            this.onExecute(sender);
     }
 }
 
@@ -90,12 +104,23 @@ export class CancelAction extends RecordSourceAction {
     public setDefaults() {
         this._caption = 'Cancel';
     }
+
     public updateAction() {
         this.enabled = this.link.dataSource && (this.link.dataSource.getState() === RecordState.Edit || this.link.dataSource.getState() === RecordState.Insert);
     }
-    public execute(sender: any) {
+
+    public execute(sender?: any) {
         if (this.enabled && this.link.dataSource)
-            this.link.dataSource.cancel();
+            if (this.onCanExecute)
+                this.onCanExecute(sender).then(() => { this.doExecute(); });
+            else
+                this.doExecute(sender);
+    }
+
+    protected doExecute(sender?: any) {
+        this.link.dataSource.cancel();
+        if (this.onExecute)
+            this.onExecute(sender);
     }
 }
 
@@ -103,12 +128,24 @@ export class DeleteAction extends RecordSetSourceAction {
     public setDefaults() {
         this._caption = 'Delete';
     }
+
     public updateAction() {
         this.enabled = this.dataSource && (this.dataSource.current != null);
     }
-    public execute(sender: any) {
-        if (this.enabled && this.dataSource)
-            this.dataSource.delete();
+
+    public execute(sender?: any) {
+        if (this.enabled && this.dataSource) {
+            if (this.onCanExecute)
+                this.onCanExecute(sender).then(() => { this.doExecute(); });
+            else
+                this.doExecute();
+        }
+    }
+
+    protected doExecute(sender?: any) {
+        this.dataSource.delete();
+        if (this.onExecute)
+            this.onExecute(sender);
     }
 }
 
@@ -116,11 +153,23 @@ export class InsertAction extends RecordSetSourceAction {
     public setDefaults() {
         this._caption = 'Insert';
     }
+
     public updateAction() {
         this.enabled = this.dataSource != null;
     }
-    public execute(sender: any) {
-        if (this.enabled && this.dataSource)
-            this.dataSource.insert();
+
+    public execute(sender?: any) {
+        if (this.enabled && this.dataSource) {
+            if (this.onCanExecute)
+                this.onCanExecute(sender).then(() => { this.doExecute(); });
+            else
+                this.doExecute(sender);
+        }
+    }
+
+    protected doExecute(sender?: any) {
+        this.dataSource.insert();
+        if (this.onExecute)
+            this.onExecute(sender);
     }
 }

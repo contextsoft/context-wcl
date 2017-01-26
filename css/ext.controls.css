@@ -315,6 +315,7 @@
   animation-iteration-count: 1;
   animation-timing-function: ease-out;
   animation-duration: 0.1s;
+  z-index: 2000;
 }
 
 .CtxPopupMenu, .CtxPopupMenu:focus {
