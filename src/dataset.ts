@@ -394,10 +394,9 @@ export class TableDataSource<R extends Record> extends RecordSetSource {
         this.checkList();
         this.doAutoPost();
         this.dataTable.add();
-        this.setState(RecordState.Insert);
-
         this._curIndex = this._records.length - 1;
         this._oldValue = {};
+        this.setState(RecordState.Insert);
         this.notifyLinks(DataEventType.CursorMoved);
     }
 }
