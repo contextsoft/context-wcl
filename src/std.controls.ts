@@ -99,8 +99,9 @@ export class GroupBoxView extends View {
         drawBorder: 'border'
     };
 
-    constructor(parent: View, name?: string) {
+    constructor(parent: View, name?: string, text?: string) {
         super(parent, name);
+        this.text = text;
         this.renderClientArea = true;
         this.theme = GroupBoxView.themes.drawBorder;
     }

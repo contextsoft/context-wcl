@@ -104,7 +104,7 @@ export class Application {
         if (onReady)
             this.onReady = onReady;
 
-        this.url = document.URL;
+        this.url = location.href.replace(/[^/]*$/, '');
 
         utils.setLocaleFunc((str: string): string => {
             let locale = this.settings['locale'];
