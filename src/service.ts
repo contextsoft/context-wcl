@@ -7,7 +7,7 @@ import { WaitScreen } from './std.controls';
 export interface IResponse {
     data: any;
     raw?: string;
-    code?: number;
+    code?: string;
     message?: string;
     stack?: string;
 }
@@ -263,7 +263,7 @@ export class Service implements IService {
                         response = {
                             data: '',
                             raw: result,
-                            code: 0,
+                            code: '0',
                             message: 'Service error',
                             stack: ''
                         };
@@ -288,7 +288,7 @@ export class Service implements IService {
 
     public showError(response: IResponse) {
         let msg = response.message;
-        if (application.obj.config.debug && response.stack && response.code > 0) {
+        if (application.obj.config.debug && response.stack && (response.code && (parseInt(response.code) > 0 || response.code))) {
             msg += '<div class="stack" style="font-weight: normal; font-size: 12px; margin-top: 10px; margin-bottom: 10px">' + response.stack + '</div>';
         }
         if (application.obj.config.debug && application.obj.config.showServiceRawOutput && response.raw)
