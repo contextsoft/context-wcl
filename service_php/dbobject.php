@@ -12,21 +12,39 @@ class DbObject
 
     protected static function internalExecSql($sql, $params)
     {
-        $con = DbObject::getConnection();
-        $query = $con->prepare($sql);
+        $connection = DbObject::getConnection();
+        $query = $connection->prepare($sql);
         $query->execute($params);
         return $query;
     }
 
-    public static function execSql($sql, $params)
+    public static function execSql($sql, $params = null)
     {
         DbObject::internalExecSql($sql, $params);
     }
 
-    public static function fetchSql($sql, $params)
+    public static function fetchSql($sql, $params = null)
     {
         $query = DbObject::internalExecSql($sql, $params);
         return $query->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function beginTransaction()
+    {
+        $connection = DbObject::getConnection();
+        $connection->beginTransaction();
+    }
+
+    public static function commitTransaction()
+    {
+        $connection = DbObject::getConnection();
+        $connection->commit();
+    }
+
+    public static function rollbackTransaction()
+    {
+        $connection = DbObject::getConnection();
+        $connection->rollBack();
     }
 }
 
