@@ -5,6 +5,8 @@
  */
 class DbObject
 {
+    protected static $transaction = 0;
+
     protected static function getConnection()
     {
         return Application::getConnection();
@@ -31,18 +33,31 @@ class DbObject
 
     public static function beginTransaction()
     {
+        DbObject::$transaction++;
+        if (DbObject::$transaction > 1)
+            return;
         $connection = DbObject::getConnection();
         $connection->beginTransaction();
     }
 
     public static function commitTransaction()
     {
+        if (DbObject::$transaction == 0)
+            return;
+        DbObject::$transaction--;
+        if (DbObject::$transaction > 0)
+            return;
         $connection = DbObject::getConnection();
         $connection->commit();
     }
 
     public static function rollbackTransaction()
     {
+        if (DbObject::$transaction == 0)
+            return;
+        DbObject::$transaction--;
+        if (DbObject::$transaction > 0)
+            return;
         $connection = DbObject::getConnection();
         $connection->rollBack();
     }
@@ -89,15 +104,23 @@ class DataTable extends DbObject implements IAdapter
 
     public function applyUpdates($params)
     {
-        foreach ($params as $update) {
-            $updateType = $update['updateType'];
-            if (strcasecmp($updateType, 'update') == 0) {
-                $this->updateRecord($update['data']);
-            } elseif (strcasecmp($updateType, 'delete') == 0) {
-                $this->deleteRecord($update['data']);
-            } elseif (strcasecmp($updateType, 'insert') == 0) {
-                $this->insertRecord($update['data']);
+        DbObject::beginTransaction();
+        try {
+            foreach ($params as $update) {
+                $updateType = $update['updateType'];
+                if (strcasecmp($updateType, 'update') == 0) {
+                    $this->updateRecord($update['data']);
+                } elseif (strcasecmp($updateType, 'delete') == 0) {
+                    $this->deleteRecord($update['data']);
+                } elseif (strcasecmp($updateType, 'insert') == 0) {
+                    $this->insertRecord($update['data']);
+                }
             }
+            DbObject::commitTransaction();
+        }
+        catch (Exception $e) {
+            DbObject::rollbackTransaction();
+            throw $e;
         }
     }
     
