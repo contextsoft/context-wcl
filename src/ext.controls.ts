@@ -216,12 +216,13 @@ export class ModalView extends View {
     public modalContainer: PanelView;
 
     constructor(name?: string, initComponents = true) {
-        super(null, name, false);
-        this.visible = false;
+        super(null, name, null, false);
         this.modalContainer = new PanelView(this, 'cxtModalContainer');
+        this.visible = false;
         if (initComponents)
             this.initComponents();
     }
+
 }
 
 /** 
@@ -242,9 +243,10 @@ export class DialogView extends ModalView {
 
     constructor(name?: string, caption?: string) {
         super(name, false);
+
         let captionContainer = new PanelView(this.modalContainer, 'ctxCaptionContainer');
         this._caption = new TextView(captionContainer, 'ctxCaption');
-        this._caption.text = caption;
+        this.caption = caption;
 
         let closeBtn = new TextView(captionContainer, 'ctxClose');
         closeBtn.events.onclick = () => {

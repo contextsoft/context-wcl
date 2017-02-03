@@ -245,6 +245,14 @@ body {
     margin-right: 4px;
 }
 
+.CtxButtonView .ctx_icon {
+    width: 20px;
+    height: 20px; 
+    margin-right: 5px;
+    margin-top: -3px;
+    vertical-align: middle;
+}
+
 .CtxButtonView:hover {
     color: #333333;
     background-color: #ebebeb;

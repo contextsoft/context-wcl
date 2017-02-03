@@ -18,8 +18,9 @@ resources.register('context-wcl',
  */
 export class ScreenView extends View {
     constructor(name?: string) {
-        super(null, name);
+        super(null, name, null, false);
         this._visible = false;
+        this.initComponents();
         // this.isController = true; //TODO: used in serizalization, needs refactoring
     }
 }
@@ -46,10 +47,6 @@ export class WaitScreen extends ScreenView {
  * <div> wrapper 
  */
 export class TextView extends View {
-    constructor(parent: View, name?: string, text?: string) {
-        super(parent, name);
-        this.text = text;
-    }
 }
 
 /**
@@ -60,8 +57,8 @@ export class HeaderView extends View {
         fixed: 'fixed'
     };
 
-    constructor(parent: View, name?: string) {
-        super(parent, name);
+    constructor(parent: View, name?: string, text?: string) {
+        super(parent, name, text);
         this.tag = 'header';
         //this.theme = HeaderView.themes.fixed;
     }
@@ -75,8 +72,8 @@ export class FooterView extends View {
         fixed: 'fixed'
     };
 
-    constructor(parent: View, name?: string) {
-        super(parent, name);
+    constructor(parent: View, name?: string, text?: string) {
+        super(parent, name, text);
         this.tag = 'footer';
         this.theme = FooterView.themes.fixed;
     }
@@ -86,9 +83,6 @@ export class FooterView extends View {
  * <div> wrapper used for layouting purposes 
  */
 export class PanelView extends View {
-    constructor(parent: View, name?: string) {
-        super(parent, name);
-    }
 }
 
 /**
@@ -385,7 +379,7 @@ export class ContainerView extends View {
                 this._element.appendChild(childElement);
             childElement.outerHTML = child.internalRender();
             child._element = childElement;
-            child.afterUpdateView();
+            child.internalAfterUpdateView();
         } else
             this.updateView();
     };

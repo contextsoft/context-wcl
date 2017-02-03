@@ -205,8 +205,14 @@ export class GridView extends View {
                     (<any>column.view).afterUpdateView();
                     column.view.visible = wasVisible;
                 }
-                else
-                    v = rec[column.fieldName];
+                else {
+                    if (column.fieldName in rec)
+                        v = rec[column.fieldName];
+                    else if (column.fieldName.toLowerCase() in rec)
+                        v = rec[column.fieldName.toLowerCase()];
+                    else if (column.fieldName.toUpperCase() in rec)
+                        v = rec[column.fieldName.toUpperCase()];
+                }
                 if (typeof this.onGetColumnAttr === 'function')
                     colAttr = this.onGetColumnAttr(row, col, v);
                 else if (column.attributes)

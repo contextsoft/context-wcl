@@ -310,6 +310,8 @@ export class DataTable<R extends Record> implements IDataTable {
 export class DataTableAdapter implements IDataTableAdapter {
     public adapter: string;
     public service: IService;
+    public fillMethod = 'fill';
+    public applyUpdatesMethod = 'applyUpdates';
 
     constructor(adapter: string) {
         this.adapter = adapter;
@@ -322,7 +324,7 @@ export class DataTableAdapter implements IDataTableAdapter {
     }
 
     public fill(table: IDataTable): Promise<void> {
-        return this.execute('fill').then((data) => {
+        return this.execute(this.fillMethod).then((data) => {
             if (!data || !data.records)
                 throw 'Service did not returned any data';
             table.fillRecords(data);
@@ -333,7 +335,7 @@ export class DataTableAdapter implements IDataTableAdapter {
         let params = table.recordsUpdates.getUpdateParams();
         if (!params)
             return;
-        return this.execute('applyUpdates', params).then(() => {
+        return this.execute(this.applyUpdatesMethod, params).then(() => {
             table.recordsUpdates.clear();
         });
     }

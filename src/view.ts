@@ -122,10 +122,11 @@ export abstract class View extends Component {
     protected _text: any;
     protected _classPath: string;
 
-    constructor(parent: View, name?: string, initComponents = true) {
+    constructor(parent: View, name?: string, text?: string, initComponents = true) {
         super(name);
         this._id = 'w' + (View.nextViewId++);
         this._parent = parent;
+        this._text = text;
         if (parent)
             parent.addView(this);
         if (initComponents)
@@ -427,7 +428,7 @@ export abstract class View extends Component {
     public renderIcon(): string {
         let icon = this.getIcon();
         if (icon)
-            return '<img src="' + icon + '">';
+            return '<img class="ctx_icon" src="' + icon + '">';
         else
             return '';
     }

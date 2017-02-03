@@ -55,9 +55,7 @@ class DbObject
     {
         if (DbObject::$transaction == 0)
             return;
-        DbObject::$transaction--;
-        if (DbObject::$transaction > 0)
-            return;
+        DbObject::$transaction = 0;
         $connection = DbObject::getConnection();
         $connection->rollBack();
     }
