@@ -58,7 +58,7 @@ export interface IDataAdapter {
 
 /** Describes an object for table remote data manipulation */
 export interface IDataTableAdapter extends IDataAdapter {
-    fill(table: IDataTable): Promise<void>;
+    fill(table: IDataTable, params?: any): Promise<void>;
     applyUpdates(table: IDataTable): Promise<void>;
 }
 
@@ -269,8 +269,8 @@ export class DataTable<R extends Record> implements IDataTable {
         return <R>newRec;
     }
 
-    public fill(): Promise<void> {
-        return this.adapter.fill(this).then(() => {
+    public fill(params?: any): Promise<void> {
+        return this.adapter.fill(this, params).then(() => {
             this.notifyLinks(DataSetEventType.Refreshed);
         });
     }
@@ -323,8 +323,8 @@ export class DataTableAdapter implements IDataTableAdapter {
         });
     }
 
-    public fill(table: IDataTable): Promise<void> {
-        return this.execute(this.fillMethod).then((data) => {
+    public fill(table: IDataTable, params?: any): Promise<void> {
+        return this.execute(this.fillMethod, params).then((data) => {
             if (!data || !data.records)
                 throw 'Service did not returned any data';
             table.fillRecords(data);

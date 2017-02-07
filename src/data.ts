@@ -574,15 +574,34 @@ export class RecordSetSource extends BaseSource implements IRecordSetSource, IUp
         return true;
     }
 
-    /** Locates record with specified values and sets it as the current */
-    public locate(values: IRecord): boolean {
+    /** Finds record with specified values */
+    public findIndex(values: IRecord): number {
         for (let i = 0; i < this.recordCount(); i++) {
             if (this.compareRecord(this._records[i], values)) {
-                this.currentIndex = i;
-                return true;
+                return i;
             }
         }
-        return false;
+        return -1;
+    }
+
+    /** Finds record with specified values */
+    public find(values: IRecord): IRecord {
+        let idx = this.findIndex(values);
+        if (idx >= 0)
+            return this.getRecord(idx);
+        else
+            return null;
+    }
+
+    /** Locates record with specified values and sets it as the current */
+    public locate(values: IRecord): boolean {
+        let r = this.findIndex(values);
+        if (r >= 0) {
+            this.currentIndex = r;
+            return true;
+        }
+        else
+            return false;
     }
 
     /** Returns record by index */

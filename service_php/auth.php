@@ -2,7 +2,8 @@
 
 class Auth implements IAdapter
 {
-    public static function getAllowedMethods() { 
+    public static function getAllowedMethods()
+    {
         return [
             'getAuthProviders',
             'login', 'loginSocial', 'logout',
@@ -50,7 +51,7 @@ class Auth implements IAdapter
             Application::raise('Please enter email and password');
         }
             
-        $user = DbObject::fetchSQL(
+        $user = DbObject::fetchSql(
             "SELECT id, photo_url, display_name, first_name, last_name, email_confirmed, active FROM user u 
               WHERE UPPER(TRIM(u.email)) = UPPER(TRIM(?)) AND u.password = MD5(?)",
             [$params['email'], $params['password']]);
@@ -73,14 +74,15 @@ class Auth implements IAdapter
         return $this->getSessionUser();
     }
 
-    protected function getUser($email, $id = null) {
-        if(isset($id)) {
-            $user = DbObject::fetchSQL(
+    protected function getUser($email, $id = null)
+    {
+        if (isset($id)) {
+            $user = DbObject::fetchSql(
                 "SELECT id, photo_url, display_name, first_name, last_name, email_confirmed, active FROM user u 
                     WHERE id = ?",
                 [$id]);
         } else {
-            $user = DbObject::fetchSQL(
+            $user = DbObject::fetchSql(
                 "SELECT id, photo_url, display_name, first_name, last_name, email_confirmed, active FROM user u 
                     WHERE UPPER(TRIM(u.email)) = UPPER(TRIM(?))",
                 [$email]);
@@ -102,8 +104,9 @@ class Auth implements IAdapter
         try {
             // inlcude HybridAuth library
             Libs::requireOnce(Libs::$hybridAuth . '/Auth.php');
-            if ($providerName === 'Facebook')
+            if ($providerName === 'Facebook') {
                 Libs::requireOnce(Libs::$hybridAuth . '/thirdparty/Facebook/autoload.php');
+            }
     
             // initialize Hybrid_Auth class with the config file
             $hybridauth = new Hybrid_Auth(AuthConfig::$hybridAuthConfig);
@@ -113,10 +116,9 @@ class Auth implements IAdapter
     
             // then grab the user profile
             $userProfile = $adapter->getUserProfile();
-        }
-        // something went wrong?
-        catch( Exception $e ) {
-            throw $e; 
+        } // something went wrong?
+        catch (Exception $e) {
+            throw $e;
         }
     
         // check if the current user already have authenticated using this provider before
@@ -156,10 +158,9 @@ class Auth implements IAdapter
                     'id_user' => $user['id'],
                     'provider' => $providerName,
                     'provider_user_id' => $userProfile->identifier
-                ]);                        
-        }
-        else {
-            $user = $this->getUser(null, $user[0]['id_user']); 
+                ]);
+        } else {
+            $user = $this->getUser(null, $user[0]['id_user']);
             $user = $user[0];
         }
 
@@ -200,11 +201,11 @@ class Auth implements IAdapter
             "UPDATE user SET email_confirmed = 1, email_confirmation_key = NULL WHERE id = ?",
             [$user['id']]);
 
-        $this->setUser($user['id'],$user['first_name'], $user['last_name'], $user['display_name'], $user['photo_url']);
+        $this->setUser($user['id'], $user['first_name'], $user['last_name'], $user['display_name'], $user['photo_url']);
         return $this->getSessionUser();
     }
 
-    /** Sends via email registration confirmation code 
+    /** Sends via email registration confirmation code
      * params: [email]
      */
     public function sendRegistrationConfirmationCode($params)
@@ -221,8 +222,8 @@ class Auth implements IAdapter
 
         $id = $user['id'];
         $display_name = $user['display_name'];
-        if(empty($display_name)) {
-            $display_name = $user['first_name'] . ' ' . $user['last_name']; 
+        if (empty($display_name)) {
+            $display_name = $user['first_name'] . ' ' . $user['last_name'];
         }
         $email_confirmation_key = Auth::generateCode();
 
@@ -275,10 +276,11 @@ class Auth implements IAdapter
                FROM user 
               WHERE email = ?",
             [$params['email']]);
-        if(!count($user))
+        if (!count($user)) {
             return ['sent' => false];
-        else 
+        } else {
             return ['sent' => !empty($user[0]['password_reset_key'])];
+        }
     }
 
     /** Changes password and logins user.
@@ -424,15 +426,14 @@ class Auth implements IAdapter
         if (!empty($params['new_password']) || !empty($params['password_confirm'])) {
             if ($params['new_password'] != $params['password_confirm']) {
                 Application::raise('Passwords do not match');
-            }
-            else if (!empty($user[0]['password']) && md5($params['old_password']) != $user[0]['password']) {
+            } elseif (!empty($user[0]['password']) && md5($params['old_password']) != $user[0]['password']) {
                 Application::raise('Password is incorrect');
             } else {
                 $newPwd = $params['new_password'];
             }
         }
 
-        if(isset($newPwd)) {
+        if (isset($newPwd)) {
             $validate = Auth::validatePassword($newPwd);
             if (!empty($validate)) {
                 Application::raise($validate);
@@ -561,8 +562,9 @@ class Auth implements IAdapter
         UserSession::SetValue("user_id", $id);
         UserSession::SetValue("user_first_name", $first_name);
         UserSession::SetValue("user_last_name", $last_name);
-        if(empty($display_name))
+        if (empty($display_name)) {
             $display_name = "$first_name $last_name";
+        }
         UserSession::SetValue("user_display_name", $display_name);
         UserSession::SetValue("user_photo_url", $photo_url);
         UserSession::SetValue("user_social", $social);
@@ -577,7 +579,7 @@ class Auth implements IAdapter
                 'user_last_name' => UserSession::GetValue("user_last_name"),
                 'user_display_name' => UserSession::GetValue("user_display_name"),
                 'user_photo_url' => UserSession::GetValue("user_photo_url"),
-                'user_social' => UserSession::GetValue("user_social") 
+                'user_social' => UserSession::GetValue("user_social")
             ];
         }
     }
@@ -589,15 +591,18 @@ class Auth implements IAdapter
         }
     }
 
-    protected function generateUserId() {
+    protected function generateUserId()
+    {
         return null;
     }
 
-    protected function generateUserProviderId() {
+    protected function generateUserProviderId()
+    {
         return null;
     }
 
-    protected function getRegistrationCodeEmailContent($code) {
+    protected function getRegistrationCodeEmailContent($code)
+    {
         return
             "<html>".
             "Thank you for registration.<br><br>".
@@ -606,13 +611,13 @@ class Auth implements IAdapter
             "</html>";
     }
 
-    protected function getPasswordResetEmailContent($code) {
+    protected function getPasswordResetEmailContent($code)
+    {
         return
             "<html>".
             "You requested password reset code.<br><br>".
             "Your code is <b>$code</b><br><br>".
             "Please use it to confirm your new password on password reset page.".
             "</html>";
-        
     }
 }

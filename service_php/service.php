@@ -49,7 +49,7 @@ class Application
                 $params = $_POST['params'];
                 if (!empty($params)) {
                     $decoded = json_decode($params, true);
-                    if ($decoded) {
+                    if (is_array($decoded)) {
                         $params = $decoded;
                     }
                 }

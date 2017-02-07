@@ -580,6 +580,7 @@ export class PopupSelectView extends ValueView {
     public onPopup: (menuItems: IMenuItem[], target: { target: View, offsetX: number, offsetY: number }) => void;
     /** Source of records displayed inside the menu */
     public popupData: LookupDataLink;
+    public onGetDisplayValue: (rec: IRecord) => string;
 
     protected popupMenu: PopupMenu;
     protected caption: TextView;
@@ -643,7 +644,13 @@ export class PopupSelectView extends ValueView {
 
     protected afterUpdateView() {
         super.afterUpdateView();
-        if (this.caption.element && typeof this._value !== 'undefined')
-            this.caption.element.innerText = this.popupData.getDisplayValue(this.popupData.dataSource.current);
+        if (this.caption.element && typeof this._value !== 'undefined') {
+            let v;
+            if (this.onGetDisplayValue)
+                v = this.onGetDisplayValue(this.popupData.dataSource.current);
+            else
+                v = this.popupData.getDisplayValue(this.popupData.dataSource.current);
+            this.caption.element.innerText = v;
+        }
     }
 }

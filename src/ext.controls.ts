@@ -241,7 +241,7 @@ export class DialogView extends ModalView {
 
     protected _caption: TextView;
 
-    constructor(name?: string, caption?: string) {
+    constructor(name?: string, caption?: string, initComponents = true) {
         super(name, false);
 
         let captionContainer = new PanelView(this.modalContainer, 'ctxCaptionContainer');
@@ -253,7 +253,8 @@ export class DialogView extends ModalView {
             this.close();
         };
 
-        this.initComponents();
+        if (initComponents)
+            this.initComponents();
     }
 
     public close() {

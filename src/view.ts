@@ -48,7 +48,7 @@ export abstract class View extends Component {
 
     // Standard events 
 
-    public onClick: IVoidEvent;
+    //public onClick: IVoidEvent;
 
     /** Controls's id for DOM */
     public get id() {

@@ -67,6 +67,9 @@ export class GridView extends View {
     /** Fires when footer rendered */
     public onGetFooterText: (column: number) => string;
 
+    /** Fires when user double clicks or touches record */
+    public onDblClick: (rec: IRecord) => void;
+
     protected innerListId;
 
     constructor(parent: View, name?: string) {
@@ -230,6 +233,8 @@ export class GridView extends View {
         super.afterUpdateView();
         this.handleEvent('onmousedown', this.handleMouseDown);
         this.handleEvent('ontouchstart', this.handleClick);
+        this.handleEvent('ondblclick', this.handleDblClick);
+        this.handleEvent('ontouchend', this.handleDblClick);
     }
 
     protected getEventRowElement(event) {
@@ -268,6 +273,14 @@ export class GridView extends View {
         if (idx < 0)
             return;
         this.data.dataSource.currentIndex = idx;
+    }
+
+    protected handleDblClick(event) {
+        let idx = this.getEventElementRow(event);
+        if (idx < 0)
+            return;
+        if (this.onDblClick)
+            this.onDblClick(this.data.dataSource.current);
     }
 
     protected updateSelectedRow() {
