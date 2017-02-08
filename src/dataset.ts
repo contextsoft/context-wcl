@@ -72,18 +72,39 @@ export interface IDataTableSetAdapter extends IDataAdapter {
 
 /** Object contaning its metainfo and table */
 export class Record implements IRecord {
-    /** Fields information, in general not needed because DataTable contains its own */
-    public static metaInfo = {
-        /* implement in descendats, e:g:
-            name: {
-                dataType: 'string',
-                dataSize: 20,
-                required: false
-            }
-        */
-    };
     public table: DataTable<Record>;
+
+    /** Fields information, in general not needed because DataTable contains its own */
+    public static metaInfo: IField[];
+
+    //    public static getField()
+
+    /** Validates record for required fields etc, returns error message */
+    public static validate(rec: Record): string {
+        let cap, reqCols = [], metaArr = rec.table.getMetaInfo(), meta: IField;
+        for (let i = 0; i < metaArr.length; i++) {
+            meta = metaArr[i];
+            cap = meta.caption || utils.replaceChar(utils.capitilizeFirst(meta.name), '_');
+            if (meta.required && utils.empty(rec[meta.name]))
+                reqCols.push(cap);
+        }
+        let msg = '';
+        for (let i = 0; i < reqCols.length; i++) {
+            if (msg)
+                if (i == reqCols.length - 1)
+                    msg += ' and ';
+                else
+                    msg += ', ';
+            msg += reqCols[i];
+        }
+        if (msg)
+            msg = 'Please specify: ' + msg;
+        return msg;
+    }
+
 }
+
+
 
 /** Record link used in cached updates */
 class RecordUpdate {
@@ -133,8 +154,8 @@ class RecordsUpdates {
                 updateType: RecordUpdateType[upd.updateType]
             };
             for (let j = 0; j < fields.length; j++) {
-                if (rec.hasOwnProperty(fields[j].fieldName))
-                    param.data[fields[j].fieldName] = rec[fields[j].fieldName];
+                if (rec.hasOwnProperty(fields[j].name))
+                    param.data[fields[j].name] = rec[fields[j].name];
             }
             result.push(param);
         }
@@ -235,7 +256,7 @@ export class DataTable<R extends Record> implements IDataTable {
     }
 
     public getMetaInfo(): any {
-        if (this.recordFactory && (<any>this.recordFactory).metaInfo && !utils.isEmptyObject((<any>this.recordFactory).metaInfo))
+        if (this.recordFactory && (<any>this.recordFactory).metaInfo.length) /*(<any>this.recordFactory).metaInfo && !utils.isEmptyObject((<any>this.recordFactory).metaInfo))*/
             return (<any>this.recordFactory).metaInfo;
         else
             return this.fields;

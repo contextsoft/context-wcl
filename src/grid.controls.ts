@@ -93,8 +93,8 @@ export class GridView extends View {
         if (ds.fields.length > 0)
             for (let f = 0; f < ds.fields.length; f++)
                 this.columns.push({
-                    caption: ds.fields[f].fieldName,
-                    fieldName: ds.fields[f].fieldName
+                    caption: ds.fields[f].caption || ds.fields[f].name,
+                    fieldName: ds.fields[f].name
                 });
         else {
             let rec = this.data.dataSource.current;

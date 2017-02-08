@@ -728,8 +728,9 @@ export abstract class ValueView extends View {
     public onChange: (newValue) => void;
 
     /** FieldDataLink used as value store */
-    public data = new FieldDataLink((eventType: DataEventType, data: any): void => {
-        this.setValue((this.data).value || '');
+    public data = new FieldDataLink((eventType: DataEventType, field: any): void => {
+        if (field && this.data.dataField && field == this.data.dataField)
+            this.setValue((this.data).value || '');
     });
 
     protected _value: any;

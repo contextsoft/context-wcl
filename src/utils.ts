@@ -154,6 +154,25 @@ export namespace utils {
         return idx;
     }
 
+    export function capitilizeFirst(str: string) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    export function capitilizeEach(str) {
+        let splitStr = str.toLowerCase().split(' ');
+        for (let i = 0; i < splitStr.length; i++) {
+            // You do not need to check if i is larger than splitStr length, as your for does that for you
+            // Assign it back to the array
+            splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
+        }
+        // Directly return the joined string
+        return splitStr.join(' ');
+    }
+
+    export function replaceChar(str: string, fromChar: string, toChar = ' ') {
+        return str.split(fromChar).join(toChar);
+    }
+
     //  Number utils
 
     export function isValidNumber(val: any) {
@@ -201,13 +220,13 @@ export namespace utils {
         return (date.getMonth() + 1).toString() + '/' + date.getDate().toString() + '/' + date.getFullYear().toString();
     }
 
-    /** Formats date as mm/dd/yyyy hh:nn */
+    /** Formats date as mm/dd/yyyy hh:nn t */
     export function dateTimeToStr(val: any) {
         return formatDate(val, 'mm/dd/yyyy hh:nn t');
     }
 
-    /** Formats data as yyyy-mm-dd */
-    export function dateToSQLStr(val: any) {
+    /** Formats date as yyyy-mm-dd */
+    export function dateToSQLStr(val?: any) {
         let date;
         if (!val)
             date = new Date();
@@ -217,6 +236,20 @@ export namespace utils {
             date = val ? new Date(val) : new Date();
         return completeByZero(date.getFullYear().toString(), 4) + '-' + completeByZero((date.getMonth() + 1).toString(), 2) + '-' + completeByZero(date.getDate().toString(), 2);
     }
+
+    /** Formats date as yyyy-mm-dd HH:nn */
+    export function dateTimeToSQLStr(val?: any) {
+        let date;
+        if (!val)
+            date = new Date();
+        else if (typeof val === 'object')
+            date = val;
+        else
+            date = val ? new Date(val) : new Date();
+        return completeByZero(date.getFullYear().toString(), 4) + '-' + completeByZero((date.getMonth() + 1).toString(), 2) + '-' + completeByZero(date.getDate().toString(), 2)
+            + ' ' + date.getHours().toString() + ':' + date.getMinutes().toString() + ':' + date.getSeconds().toString();
+    }
+
 
     /** Converts val formatted as "yyyymmddhhnnss" to date */
     export function strTrimmedSQLToDate(val: string) {
@@ -288,9 +321,7 @@ export namespace utils {
             format = format.replace('HH', completeByZero(hours.toString(), 2));
         if (format.indexOf('hh') > -1) {
             if (hours > 12)
-                hours = 12;
-            if (hours === 0)
-                hours = 12;
+                hours = hours - 12;
             format = format.replace('hh', completeByZero(hours.toString(), 2));
         }
         if (format.indexOf('nn') > -1)
