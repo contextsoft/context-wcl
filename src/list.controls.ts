@@ -606,6 +606,9 @@ export class PopupSelectView extends ValueView {
     }
 
     public popup() {
+        if (!this.popupData.dataSource)
+            return;
+
         let items: IMenuItem[] = [];
         let rec: IRecord, item: IMenuItem;
         for (let i = 0; i < this.popupData.dataSource.recordCount(); i++) {
