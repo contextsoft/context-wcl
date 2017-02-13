@@ -196,7 +196,7 @@ class DataTableSet implements IAdapter
     public function fill($params)
     {
         foreach ($this->tables as $table) {
-            $data[$table->tableName] = $table->fill($params);
+            $data[$table->$tableName] = $table->fill($params);
         }
         return $data;
     }

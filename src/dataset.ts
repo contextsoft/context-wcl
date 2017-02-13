@@ -64,7 +64,7 @@ export interface IDataTableAdapter extends IDataAdapter {
 
 /** Describes an object document remote data manipulation */
 export interface IDataTableSetAdapter extends IDataAdapter {
-    fill(tableSet: IDataTableSet): Promise<void>;
+    fill(tableSet: IDataTableSet, params?: any): Promise<void>;
     applyUpdates(tableSet: IDataTableSet): Promise<void>;
 }
 
@@ -453,8 +453,8 @@ export class DataTableSet implements IDataTableSet {
     }
 
     /** Fills tables using application service */
-    public fill(): Promise<void> {
-        return this.adapter.fill(this).then(() => {
+    public fill(params?: any): Promise<void> {
+        return this.adapter.fill(this, params).then(() => {
             for (let i = 0; i < this.tables.length; i++)
                 this.tables[i].notifyLinks(DataSetEventType.Refreshed);
         });
@@ -487,8 +487,8 @@ export class DataTableSetAdapter implements IDataTableSetAdapter {
         });
     }
 
-    public fill(tableSet: IDataTableSet): Promise<void> {
-        return this.execute('fill').then((data) => {
+    public fill(tableSet: IDataTableSet, params?: any): Promise<void> {
+        return this.execute('fill', params).then((data) => {
             let dataTable;
             for (let table in data) {
                 if (data.hasOwnProperty(table) && data[table].hasOwnProperty('records') && (dataTable === tableSet.tableByName(table))) {
